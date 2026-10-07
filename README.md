@@ -270,4 +270,4 @@ See `CONTRIBUTING.md` for the branch, commit and pull-request workflow.
 
 ## License
 
-_Choose a license (e.g. MIT) and add a `LICENSE` file._
+Apache-2.0 license
