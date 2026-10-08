@@ -1,0 +1,13 @@
+# Random baseline on FrozenLake 4x4 (no learning)
+env_name: FrozenLake-v1
+env_kwargs:
+  map_name: 4x4
+  is_slippery: false
+agent: random
+episodes: 200
+seed: 0
+max_steps_per_episode: 100
+eval_every: 100
+eval_episodes: 20
+checkpoint_every: 100
+run_root: runs
