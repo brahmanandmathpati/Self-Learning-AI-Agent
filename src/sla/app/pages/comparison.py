@@ -14,7 +14,8 @@ LABELS = {"q_learning": "Q-learning", "dqn": "DQN"}
 
 def render() -> None:
     svc = services()
-    hero("Agent comparison", "Every number is a frozen-policy score on held-out test seeds; dots are individual seeds.")
+    hero("Agent comparison", "Frozen-policy scores on held-out test seeds from completed multi-seed experiments; "
+         "dots are individual seeds.")
     table = svc.experiments.comparison_table()
     if table.empty:
         empty_state("No test evaluations yet. Run a multi-seed experiment to compare agents with the random baseline.",
@@ -36,7 +37,8 @@ def render() -> None:
                          column_config={"Success rate": st.column_config.ProgressColumn(format="percent",
                                                                                          min_value=0, max_value=1)})
             runs = svc.experiments.trained_runs()
-            runs = runs[(runs["env"] == env) & (runs["variant"].isna())] if not runs.empty else runs
+            ids = set(pts["run_id"])
+            runs = runs[runs["run_id"].isin(ids)] if not runs.empty else runs
             curves: dict[str, list] = {}
             for _, r in runs.iterrows():
                 curves.setdefault(LABELS.get(r["algorithm"], r["algorithm"]), []).append(

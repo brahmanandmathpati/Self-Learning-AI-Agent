@@ -73,11 +73,21 @@ class ExperimentService:
                 "reflections": self.db.query_reflections(run_id), "log_tail": log_tail}
 
     # ------------------------------------------------------------ comparison
-    def test_results(self) -> pd.DataFrame:
-        """One row per run with a held-out test evaluation (latest per run), incl. random baselines."""
+    def test_results(self, pipeline_only: bool = True) -> pd.DataFrame:
+        """One row per run with a held-out test evaluation (latest per run), incl. random baselines.
+
+        By default only runs that belong to a completed multi-seed experiment are used, so one-off demo runs
+        and ablation variants do not change the headline comparison.
+        """
         test = self.db.query_evaluations(kind="test")
         if test.empty:
             return test
+        if pipeline_only:
+            exps = self.db.list_experiments("pipeline")
+            done = set(exps.loc[exps["status"] == "completed", "experiment_id"]) if not exps.empty else set()
+            test = test[test["experiment_id"].isin(done)]
+            if test.empty:
+                return test
         test = test.sort_values("eval_id").groupby("run_id", as_index=False).last()
         test["label"] = test.apply(_label, axis=1)
         return test
