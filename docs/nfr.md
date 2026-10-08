@@ -1,26 +1,41 @@
-# Non-Functional Requirements & Evaluation Questions
+# Non-Functional Requirements — Self-Learning AI Agent
+**Owner:** Vedant Biradar · **Task:** SLA-01-VB-1 · **Week:** 1  
 
-## Non-Functional Requirements (Measurable NFRs)
+Every NFR has a number, a way to measure it, the week it is tested, and the requirement (REQ ID) it is connected to.
 
-| Category | Requirement | Measure | How Measured | Week Tested |
-| :--- | :--- | :--- | :--- | :--- |
-| **Reproducibility** | Same seed and configuration must produce identical episode returns | 100% bitwise/numerical match | `pytest tests/test_runner.py::test_same_seed_same_returns` | Week 4 |
-| **Compute Budget** | Complete 600 CartPole-v1 DQN episodes on the weakest laptop CPU | < 60 minutes, CPU only | `python scripts/measure_performance.py` | Week 8 |
-| **Memory Limit** | Peak RAM consumption during DQN training | ≤ 2.0 GB peak RAM | `psutil` peak memory logging script | Week 8 |
-| **Offline Operation** | Full pipeline runs without an active internet connection | 100% functionality offline | Clean install test with network disabled (T-24) | Week 9 |
-| **Zero Software Cost** | Total external software and API licensing cost | ₹0 software cost | `docs/feasibility.md` & `docs/licences.md` | Week 9 |
-| **Transparency** | Every line of the learning algorithm can be explained by team members | Viva score ≥ 8/10 | Mock viva evaluation | Week 10 |
-| **Data Integrity** | Every reported evaluation number is traceable to run folder and Git commit | 100% of reported results | `results/manifest.csv` hash verification | Week 8 |
-| **Reliability** | Training resumes seamlessly after abrupt termination | Resumes from latest checkpoint | Integration test T-13 | Week 5 |
+---
 
-## Evaluation Questions (Week 6 Protocol)
-1. Does the frozen trained policy achieve a statistically higher score than a random agent on unseen test seeds?
-2. Does the agent score significantly higher than its own untrained state (checkpoint 0)?
-3. Is performance improvement consistent across 5 independent training seeds (95% CI strictly positive)?
-4. Does the learned policy retain its performance when loaded into a completely fresh Python process?
-5. Does removing the replay buffer or the target network cause learning collapse or instability (ablation analysis)?
+## Measurable Non-Functional Requirements Table
 
-## Background & Literature Foundations
-- **Experience Replay (Lin, 1992):** Replay buffers store consecutive experience tuples $(s, a, r, s', done)$. Uniform random sampling breaks temporal correlation and stabilizes training.
-- **Deep Q-Networks (Mnih et al., 2015):** Combining neural network function approximation with experience replay and periodic target network updates prevents policy divergence.
-- **Evaluation Standards (Henderson et al., 2018; Agarwal et al., 2021):** Reporting mean over multiple seeds with confidence intervals prevents cherry-picked reinforcement learning results.
+| ID | Category | Requirement | Measure | How measured | Week | Related REQ |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **NFR-01** | Reproducibility | Same seed and same config give identical episode returns | 100% identical | `test_runner.py::test_same_seed_same_returns` | 4 | REQ-01 |
+| **NFR-02** | Compute | 600 CartPole DQN episodes on the weakest laptop | < 60 min, CPU only | `scripts/measure_performance.py` | 8 | REQ-08 |
+| **NFR-03** | Memory | Peak RAM during DQN training | < 2 GB | `scripts/measure_performance.py` | 8 | REQ-08 |
+| **NFR-04** | Offline | Train, evaluate, UI and template note work with internet off | All work | T-24 (clean install test) | 9 | REQ-21 |
+| **NFR-05** | Cost | Software cost | ₹0 | `docs/licences.md` | 9 | REQ-21 |
+| **NFR-06** | Transparency | Every algorithm line can be explained by its owner | Mock viva ≥ 8/10 | Week-10 mock viva | 10 | REQ-05, REQ-08 |
+| **NFR-07** | Honesty | Every reported number is traceable to a run folder and git commit | 100% of table rows | `results/manifest.csv` | 8 | REQ-13 |
+| **NFR-08** | Reliability | Training resumes after a forced stop | Resumes at the next episode | T-13 | 5 | REQ-11 |
+| **NFR-09** | Data durability | Stored runs and episodes survive a restart | 0 rows lost | T-10, T-11 | 5 | REQ-10 |
+| **NFR-10** | Usability | A new user can start a training run from the UI without help | ≤ 3 clicks and ≤ 2 minutes | Demo test with a teammate | 9 | REQ-17 |
+
+---
+
+## Evaluation Questions (Vedant owns the answers in Week 6)
+1. Does the frozen trained policy score higher than the random agent on unseen test seeds?
+2. Does it score higher than its own untrained version (checkpoint 0)?
+3. Is the improvement consistent across 5 training seeds (does the confidence interval exclude 0)?
+4. Does the improvement survive saving, closing the program and reloading?
+5. Does removing the replay buffer or the target network change the result (ablation)?
+
+---
+
+## Background: Experience Replay & DQN Foundations
+*Notes from Lin (1992) and Mnih et al. (2015):*
+
+- **Experience Replay Origin:** Lin (1992) introduced experience replay: the agent stores past experiences $(s, a, r, s')$ and trains on them repeatedly, instead of discarding each transition after one update.
+- **Data Efficiency:** Replaying past experiences makes learning significantly more data-efficient, because one environmental step can contribute to multiple gradient updates.
+- **Deep Q-Networks (DQN):** Mnih et al. (2015) successfully combined deep neural networks with experience replay to master Atari games directly from raw visual observations.
+- **Breaking Correlation:** Sampling uniform random mini-batches from the replay buffer breaks the strong temporal autocorrelation of consecutive states, stabilizing neural network convergence.
+- **Target Network & Ablation:** The DQN utilizes a separate, periodically updated target network so that target value estimates remain stationary during gradient descent. The ablation study (REQ-20) rigorously tests the impact of isolating or removing replay memory and target networks.
