@@ -24,6 +24,7 @@ class ExperimentService:
         latest = trained.iloc[0].to_dict() if not trained.empty else None
         test = self.db.query_evaluations(kind="test")
         test_trained = test[test["algorithm"] != "random"] if not test.empty else test
+        latest_test = test_trained.iloc[-1] if not test_trained.empty else None
         episodes_total = counts["episodes"]
         best_reward = avg_reward = None
         if latest is not None:
@@ -41,7 +42,9 @@ class ExperimentService:
             "latest_run": latest,
             "latest_best_reward": best_reward,
             "latest_avg_reward_last50": avg_reward,
-            "latest_test_mean": (float(test_trained.iloc[-1]["mean_return"]) if not test_trained.empty else None),
+            "latest_test_mean": float(latest_test["mean_return"]) if latest_test is not None else None,
+            "latest_test_label": (f"{latest_test['algorithm']} on {latest_test['env']}, seed {latest_test['seed']}"
+                                  if latest_test is not None else None),
             "reflections": counts["reflections"],
         }
 

@@ -7,4 +7,8 @@
 5. **Baseline.** A random-action agent is evaluated on the same test seeds for every training seed.
 6. **Metrics.** Mean, standard deviation, median, success rate (FrozenLake: goal reached; CartPole: return 500), mean episode length.
 7. **Statistics over seeds** (`evaluation/stats.py`): Welch's t-test (unequal variances) and a bootstrap 95% CI for the difference of means (10 000 resamples, fixed seed). If both groups have zero variance the t-test is undefined: it is reported as p = 0 when the means differ and p = 1 when they are equal.
-8. **No invented numbers.** All tables and dashboard values are read from the database; missing data is shown as NOT RUN.
+8. **Deterministic environments.** On the non-slippery FrozenLake map the start state and transitions are fixed, so
+   every evaluation episode of a greedy policy is identical and its standard deviation is 0; seeds only matter on the
+   slippery map. The variation that the statistics measure there comes from the 5 *training* seeds. On CartPole the
+   seed sets the start state, so held-out test seeds matter for every policy.
+9. **No invented numbers.** All tables and dashboard values are read from the database; missing data is shown as NOT RUN.

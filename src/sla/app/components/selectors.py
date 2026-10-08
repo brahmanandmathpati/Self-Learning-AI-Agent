@@ -28,4 +28,7 @@ def experiment_selector(experiments: pd.DataFrame, key: str, label: str = "Exper
         return None
     labels = {int(r["experiment_id"]): f"#{int(r['experiment_id'])} · {r['name']} · {r['status']} · {r['created_at']}"
               for _, r in experiments.iterrows()}
-    return st.selectbox(label, list(labels), format_func=labels.get, key=key)
+    ids = list(labels)
+    completed = [int(r["experiment_id"]) for _, r in experiments.iterrows() if r["status"] == "completed"]
+    index = ids.index(completed[0]) if completed else 0  # newest finished experiment by default
+    return st.selectbox(label, ids, index=index, format_func=labels.get, key=key)
