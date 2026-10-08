@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
-import streamlit as st
+import sys
+from pathlib import Path
 
-from sla.app.state import services
-from sla.app.styles.theme import inject_css
-from sla.app.views import (
+# Make "sla" importable when the package is not pip-installed (e.g. Streamlit Community Cloud).
+_SRC = Path(__file__).resolve().parents[2]
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+import streamlit as st  # noqa: E402
+
+from sla.app.state import services  # noqa: E402
+from sla.app.styles.theme import inject_css  # noqa: E402
+from sla.app.views import (  # noqa: E402
     ablation,
     about,
     comparison,
