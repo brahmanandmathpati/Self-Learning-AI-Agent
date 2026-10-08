@@ -183,6 +183,9 @@ runs/               run folders and the database (git-ignored)
 - Two small benchmark tasks; bounded single-task learning only.
 - DQN is sensitive to hyper-parameters and random seeds; 5 seeds give wide intervals.
 - The reflection layer explains learning; it does not cause it.
+- Number validation checks values, not meaning: an LLM sentence that uses a real fact's value in the wrong context
+  can still pass, so the template note remains the reference explanation.
+- The best checkpoint is the first one that reaches the highest validation score (ties keep the earlier one).
 
 **Future work**
 - Double DQN and prioritised experience replay
