@@ -1,0 +1,28 @@
+# Ablation: DQN WITHOUT a target network (bootstraps from the online network).
+env_name: CartPole-v1
+agent: dqn
+episodes: 600
+seed: 0
+gamma: 0.99
+learning_rate: 0.0005
+epsilon_start: 1.0
+epsilon_end: 0.05
+epsilon_decay_steps: 10000   # environment steps
+max_steps_per_episode: 500
+max_wall_clock_s: 3600
+eval_every: 50               # validation evaluation (picks the best checkpoint)
+eval_episodes: 20
+checkpoint_every: 50
+run_root: runs
+dqn:
+  hidden_size: 128
+  batch_size: 64
+  buffer_size: 50000
+  learning_starts: 1000
+  train_freq: 1
+  target_update_every: 500   # gradient steps between target-network syncs
+  grad_clip: 10.0
+  optimizer: adam            # adam | adamw
+  weight_decay: 0.0
+  replay_enabled: true
+  target_net_enabled: false
