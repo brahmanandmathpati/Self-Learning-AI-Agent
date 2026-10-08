@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Self-Learning AI Agent: generated data (never commit) ---
+runs/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.pt
+*.npz
+hardware_*.json
+.streamlit/secrets.toml

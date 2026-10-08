@@ -1,246 +1,191 @@
 # Self-Learning AI Agent
 
-> A self-learning RL agent: a from-scratch Deep Q-Network with experience replay that learns CartPole by trial and error, with multi-seed evaluation and an LLM that explains what it learned.
+> An agent that starts with **no trained policy**, interacts with an environment, and **measurably improves from reward** — tabular Q-learning on FrozenLake and a from-scratch Deep Q-Network on CartPole, with held-out evaluation, statistics, an ablation study, SQLite experiment tracking, grounded explanations and a Streamlit dashboard.
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-CPU-orange)
-![Gymnasium](https://img.shields.io/badge/Gymnasium-CartPole--v1-green)
+![Gymnasium](https://img.shields.io/badge/Gymnasium-FrozenLake%20%7C%20CartPole-green)
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-lightgrey)
 
 Final-year B.Tech CSE (AI Specialization) project, 2023–2027.
 
 ---
 
-## What this project is
+## Problem statement
 
-Most student "AI agents" are static: they prompt an LLM with fixed instructions and behave the same on day 1 and day 100. This agent is different. It **starts with zero knowledge of its task, learns by trial and error, and gets measurably better with experience.**
+Most student "AI agents" are static: they prompt an LLM with fixed instructions and behave the same on day 1 and day 100. Chat history, prompt edits and better-worded LLM text are **not learning**. This project builds an agent whose **policy actually changes from experience** and proves the improvement with a rigorous protocol.
 
-- **Learning happens in the weights.** A Deep Q-Network (written by us in PyTorch, not imported from a library) updates its weights from a reward signal.
-- **It remembers its past attempts.** A replay buffer stores every transition, and the agent samples from it to learn from past steps again.
-- **Improvement is proven, not claimed.** A frozen copy of the trained policy is evaluated across 5 random seeds and compared with a random-action baseline.
-- **It explains itself.** An LLM layer (local, via Ollama) turns computed training statistics into a plain-language note. A validator rejects any note containing a number the logs don't support.
+## How learning actually happens
 
-**Scope.** "Self-learning" here means learning one bounded task through repeated interaction. It is not general-purpose or continual multi-task learning.
+The agent receives `(state, action, reward, next_state)` from the environment and updates its value estimates:
 
----
+**Tabular Q-learning (FrozenLake-v1)**
+
+```
+Q(s, a) ← Q(s, a) + α [ r + γ · max_a' Q(s', a') − Q(s, a) ]       (target = r at a terminal step)
+```
+
+A worked example by hand is in [`docs/q_learning_by_hand.md`](docs/q_learning_by_hand.md); the unit test `test_update_matches_hand_calculation` checks the code against it.
+
+**Deep Q-Network (CartPole-v1)** — written by us in PyTorch (no Stable-Baselines3):
+
+```
+batch  = replay_buffer.sample(B)                         # s, a, r, s', terminated
+q      = online_net(s)[a]
+target = r + γ · (1 − terminated) · max_a' target_net(s')[a']
+loss   = Huber(q, target);  Adam/AdamW step;  clip grad-norm
+every C gradient steps: target_net ← online_net
+```
+
+Truncation at the 500-step time limit is **not** terminal, so the target still bootstraps.
+
+## How we prove it learned
+
+| Evidence | How |
+|---|---|
+| Learning curve | training return per episode with a moving average, 5 seeds |
+| Frozen-policy evaluation | ε = 0, no gradient / replay / target updates, on a deep copy of the agent |
+| Held-out seeds | training resets `seed×100000+episode`; validation `10 000 000+i` (picks the best checkpoint); test `20 000 000+i` (reported numbers only) |
+| Before / after | the **untrained** policy and the **trained** policy play the same test seeds |
+| Against chance | trained vs random-action baseline: Welch's t-test + bootstrap 95% CI over seeds |
+| Persistence | a checkpoint reloaded in a **new process** keeps its score (test) |
+| Ablation | full DQN vs no replay vs no target network |
 
 ## Results
 
-> ⚠️ This table is filled only from real training runs. Every number links to a run folder listed in `results/manifest.csv`.
+> Results are produced only by real runs and are stored in the SQLite database. Regenerate the tables with
+> `python scripts/make_tables.py` — they are written to [`results/`](results/). Until experiments are run, the
+> dashboard and the tables show **NOT RUN**.
 
-| Agent | Environment | Frozen-policy mean return (± std, 5 seeds) | Episodes to reach 195 |
-| --- | --- | --- | --- |
-| Random baseline | CartPole-v1 | _TBD_ | — |
-| DQN (ours) | CartPole-v1 | _TBD_ | _TBD_ |
-| DQN without replay (ablation) | CartPole-v1 | _TBD_ | _TBD_ |
-| Tabular Q-learning (ours) | FrozenLake-v1 4×4 | _TBD_ (success rate) | — |
-
-<!-- Add after Week 5: results/figures/learning_curve.png and demo/before_after.gif -->
+| Agent | Environment | Held-out test return (mean ± std over 5 seeds) |
+|---|---|---|
+| Random baseline | FrozenLake-v1 4×4 | NOT RUN |
+| Tabular Q-learning | FrozenLake-v1 4×4 | NOT RUN |
+| Random baseline | CartPole-v1 | NOT RUN |
+| DQN | CartPole-v1 | NOT RUN |
+| DQN without replay / without target network | CartPole-v1 | NOT RUN |
 
 ---
 
 ## Architecture
 
 ```
-┌──────────── Training runner (M4): config, seeds, checkpoints ────────────┐
-│                                                                          │
-│   Environment (M1)  ⇄   RL agent core (M2)   ⇄   Replay buffer (M3)      │
-│   state, reward         ε-greedy action,         stores transitions,     │
-│                         TD update of weights     samples mini-batches    │
-└──────────────┬──────────────────────┬────────────────────────────────────┘
-               │ episode rows         │ checkpoints
-               ▼                      ▼
-     Episode store (M3) ──►  Evaluation (M5) ──►  Reflection (M6) ──►  Dashboard (M6)
-     SQLite log              frozen policy,        stats → LLM note,     curves, notes,
-                             5 seeds vs baseline   numbers fact-checked  GIFs (Streamlit)
+            ┌──────────── Streamlit dashboard (src/sla/app) ─────┐      CLI: sla ...
+            │ views · components · charts (Plotly) · styles       │        │
+            └──────────────────────────┬──────────────────────────┘        │
+                                       ▼                                   ▼
+              Service layer (src/sla/services): Training · Evaluation · Experiment · Reflection · Checkpoint
+                                       │
+              Training pipeline (training/pipeline.py): train_run · resume_run · run_experiment · run_baseline
+                                       │                                         evaluation/ablation.py
+   ┌──────── Runner + callbacks (training/runner.py) — the only place learning happens ────────┐
+   │  Environment (envs/) ⇄ Agent (agents/: random, Q-learning, DQN) ⇄ Replay buffer (memory/)  │
+   │  callbacks: database · initial eval · transition validation · checkpoints · validation     │
+   │             eval (best checkpoint) · regression monitor · divergence guard · UI progress   │
+   └──────────────┬───────────────────────────────┬────────────────────────────────────────────┘
+                  ▼                               ▼
+        SQLite (database/store.py)         Checkpoints on disk (checkpoints/manager.py)
+        experiments · runs · episodes ·    runs/<run_id>/checkpoints/{ep_XXXXXX, best, latest.json}
+        metrics · evaluations · ablation
+        · reflections · feedback           Evaluation (evaluation/): frozen policy · metrics · stats
+                  │
+                  ▼
+        Reflection (reflection/): facts → template or optional Ollama → number validation
 ```
 
-Only the top loop changes the agent's behaviour. The bottom row measures and explains learning; it never trains the agent.
+Details: [`docs/architecture.md`](docs/architecture.md).
 
-| Module | Path | Responsibility |
-| --- | --- | --- |
-| M1 Environment layer | `src/sla/envs/` | Seeded Gymnasium environments, wrappers, rendering |
-| M2 Agent core | `src/sla/agents/` | Random baseline, tabular Q-learning, DQN |
-| M3 Experience memory | `src/sla/memory/` | Replay buffer; persistent SQLite episode log |
-| M4 Training runner | `src/sla/training/`, `src/sla/cli.py` | Episode loop, configs, seeding, checkpoints, CLI |
-| M5 Evaluation harness | `src/sla/evaluation/` | Frozen-policy evaluation, metrics, statistics, plots |
-| M6 Reflection + dashboard | `src/sla/reflection/`, `src/sla/app/` | Grounded LLM notes; Streamlit UI; GIFs |
+## Installation
 
----
-
-## Getting started
-
-### Requirements
-
-- Python 3.10 or newer
-- A laptop CPU is enough; no GPU needed
-- Optional: [Ollama](https://ollama.com) with a small model (e.g. `llama3.2:3b`) for the reflection layer
-
-### Install
+Requirements: Python 3.10+ and a normal laptop CPU (no GPU needed).
 
 ```bash
-git clone https://github.com/<your-org>/self-learning-agent.git
-cd self-learning-agent
+git clone https://github.com/brahmanandmathpati/Self-Learning-AI-Agent.git
+cd Self-Learning-AI-Agent
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+source .venv/bin/activate                 # Windows: .venv\Scripts\activate
+pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -e ".[dev]"
-cp .env.example .env             # only needed if you change defaults
+sla init-db
 ```
 
-Optional, for the reflection layer:
+Optional (explanations by a local LLM): install [Ollama](https://ollama.com) and `ollama pull qwen2.5:1.5b`. Everything works without it.
 
-```bash
-ollama pull llama3.2:3b
-```
-
-### Quickstart
-
-Train, evaluate, write a reflection note and make plots in one command:
-
-```bash
-sla pipeline --config configs/cartpole_dqn.yaml --seeds 0 1 2 3 4
-sla dashboard                     # opens the Streamlit dashboard
-```
-
-### Individual commands
+## Commands
 
 | Command | What it does |
-| --- | --- |
-| `sla train --config configs/cartpole_dqn.yaml --seed 0` | Train one run; creates a folder in `runs/` |
-| `sla train --resume runs/<run_dir>` | Resume a run from its latest checkpoint |
-| `sla evaluate --run runs/<run_dir> --episodes 100` | Evaluate the frozen policy (ε = 0) |
-| `sla reflect --run runs/<run_dir>` | Generate and fact-check a learning summary |
-| `sla dashboard` | Launch the dashboard |
-| `python scripts/run_baseline.py` | Random-agent baseline, 5 seeds |
-| `python scripts/run_ablation.py` | Full DQN vs. no replay vs. no target network |
-| `python scripts/make_tables.py` | Regenerate all results tables from run folders |
+|---|---|
+| `sla train --config configs/frozenlake_qlearning.yaml --seed 0` | Train one run (FrozenLake, a few seconds) |
+| `sla train --config configs/cartpole_dqn.yaml --seed 0` | Train the DQN (minutes on CPU) |
+| `sla train --resume runs/<run_id>` | Resume a stopped run from its latest checkpoint |
+| `sla evaluate --run runs/<run_id> --episodes 100` | Frozen-policy evaluation of the best checkpoint on test seeds |
+| `sla pipeline --config configs/cartpole_dqn.yaml --seeds 0 1 2 3 4` | 5 seeds + random baseline + Welch / bootstrap statistics |
+| `sla ablation --config configs/cartpole_dqn.yaml --seeds 0 1 2 3 4` | Full DQN vs no replay vs no target network |
+| `sla baseline --config configs/cartpole_random.yaml` | Random-action baseline only |
+| `sla reflect --run runs/<run_id> [--llm]` | Grounded plain-language summary of a run |
+| `sla runs` | List stored runs |
+| `sla dashboard` | Launch the dashboard (http://localhost:8501) |
 
-Each run folder holds a copy of its config, the git commit SHA, the SQLite episode log, checkpoints and `run.log`.
+`python -m sla <command>` works too. Full reference: [`docs/usage.md`](docs/usage.md).
 
----
+## Dashboard
 
-## How the agent learns
+`sla dashboard` opens a dark, multi-page experimentation dashboard: **Overview**, **Training** (start runs and watch reward, moving average, ε, loss and episode length live), **Agent comparison**, **Evaluation** (5-seed results, CI, Welch's t-test, before/after), **Ablation**, **Run explorer** (config, evaluations, checkpoints, logs), **Reflection** (notes, facts, validation status, ratings), **Environments** and **About**. Every number is read from the database; empty sections say NOT RUN.
 
-**Q-learning update** (tabular, FrozenLake):
+<!-- Screenshots: add docs/screenshots/*.png after the first real experiments. -->
 
-```
-Q(s, a) ← Q(s, a) + α [ r + γ · max_a' Q(s', a') − Q(s, a) ]
-```
+## Experiments and reproducibility
 
-**DQN update** (CartPole):
-
-```
-batch  = replay_buffer.sample(B)                      # s, a, r, s', terminated
-q      = online_net(s)[a]
-target = r + γ · (1 − terminated) · max_a' target_net(s')[a']
-loss   = Huber(q, target)
-gradient step on online_net (grad-norm clip 10)
-every C steps: target_net ← online_net
-```
-
-Truncation (hitting the 500-step time limit) is **not** treated as terminal, so the target still bootstraps.
-
-| Hyper-parameter | Starting value |
-| --- | --- |
-| Learning rate (Adam) | 1e-3 |
-| Discount γ | 0.99 |
-| Batch size | 64 |
-| Replay buffer size | 50,000 |
-| Learning starts | 1,000 steps |
-| Target network sync | every 500 steps |
-| ε schedule | 1.0 → 0.05 over 10,000 steps |
-
-Final tuned values are in `configs/cartpole_dqn.yaml`.
-
----
-
-## How we prove it learns
-
-We claim the agent learns only if all of the following hold:
-
-1. **Learning curve:** training return rises across 5 seeds.
-2. **Frozen-policy evaluation:** with ε = 0 and no updates, the trained policy beats the random baseline (Welch's t-test, n = 5 seeds).
-3. **Before/after:** the last 5% of episodes score higher than the first 5%, with a bootstrap 95% confidence interval that excludes zero.
-4. **Persistence:** the checkpoint, reloaded in a new process, keeps its score.
-5. **Held-out seeds:** evaluation seeds are never used in training.
-6. **Ablation:** we report what happens when the replay buffer or target network is removed.
-
-What does **not** count as learning: better-worded LLM notes, stored history the policy never uses, or prompt changes between runs.
-
----
+Every run records its seed, full config (hyper-parameters), environment, algorithm, start/end time, status, git commit SHA, checkpoint paths and metrics in SQLite, plus `config.yaml`, `metrics.json` and `run.log` in `runs/<run_id>/`. See [`docs/experiments.md`](docs/experiments.md) and [`docs/evaluation.md`](docs/evaluation.md).
 
 ## Reflection layer
 
-1. `stats.py` computes facts from the episode log (window means, failure causes, ε).
-2. The LLM receives only those facts and writes a note.
-3. `grounding.py` extracts every number in the note and rejects it if any number is not within ±1% of a fact.
-4. The dashboard shows both accepted and rejected notes.
+1. `reflection/stats.py` computes facts from the database (window means, best validation score, untrained vs trained test score, random baseline, Welch p-value, bootstrap CI, ε, loss).
+2. A deterministic template turns the facts into a note; optionally a local Ollama model writes it instead, receiving **only** the facts.
+3. `reflection/grounding.py` extracts every number from the note and rejects it unless it matches a fact (±0.01). Rejected LLM notes are kept for transparency and the template is shown.
 
-If Ollama is not running, a template note is generated from the facts instead, so the pipeline never crashes.
-
----
-
-## Running tests
+## Testing
 
 ```bash
-pytest                    # unit + integration tests
-pytest -m smoke           # 2,000-step DQN smoke run
-ruff check .              # lint
+pytest              # unit, integration and dashboard tests (no internet, no Ollama, no GPU)
+pytest -m smoke     # short DQN training + resume
+ruff check .
 ```
 
-CI runs lint, tests and the smoke run on every pull request. The LLM is mocked in CI, so no API key or network is needed.
-
----
+CI (GitHub Actions) runs lint, tests and the smoke run on every pull request.
 
 ## Project structure
 
 ```
-self-learning-agent/
-├── configs/          experiment configs (YAML)
-├── src/sla/
-│   ├── envs/         factory.py, wrappers.py
-│   ├── agents/       base.py, random_agent.py, q_learning.py, networks.py, dqn.py
-│   ├── memory/       replay_buffer.py, episode_store.py
-│   ├── training/     runner.py, config.py, checkpoint.py, seeding.py
-│   ├── evaluation/   evaluate.py, metrics.py, stats.py, plots.py
-│   ├── reflection/   stats.py, prompts.py, llm_client.py, grounding.py
-│   ├── app/          dashboard.py, record.py
-│   └── cli.py
-├── scripts/          baseline, ablation and table scripts
-├── tests/            mirrors src/sla/
-├── docs/             requirements, design, related work, notes
-├── results/          tables, figures, manifest.csv
-└── runs/             raw run folders (git-ignored)
+configs/            YAML experiment configs (frozenlake_qlearning, cartpole_dqn, ablation_*, random, smoke)
+src/sla/
+  envs/             environment factory, seeding, end reasons
+  agents/           base, random_agent, q_learning, networks, dqn, schedules (ε)
+  memory/           replay_buffer
+  checkpoints/      save / load / best / latest / resume
+  training/         config, runner, callbacks, guards, safety, pipeline
+  database/         SQLite schema, migrations and data access
+  evaluation/       evaluate (frozen policy), metrics, stats, ablation, plots
+  reflection/       stats (facts), grounding, fallback template, llm_client (Ollama), reflect, feedback
+  services/         service layer used by the CLI and the dashboard
+  app/              Streamlit dashboard: main, views/, components/, charts/, styles/
+  cli.py
+scripts/            make_tables.py
+tests/              unit/, integration/, ui/
+docs/               architecture, setup, usage, training, evaluation, experiments, troubleshooting
+results/            generated tables
+runs/               run folders and the database (git-ignored)
 ```
-
----
-
-## Reproducibility
-
-- All randomness (Python, NumPy, PyTorch, environment) is seeded from the config.
-- Evaluation runs use deterministic PyTorch settings.
-- Every reported number appears in `results/manifest.csv` with its run folder and git SHA.
-- Results tables and figures are generated by scripts, never typed by hand.
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-| --- | --- |
-| `box2d` fails to install on Windows | Only needed for LunarLander (optional). Use WSL or Colab. |
-| `sla reflect` warns "Ollama offline" | Start Ollama (`ollama serve`) or accept the template note. |
-| Results differ slightly between machines | Expected across hardware; compare means over 5 seeds. |
-| Dashboard shows no runs | Check that `runs/` contains at least one finished run folder. |
-
----
 
 ## Limitations and future work
 
 **Limitations**
-- One simple environment (CartPole); bounded single-task learning only.
-- DQN is sensitive to hyper-parameters and random seeds.
+- Two small benchmark tasks; bounded single-task learning only.
+- DQN is sensitive to hyper-parameters and random seeds; 5 seeds give wide intervals.
 - The reflection layer explains learning; it does not cause it.
+- Number validation checks values, not meaning: an LLM sentence that uses a real fact's value in the wrong context
+  can still pass, so the template note remains the reference explanation.
+- The best checkpoint is the first one that reaches the highest validation score (ties keep the earlier one).
 
 **Future work**
 - Double DQN and prioritised experience replay
@@ -257,8 +202,6 @@ self-learning-agent/
 | Atharv | Environment layer, training runner and CLI, CI, release |
 | Vedant | Experience memory, evaluation harness, statistics, ablations |
 | Somesh | Reflection layer, grounding validator, dashboard, demo |
-
-See `CONTRIBUTING.md` for the branch, commit and pull-request workflow.
 
 ---
 

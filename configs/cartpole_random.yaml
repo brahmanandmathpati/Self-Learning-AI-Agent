@@ -1,0 +1,10 @@
+# Random baseline on CartPole-v1 (no learning)
+env_name: CartPole-v1
+agent: random
+episodes: 200
+seed: 0
+max_steps_per_episode: 500
+eval_every: 100
+eval_episodes: 20
+checkpoint_every: 100
+run_root: runs

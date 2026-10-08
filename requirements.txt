@@ -1,6 +1,13 @@
-numpy
-gymnasium
-torch
-pyyaml
-matplotlib
-streamlit
+# Runtime dependencies (same as pyproject.toml). For a CPU-only PyTorch build first run:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+gymnasium>=1.0
+torch>=2.2
+pyyaml>=6.0
+matplotlib>=3.8
+plotly>=5.20
+streamlit>=1.36
+requests>=2.31
+psutil>=5.9
