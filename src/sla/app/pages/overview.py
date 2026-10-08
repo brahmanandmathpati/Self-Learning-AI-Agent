@@ -31,7 +31,8 @@ def render() -> None:
     card_row([
         metric_card("Best episode reward", ov["latest_best_reward"], "latest run, training"),
         metric_card("Average reward (last 50)", ov["latest_avg_reward_last50"], "latest run, training (ε > 0)"),
-        metric_card("Evaluation score", ov["latest_test_mean"], "latest held-out test mean (ε = 0)"),
+        metric_card("Evaluation score", ov["latest_test_mean"],
+                    f"latest test mean (ε = 0): {ov['latest_test_label']}" if ov["latest_test_label"] else None),
         metric_card("Episodes logged", ov["episodes_logged"], "all runs", "{:,}"),
         metric_card("Reflection notes", ov["reflections"], "grounded explanations", "{:,}"),
     ])
