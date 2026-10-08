@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import streamlit as st
 
-from sla.app.pages import (
+from sla.app.state import services
+from sla.app.styles.theme import inject_css
+from sla.app.views import (
     ablation,
     about,
     comparison,
@@ -15,8 +17,6 @@ from sla.app.pages import (
     reflection,
     training,
 )
-from sla.app.state import services
-from sla.app.styles.theme import inject_css
 
 st.set_page_config(page_title="Self-Learning AI Agent", page_icon="🧠", layout="wide",
                    initial_sidebar_state="expanded")

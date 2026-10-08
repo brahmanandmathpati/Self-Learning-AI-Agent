@@ -71,7 +71,7 @@ Truncation at the 500-step time limit is **not** terminal, so the target still b
 
 ```
             ┌──────────── Streamlit dashboard (src/sla/app) ─────┐      CLI: sla ...
-            │ pages · components · charts (Plotly) · styles       │        │
+            │ views · components · charts (Plotly) · styles       │        │
             └──────────────────────────┬──────────────────────────┘        │
                                        ▼                                   ▼
               Service layer (src/sla/services): Training · Evaluation · Experiment · Reflection · Checkpoint
@@ -168,7 +168,7 @@ src/sla/
   evaluation/       evaluate (frozen policy), metrics, stats, ablation, plots
   reflection/       stats (facts), grounding, fallback template, llm_client (Ollama), reflect, feedback
   services/         service layer used by the CLI and the dashboard
-  app/              Streamlit dashboard: main, pages/, components/, charts/, styles/
+  app/              Streamlit dashboard: main, views/, components/, charts/, styles/
   cli.py
 scripts/            make_tables.py
 tests/              unit/, integration/, ui/

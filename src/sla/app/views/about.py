@@ -12,7 +12,7 @@ digraph G {
   rankdir=TB; bgcolor="transparent"; nodesep=0.35; ranksep=0.35;
   node [shape=box, style="rounded,filled", fillcolor="#1a1a19",
   color="#383835", fontcolor="#ffffff", fontname="Helvetica", fontsize=11]; edge [color="#898781"];
-  UI [label="Streamlit dashboard\\n(app/pages, components, charts)"];
+  UI [label="Streamlit dashboard\\n(app/views, components, charts)"];
   CLI [label="CLI  sla ..."];
   SVC [label="Service layer\\nTraining · Evaluation · Experiment\\nReflection · Checkpoint"];
   PIPE [label="Training pipeline\\n(train_run, run_experiment,\\nrun_ablation)"];

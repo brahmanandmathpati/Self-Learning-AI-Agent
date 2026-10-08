@@ -4,7 +4,7 @@
 
 | Layer | Package | Responsibility |
 |---|---|---|
-| Frontend | `sla.app` | Streamlit pages (`pages/`), reusable components (`components/`), Plotly figures (`charts/`), design tokens and CSS (`styles/`). No business logic. |
+| Frontend | `sla.app` | Streamlit views (`views/`, one module per page; not named `pages/` so Streamlit does not auto-register them), reusable components (`components/`), Plotly figures (`charts/`), design tokens and CSS (`styles/`). No business logic. |
 | Application | `sla.services`, `sla.cli` | `TrainingService`, `EvaluationService`, `ExperimentService`, `ReflectionService`, `CheckpointService`; the CLI and the dashboard both call these. |
 | Pipeline | `sla.training.pipeline`, `sla.evaluation.ablation` | `train_run`, `resume_run`, `run_baseline`, `run_experiment`, `run_ablation`: the only way results are produced. |
 | RL engine | `sla.training.runner`, `sla.agents`, `sla.memory`, `sla.envs` | The episode loop, the agents (random, Q-learning, DQN), the replay buffer and the seeded environments. |
