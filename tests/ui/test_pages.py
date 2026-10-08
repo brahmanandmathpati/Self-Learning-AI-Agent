@@ -13,7 +13,7 @@ PAGES = ["overview", "training", "comparison", "evaluation", "ablation", "explor
 
 
 def page(name):
-    return AppTest.from_string(f"from sla.app.pages import {name}\n{name}.render()", default_timeout=60)
+    return AppTest.from_string(f"from sla.app.views import {name}\n{name}.render()", default_timeout=60)
 
 
 @pytest.mark.parametrize("name", PAGES)
