@@ -39,7 +39,9 @@ def _live_panel(cfg, total_episodes: int):
                 + metric_card("Reward", info.total_reward)
                 + metric_card("Moving avg (50)", float(last["total_reward"].mean()))
                 + metric_card("Epsilon", info.epsilon, None, "{:.3f}")
-                + metric_card("Loss", info.mean_loss, None, "{:.4f}")
+                + (metric_card("Loss", "n/a", "tabular Q-learning has no network") if cfg.agent != "dqn"
+                   else metric_card("Loss", "warming up", "filling the replay buffer") if info.mean_loss is None
+                   else metric_card("Loss", info.mean_loss, None, "{:.4f}"))
                 + "</div>", unsafe_allow_html=True)
             chart.plotly_chart(learning_curve(df, window=min(50, max(5, len(df) // 5)), color=color, height=300),
                                width="stretch", key=f"live_{ctx.run_id}_{done}")
