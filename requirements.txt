@@ -1,10 +1,11 @@
-# Runtime dependencies (same as pyproject.toml). For a CPU-only PyTorch build first run:
-#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+# Runtime dependencies, used by Streamlit Community Cloud and `pip install -r requirements.txt`.
+# CPU-only PyTorch (no GPU needed, much smaller download than the CUDA build):
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.7.1+cpu
 numpy>=1.26
 pandas>=2.1
 scipy>=1.11
 gymnasium>=1.0
-torch>=2.2
 pyyaml>=6.0
 matplotlib>=3.8
 plotly>=5.20
