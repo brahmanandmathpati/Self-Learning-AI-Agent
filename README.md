@@ -6,6 +6,9 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-CPU-orange)
 ![Gymnasium](https://img.shields.io/badge/Gymnasium-FrozenLake%20%7C%20CartPole-green)
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-lightgrey)
+[![Live demo](https://img.shields.io/badge/Live%20demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://self-learning-ai-agent-final-year-project.streamlit.app/)
+
+**Live dashboard:** https://self-learning-ai-agent-final-year-project.streamlit.app/
 
 Final-year B.Tech CSE (AI Specialization) project, 2023–2027.
 
@@ -53,17 +56,18 @@ Truncation at the 500-step time limit is **not** terminal, so the target still b
 
 ## Results
 
-> Results are produced only by real runs and are stored in the SQLite database. Regenerate the tables with
-> `python scripts/make_tables.py` — they are written to [`results/`](results/). Until experiments are run, the
-> dashboard and the tables show **NOT RUN**.
+> Results are produced only by real runs and are stored in the SQLite database (`runs/sla.db`, not committed).
+> The numbers below come from `sla pipeline` and `sla ablation` with seeds 0–4 and 100 held-out test episodes
+> per seed, run on a laptop CPU (October 2026). Trained vs random: CartPole Welch p = 0.0018 (95% CI of the gain
+> 291.22 to 474.74); FrozenLake p < 0.001. Regenerate the tables with `python scripts/make_tables.py`.
 
 | Agent | Environment | Held-out test return (mean ± std over 5 seeds) |
 |---|---|---|
-| Random baseline | FrozenLake-v1 4×4 | NOT RUN |
-| Tabular Q-learning | FrozenLake-v1 4×4 | NOT RUN |
-| Random baseline | CartPole-v1 | NOT RUN |
-| DQN | CartPole-v1 | NOT RUN |
-| DQN without replay / without target network | CartPole-v1 | NOT RUN |
+| Random baseline | FrozenLake-v1 4×4 | 0.012 ± 0.013 (goal reached 1.2%) |
+| Tabular Q-learning | FrozenLake-v1 4×4 | **1.000 ± 0.000** (goal reached 100%) |
+| Random baseline | CartPole-v1 | 22.58 ± 1.61 |
+| DQN | CartPole-v1 | **425.92 ± 122.59** (64% of test episodes reach 500) |
+| DQN without replay / without target network | CartPole-v1 | 86.79 ± 56.20 / 9.36 ± 0.02 |
 
 ---
 
@@ -129,6 +133,8 @@ Optional (explanations by a local LLM): install [Ollama](https://ollama.com) and
 `python -m sla <command>` works too. Full reference: [`docs/usage.md`](docs/usage.md).
 
 ## Dashboard
+
+**Try it online:** [self-learning-ai-agent-final-year-project.streamlit.app](https://self-learning-ai-agent-final-year-project.streamlit.app/) (hosted on Streamlit Community Cloud; the hosted database starts empty, so train a run on the Training page first).
 
 `sla dashboard` opens a dark, multi-page experimentation dashboard: **Overview**, **Training** (start runs and watch reward, moving average, ε, loss and episode length live), **Agent comparison**, **Evaluation** (5-seed results, CI, Welch's t-test, before/after), **Ablation**, **Run explorer** (config, evaluations, checkpoints, logs), **Reflection** (notes, facts, validation status, ratings), **Environments** and **About**. Every number is read from the database; empty sections say NOT RUN.
 
