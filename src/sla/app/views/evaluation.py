@@ -70,7 +70,7 @@ def render() -> None:
             what = f"Experiment #{exp_id} was {status} before it finished ({done} run(s) completed)."
             nxt = ("Statistics need every seed and the random baseline. Training stops if you leave the Training "
                    "page, refresh or close the tab — start a new multi-seed experiment and stay on that page "
-                   "until it finishes. FrozenLake takes about a minute.")
+                   "until it finishes (a 5-seed FrozenLake experiment takes a few minutes).")
         empty_state(what, next_step=nxt, glyph="clock", tag=status.upper())
         return
     label = LABELS.get(exp["algorithm"], exp["algorithm"])
