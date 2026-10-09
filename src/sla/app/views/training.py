@@ -124,8 +124,11 @@ def render() -> None:
                 slippery = st.checkbox("Slippery ice (stochastic transitions)",
                                        bool(preset.env_kwargs.get("is_slippery", False)))
         submitted = st.form_submit_button("Start training", type="primary")
+    st.info("Stay on this page while training runs. Switching to another page, refreshing or closing the tab "
+            "stops training (the run is saved as *stopped*).", icon=":material/info:")
     if algorithm == "dqn":
-        st.caption("DQN on CPU: roughly a few minutes for 600 episodes. Keep this tab open while it trains.")
+        st.caption("DQN on CPU: roughly a few minutes per 600-episode run; a 5-seed experiment takes about "
+                   "five times longer. FrozenLake finishes in seconds.")
 
     if submitted:
         try:

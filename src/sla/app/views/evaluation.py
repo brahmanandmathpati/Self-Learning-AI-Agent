@@ -62,8 +62,16 @@ def render() -> None:
     exp = data.experiment(exp_id)
     summary = exp.get("summary") or {}
     if exp["status"] != "completed" or not summary:
-        empty_state(f"Experiment #{exp_id} is {exp['status']}.", next_step="Statistics appear when it completes.",
-                    glyph="clock", tag=str(exp["status"]).upper())
+        status = str(exp["status"])
+        if status == "running":
+            what, nxt = f"Experiment #{exp_id} is still running.", "Statistics appear here when it completes."
+        else:
+            done = int((exp["runs"]["status"] == "completed").sum()) if not exp["runs"].empty else 0
+            what = f"Experiment #{exp_id} was {status} before it finished ({done} run(s) completed)."
+            nxt = ("Statistics need every seed and the random baseline. Training stops if you leave the Training "
+                   "page, refresh or close the tab — start a new multi-seed experiment and stay on that page "
+                   "until it finishes. FrozenLake takes about a minute.")
+        empty_state(what, next_step=nxt, glyph="clock", tag=status.upper())
         return
     label = LABELS.get(exp["algorithm"], exp["algorithm"])
     trained = summary.get("trained_test_means", [])

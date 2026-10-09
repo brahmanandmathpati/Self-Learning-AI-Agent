@@ -27,7 +27,9 @@ def render() -> None:
     if exps.empty:
         empty_state("No ablation has been run yet.",
                     "sla ablation --config configs/cartpole_dqn.yaml --seeds 0 1 2 3 4",
-                    "Run the ablation from the terminal; results appear here automatically.", glyph="flask")
+                    "The ablation trains 15 DQN runs (full, no replay, no target network × 5 seeds), which takes "
+                    "about 40 minutes on a laptop CPU, so it is started from a terminal on the computer that "
+                    "holds this database. Results appear here automatically.", glyph="flask")
         return
     exp_id = experiment_selector(exps, key="abl_exp")
     df, stats = data.ablation(exp_id)
