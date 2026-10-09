@@ -24,7 +24,7 @@ dependencies = [
   "pyyaml>=6.0",
   "matplotlib>=3.8",
   "plotly>=5.20",
-  "streamlit>=1.36",
+  "streamlit>=1.45",
   "requests>=2.31",
   "psutil>=5.9",
 ]

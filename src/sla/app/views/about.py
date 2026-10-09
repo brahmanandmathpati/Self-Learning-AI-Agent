@@ -10,13 +10,13 @@ from sla.app.components.ui import hero, section
 ARCH = """
 digraph G {
   rankdir=TB; bgcolor="transparent"; nodesep=0.35; ranksep=0.35;
-  node [shape=box, style="rounded,filled", fillcolor="#1a1a19",
-  color="#383835", fontcolor="#ffffff", fontname="Helvetica", fontsize=11]; edge [color="#898781"];
+  node [shape=box, style="rounded,filled", fillcolor="#0e1320",
+  color="#2a3550", fontcolor="#f4f7fb", fontname="Helvetica", fontsize=11]; edge [color="#898781"];
   UI [label="Streamlit dashboard\\n(app/views, components, charts)"];
   CLI [label="CLI  sla ..."];
   SVC [label="Service layer\\nTraining · Evaluation · Experiment\\nReflection · Checkpoint"];
   PIPE [label="Training pipeline\\n(train_run, run_experiment,\\nrun_ablation)"];
-  RUN [label="Runner + callbacks\\n(the only place learning happens)", fillcolor="#173a63"];
+  RUN [label="Runner + callbacks\\n(the only place learning happens)", fillcolor="#173a63", color="#5b9cf0"];
   ENV [label="Gymnasium env\\nFrozenLake / CartPole"];
   AG [label="Agents\\nRandom · Q-learning · DQN"];
   BUF [label="Replay buffer"];

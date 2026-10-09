@@ -5,11 +5,26 @@ from __future__ import annotations
 import numpy as np
 import streamlit as st
 
+from sla import settings
+from sla.app import data
 from sla.app.charts.figures import frozenlake_map
+from sla.app.components.chart_card import chart_card
+from sla.app.components.metric_card import metric_card
 from sla.app.components.ui import empty_state, hero, section
 from sla.app.state import services
 
 ARROWS = ["←", "↓", "→", "↑"]
+
+
+def _env_cards(items: list[tuple[str, str, str, str]]) -> None:
+    st.markdown('<div class="sla-env-row">' + "".join(metric_card(label, value, sub, icon=ic, count=False)
+                                                      for label, value, sub, ic in items) + "</div>",
+                unsafe_allow_html=True)
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _policy_cached(db: str, ver: tuple) -> tuple[list[str] | None, np.ndarray | None, str | None]:
+    return _frozenlake_policy(services())
 
 
 def _frozenlake_policy(svc) -> tuple[list[str] | None, np.ndarray | None, str | None]:
@@ -29,15 +44,23 @@ def _frozenlake_policy(svc) -> tuple[list[str] | None, np.ndarray | None, str | 
 
 
 def render() -> None:
-    svc = services()
-    hero("Environments", "Two Gymnasium tasks: a grid solved with a Q-table and a control task solved with a DQN.")
+    hero("Environments", "Two Gymnasium tasks: a grid solved with a Q-table and a control task solved with a DQN.",
+         eyebrow="Reference")
     tab_fl, tab_cp = st.tabs(["FrozenLake-v1 · tabular Q-learning", "CartPole-v1 · Deep Q-Network"])
     with tab_fl:
-        left, right = st.columns([2, 3])
+        _env_cards([
+            ("Goal", "Walk from START to GOAL without falling into a hole", "4×4 frozen lake", "target"),
+            ("State space", "16 squares", "the agent's cell on the grid · Discrete(16)", "eye"),
+            ("Action space", "4 moves", "left · down · right · up · Discrete(4)", "move"),
+            ("Reward", "+1 at the goal, 0 otherwise", "sparse; ends at goal, hole or 100 steps", "gift"),
+        ])
+        st.write("")
+        left, right = st.columns([2, 3], gap="medium")
         desc = ["SFFF", "FHFH", "FFFH", "HFFG"]
-        arrows, values, run_id = _frozenlake_policy(svc)
+        arrows, values, run_id = _policy_cached(str(settings.db_path()), data.version())
         with left:
-            st.plotly_chart(frozenlake_map(desc, arrows, values), width="stretch")
+            chart_card(frozenlake_map(desc, arrows, values), "Learned policy" if run_id else "Map",
+                       "arrows = preferred move after training" if run_id else None, key="env_fl")
             if run_id:
                 st.caption(f"Arrows = greedy action argmax_a Q(s, a) learned by run {run_id}; V = max_a Q(s, a).")
             else:
@@ -46,9 +69,6 @@ def render() -> None:
             st.markdown("""
 | | |
 |---|---|
-| **State space** | `Discrete(16)` — the agent's cell on the 4×4 grid |
-| **Action space** | `Discrete(4)` — 0 left, 1 down, 2 right, 3 up |
-| **Reward** | +1 for reaching the goal **G**, 0 otherwise (sparse) |
 | **Episode ends** | goal reached or fell in a hole **H** (terminated), or 100 steps (truncated) |
 | **Our setting** | non-slippery map by default (`is_slippery: false`); slippery is optional |
 | **Algorithm** | Tabular Q-learning with ε-greedy exploration |
@@ -56,7 +76,14 @@ def render() -> None:
             st.latex(r"Q(s,a) \leftarrow Q(s,a) + \alpha\,[\,r + \gamma \max_{a'} Q(s',a') - Q(s,a)\,]")
             st.caption("At a terminal step there is no next state, so the target is just r (no bootstrap).")
     with tab_cp:
-        left, right = st.columns([2, 3])
+        _env_cards([
+            ("Goal", "Keep the pole upright and the cart on the track", "balance as long as possible", "target"),
+            ("State space", "4 numbers", "cart position · velocity · pole angle · angular velocity · Box(4)", "eye"),
+            ("Action space", "2 pushes", "push the cart left or right · Discrete(2)", "move"),
+            ("Reward", "+1 per step balanced", "ends at > 12° or off-track; 500 steps = success", "gift"),
+        ])
+        st.write("")
+        left, right = st.columns([2, 3], gap="medium")
         with left:
             try:
                 import gymnasium as gym
@@ -70,9 +97,6 @@ def render() -> None:
             st.markdown("""
 | | |
 |---|---|
-| **State space** | `Box(4)` — cart position, cart velocity, pole angle, pole angular velocity |
-| **Action space** | `Discrete(2)` — push the cart left (0) or right (1) |
-| **Reward** | +1 for every step the pole stays up |
 | **Episode ends** | pole angle > 12° or cart leaves the track (terminated), or 500 steps (truncated) |
 | **Success** | an episode return of 500 (the full time limit) |
 | **Algorithm** | DQN: MLP 4→128→128→2, replay buffer, target network, Huber loss, gradient clipping |
