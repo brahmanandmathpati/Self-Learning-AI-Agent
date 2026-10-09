@@ -1,7 +1,12 @@
 # Runtime dependencies, used by Streamlit Community Cloud and `pip install -r requirements.txt`.
-# CPU-only PyTorch (no GPU needed, much smaller download than the CUDA build):
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.7.1+cpu
+# PyTorch: the CPU-only wheel (no GPU needed, far smaller than the CUDA build) is linked directly
+# per Python version, so no extra package index is needed (works with both pip and uv).
+torch @ https://download.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp310-cp310-manylinux_2_28_x86_64.whl ; sys_platform == "linux" and platform_machine == "x86_64" and python_version == "3.10"
+torch @ https://download.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp311-cp311-manylinux_2_28_x86_64.whl ; sys_platform == "linux" and platform_machine == "x86_64" and python_version == "3.11"
+torch @ https://download.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl ; sys_platform == "linux" and platform_machine == "x86_64" and python_version == "3.12"
+torch @ https://download.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp313-cp313-manylinux_2_28_x86_64.whl ; sys_platform == "linux" and platform_machine == "x86_64" and python_version == "3.13"
+torch @ https://download.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp314-cp314-manylinux_2_28_x86_64.whl ; sys_platform == "linux" and platform_machine == "x86_64" and python_version == "3.14"
+torch>=2.2 ; sys_platform != "linux" or platform_machine != "x86_64"
 numpy>=1.26
 pandas>=2.1
 scipy>=1.11
