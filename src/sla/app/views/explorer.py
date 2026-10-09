@@ -4,19 +4,24 @@ from __future__ import annotations
 
 import streamlit as st
 
+from sla.app import data
 from sla.app.charts.figures import learning_curve
+from sla.app.components.chart_card import chart_card
+from sla.app.components.run_card import algo_label, flatten, kv_grid, run_header
 from sla.app.components.selectors import run_selector
-from sla.app.components.ui import badge, card_row, empty_state, hero, metric_card
+from sla.app.components.ui import card_grid, empty_state, hero, metric_card
 from sla.app.state import services
 from sla.utils.errors import SLAError
 
 
 def render() -> None:
     svc = services()
-    hero("Run explorer", "Every run is reproducible: seed, config, git commit, checkpoints and logs are recorded.")
-    runs = svc.experiments.runs()
+    hero("Run explorer", "Every run is reproducible: seed, config, git commit, checkpoints and logs are recorded.",
+         eyebrow="Experiment browser")
+    runs = data.runs()
     if runs.empty:
-        empty_state("No runs stored yet.", "sla train --config configs/frozenlake_qlearning.yaml")
+        empty_state("No runs stored yet.", "sla train --config configs/frozenlake_qlearning.yaml",
+                    "Train an agent on the Training page; every run is listed here.")
         return
     f1, f2, f3 = st.columns(3)
     env = f1.multiselect("Environment", sorted(runs["env"].unique()))
@@ -29,20 +34,25 @@ def render() -> None:
         view = view[view["algorithm"].isin(algo)]
     if status:
         view = view[view["status"].isin(status)]
+    st.caption(f"{len(view)} of {len(runs)} runs")
     if view.empty:
-        empty_state("No runs match these filters.")
+        empty_state("No runs match these filters.", next_step="Clear one of the filters above.", glyph="eye")
         return
     run_id = run_selector(view, key="explorer_run")
-    d = svc.experiments.run_detail(run_id)
+    d = data.run_detail(run_id)
     run = d["run"]
-    st.markdown(f"{badge(run['status'])} &nbsp; <code>{run_id}</code>", unsafe_allow_html=True)
+    run_header(run)
     test = d["evaluations"][d["evaluations"]["kind"] == "test"] if not d["evaluations"].empty else d["evaluations"]
-    card_row([
-        metric_card("Environment", run["env"]), metric_card("Algorithm", run["algorithm"], run.get("variant") or None),
-        metric_card("Seed", run["seed"], None, "{}"),
-        metric_card("Episodes", run["episodes_completed"], run.get("stopped_reason"), "{:,}"),
-        metric_card("Test mean", float(test.iloc[-1]["mean_return"]) if not test.empty else None,
-                    f"± {test.iloc[-1]['std_return']:.2f}" if not test.empty else "not evaluated"),
+    card_grid([
+        metric_card("Environment", run["env"], icon="globe"),
+        metric_card("Algorithm", algo_label(run["algorithm"], run.get("variant")), icon="cpu"),
+        metric_card("Seed", run["seed"], None, "{}", icon="seed", count=False),
+        metric_card("Episodes", run["episodes_completed"], run.get("stopped_reason"), "{:,}", icon="layers"),
+        metric_card("Evaluation score", float(test.iloc[-1]["mean_return"]) if not test.empty else None,
+                    f"± {test.iloc[-1]['std_return']:.2f} · test, ε = 0" if not test.empty else "not evaluated",
+                    icon="check", accent="#3987e5"),
+        metric_card("Checkpoint", "best" if run.get("best_checkpoint") else None,
+                    "validation-selected" if run.get("best_checkpoint") else "none saved", icon="flag"),
     ])
     st.caption(f"Started {run['started_at']} · ended {run.get('ended_at') or '—'} · git {run.get('git_sha') or 'n/a'}"
                f" · folder {run.get('run_dir') or '—'}")
@@ -54,7 +64,8 @@ def render() -> None:
         if d["episodes"].empty:
             empty_state("This run has no training episodes (random baselines are evaluated, not trained).")
         else:
-            st.plotly_chart(learning_curve(d["episodes"], title="Training reward"), width="stretch")
+            chart_card(learning_curve(d["episodes"], height=340), "Training reward",
+                       "faint = per episode · bold = moving average", key="ex_curve")
     with tabs[1]:
         if d["evaluations"].empty:
             empty_state("No evaluations recorded.")
@@ -75,7 +86,10 @@ def render() -> None:
                 except (SLAError, OSError) as exc:
                     st.error(str(exc))
     with tabs[2]:
-        st.json(run["config"])
+        cfg = run["config"] or {}
+        kv_grid(flatten(cfg))
+        with st.expander("Raw configuration (JSON)"):
+            st.json(cfg)
     with tabs[3]:
         cks = svc.checkpoints.list(run["run_dir"]) if run.get("run_dir") else None
         if cks is None or cks.empty:

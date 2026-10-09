@@ -17,7 +17,10 @@ def run_selector(runs: pd.DataFrame, key: str, label: str = "Run") -> str | None
     labels = {row["run_id"]: run_label(row) for _, row in runs.iterrows()}
     ids = list(labels)
     default = st.session_state.get("selected_run")
-    index = ids.index(default) if default in ids else 0
+    completed = [row["run_id"] for _, row in runs.iterrows() if row["status"] == "completed"]
+    if default not in ids:
+        default = completed[0] if completed else ids[0]  # newest finished run by default
+    index = ids.index(default)
     chosen = st.selectbox(label, ids, index=index, format_func=labels.get, key=key)
     st.session_state["selected_run"] = chosen
     return chosen

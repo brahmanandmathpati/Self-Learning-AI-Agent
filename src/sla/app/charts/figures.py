@@ -13,17 +13,22 @@ from sla.utils.summary import rolling_mean
 def _layout(fig: go.Figure, title: str | None = None, x: str = "", y: str = "", height: int = 340,
             legend: bool = True) -> go.Figure:
     fig.update_layout(
-        title=dict(text=title, font=dict(size=14, color=INK["primary"]), x=0, xanchor="left") if title else None,
-        height=height, margin=dict(l=8, r=8, t=40 if title else 12, b=8),
-        paper_bgcolor=INK["surface"], plot_bgcolor=INK["surface"],
-        font=dict(family='system-ui, -apple-system, "Segoe UI", sans-serif', color=INK["secondary"], size=12),
+        title=dict(text=title, font=dict(size=13, color=INK["primary"]), x=0, xanchor="left") if title else None,
+        height=height, margin=dict(l=6, r=6, t=38 if title else 10, b=6),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family='Inter, system-ui, -apple-system, "Segoe UI", sans-serif', color=INK["secondary"], size=12),
         hovermode="x unified" if fig.data and fig.data[0].type == "scatter" else "closest",
-        hoverlabel=dict(bgcolor=INK["surface_2"], bordercolor=INK["axis"], font_color=INK["primary"]),
-        showlegend=legend,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=11)),
+        hoverlabel=dict(bgcolor="#141b2b", bordercolor="rgba(91,156,240,.5)", font_color=INK["primary"],
+                        font_family="Inter, sans-serif"),
+        showlegend=legend, transition=dict(duration=300, easing="cubic-in-out"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=11),
+                    bgcolor="rgba(0,0,0,0)", itemclick="toggle", itemdoubleclick="toggleothers"),
+        dragmode="zoom",
     )
-    axis = dict(gridcolor=INK["grid"], zerolinecolor=INK["axis"], linecolor=INK["axis"],
-                tickfont=dict(color=INK["muted"]), title_font=dict(color=INK["muted"], size=12))
+    axis = dict(gridcolor=INK["grid"], zerolinecolor=INK["axis"], linecolor=INK["axis"], showline=False,
+                tickfont=dict(color=INK["muted"], size=11), title_font=dict(color=INK["muted"], size=11),
+                showspikes=True, spikecolor="rgba(148,163,184,.35)", spikethickness=1, spikedash="dot",
+                spikemode="across")
     fig.update_xaxes(title_text=x, **axis)
     fig.update_yaxes(title_text=y, **axis)
     return fig
@@ -39,8 +44,8 @@ def learning_curve(episodes: pd.DataFrame, window: int = 50, color: str = SERIES
         fig.add_trace(go.Scatter(x=x, y=y, mode="lines", name="Reward per episode", line=dict(width=1, color=color),
                                  opacity=0.28, hovertemplate="%{y:.2f}"))
         fig.add_trace(go.Scatter(x=x, y=rolling_mean(y.tolist(), window), mode="lines",
-                                 name=f"Moving average ({window})", line=dict(width=2.2, color=color),
-                                 hovertemplate="%{y:.2f}"))
+                                 name=f"Moving average ({window})", line=dict(width=2.4, color=color),
+                                 fill="tozeroy", fillcolor=_alpha(color, 0.08), hovertemplate="%{y:.2f}"))
     return _layout(fig, title, "Episode", "Total reward", height)
 
 
@@ -53,7 +58,8 @@ def single_series(episodes: pd.DataFrame, column: str, label: str, color: str = 
         if window:
             y = rolling_mean(y, window)
         fig.add_trace(go.Scatter(x=data["episode"] + 1, y=y, mode="lines", name=label,
-                                 line=dict(width=2, color=color), hovertemplate="%{y:.4g}"))
+                                 line=dict(width=2, color=color), fill="tozeroy", fillcolor=_alpha(color, 0.07),
+                                 hovertemplate="%{y:.4g}"))
     return _layout(fig, title, "Episode", label, height, legend=False)
 
 
@@ -132,7 +138,7 @@ def frozenlake_map(desc: list[str], arrows: list[str] | None = None, values: np.
     n = len(desc)
     kinds = {"S": 0.15, "F": 0.15, "H": 0.0, "G": 1.0}
     z = [[kinds[c] for c in row] for row in desc]
-    colors = [[0, "#11253f"], [0.14, "#11253f"], [0.15, "#24364d"], [0.99, "#24364d"], [1.0, "#0e5c43"]]
+    colors = [[0, "#0a1322"], [0.14, "#0a1322"], [0.15, "#1a2840"], [0.99, "#1a2840"], [1.0, "#0e5c43"]]
     fig = go.Figure(go.Heatmap(z=z, colorscale=colors, showscale=False, hoverinfo="skip", xgap=3, ygap=3))
     names = {"S": "START", "H": "HOLE", "G": "GOAL", "F": ""}
     for i, row in enumerate(desc):

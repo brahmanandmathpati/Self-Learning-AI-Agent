@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import html
 from dataclasses import replace
 
 import pandas as pd
 import streamlit as st
 
+from sla.app import data
 from sla.app.charts.figures import learning_curve, single_series
+from sla.app.components.chart_card import PLOTLY_CONFIG, chart_card
 from sla.app.components.selectors import run_selector
-from sla.app.components.ui import card_row, empty_state, hero, metric_card, section
+from sla.app.components.ui import badge, card_grid, empty_state, hero, metric_card, section, skeleton
 from sla.app.state import services
 from sla.app.styles.theme import AGENT_COLORS, SERIES
 from sla.utils.errors import SLAError
@@ -17,11 +20,46 @@ from sla.utils.errors import SLAError
 LABELS = {"q_learning": "Q-learning", "dqn": "DQN"}
 
 
+TREND = {"improving": ("▲ Improving", "#22c55e"), "flat": ("■ Flat", "#f5b83d"),
+         "declining": ("▼ Declining", "#ef5350")}
+
+
+def _progress_html(done: int, total: int, run_id: str, live: bool) -> str:
+    pct = 100 * min(done / max(total, 1), 1.0)
+    state = badge("live", "Live training") if live else badge("completed", "Finished")
+    return (f'<div class="sla-progress"><div class="row"><span>{state}</span>'
+            f'<span class="mono">{html.escape(run_id)}</span>'
+            f'<span><b style="color:var(--ink)">{done:,}</b> / {total:,} episodes · {pct:.0f}%</span></div>'
+            f'<div class="track"><div class="fill{" live" if live else ""}" '
+            f'style="width:{pct:.1f}%"></div></div></div>')
+
+
+def _live_cards(df: pd.DataFrame, info, agent: str) -> list[str]:
+    last = df.tail(50)
+    if agent != "dqn":
+        loss = metric_card("Loss", "n/a", "tabular Q-learning has no network", icon="loss")
+    elif info.mean_loss is None:
+        loss = metric_card("Loss", "warming up", "filling the replay buffer", icon="loss")
+    else:
+        loss = metric_card("Loss", info.mean_loss, "Huber, this episode", "{:.4f}", icon="loss", accent=SERIES[1])
+    return [
+        metric_card("Episode", len(df), None, "{:,}", icon="layers", count=False),
+        metric_card("Reward", info.total_reward, "this episode", icon="trophy", accent="#f5b83d"),
+        metric_card("Moving average", float(last["total_reward"].mean()), f"last {len(last)} episodes", icon="avg",
+                    accent=SERIES[2]),
+        loss,
+        metric_card("Epsilon", info.epsilon, "exploration rate", "{:.3f}", icon="dice"),
+        metric_card("Episode length", info.length, "steps this episode", "{:,}", icon="len", count=False),
+    ]
+
+
 def _live_panel(cfg, total_episodes: int):
-    """Placeholders updated from the training callback."""
-    prog = st.progress(0.0, text="Starting…")
-    cards = st.empty()
+    """Placeholders updated from the training callback (throttled to ~60 redraws per run)."""
+    head = st.empty()
+    head.markdown(_progress_html(0, total_episodes, "starting…", True) + skeleton(6, 96), unsafe_allow_html=True)
+    trend_ph = st.empty()
     chart = st.empty()
+    small = st.empty()
     rows: list[dict] = []
     color = AGENT_COLORS.get(LABELS.get(cfg.agent, ""), SERIES[0])
 
@@ -29,29 +67,39 @@ def _live_panel(cfg, total_episodes: int):
         rows.append({"episode": info.episode, "total_reward": info.total_reward, "length": info.length,
                      "epsilon": info.epsilon, "mean_loss": info.mean_loss})
         done = info.episode + 1
-        prog.progress(min(done / total_episodes, 1.0), text=f"{ctx.run_id} · episode {done:,} / {total_episodes:,}")
-        if done % max(1, total_episodes // 60) == 0 or done == total_episodes:
+        if done % max(1, total_episodes // 60) == 0 or done == total_episodes or done == 1:
             df = pd.DataFrame(rows)
-            last = df.tail(50)
-            cards.markdown(
-                "<div style='display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem'>"
-                + metric_card("Episode", done, None, "{:,}")
-                + metric_card("Reward", info.total_reward)
-                + metric_card("Moving avg (50)", float(last["total_reward"].mean()))
-                + metric_card("Epsilon", info.epsilon, None, "{:.3f}")
-                + (metric_card("Loss", "n/a", "tabular Q-learning has no network") if cfg.agent != "dqn"
-                   else metric_card("Loss", "warming up", "filling the replay buffer") if info.mean_loss is None
-                   else metric_card("Loss", info.mean_loss, None, "{:.4f}"))
-                + "</div>", unsafe_allow_html=True)
-            chart.plotly_chart(learning_curve(df, window=min(50, max(5, len(df) // 5)), color=color, height=300),
-                               width="stretch", key=f"live_{ctx.run_id}_{done}")
+            live = done < total_episodes
+            head.markdown(_progress_html(done, total_episodes, ctx.run_id, live)
+                          + '<div class="sla-grid">' + "".join(_live_cards(df, info, cfg.agent)) + "</div>",
+                          unsafe_allow_html=True)
+            trend = data.learning_trend(df)
+            if trend:
+                word, c = TREND[trend[0]]
+                trend_ph.markdown(f'<div class="sla-badge" style="margin:.2rem 0 .4rem"><span class="sla-dot pulse" '
+                                  f'style="--c:{c}"></span>Is it learning? {word} · {html.escape(trend[1])}</div>',
+                                  unsafe_allow_html=True)
+            window = min(50, max(5, len(df) // 5))
+            chart.plotly_chart(learning_curve(df, window=window, color=color, height=300), width="stretch",
+                               config=PLOTLY_CONFIG, key=f"live_{ctx.run_id}_{done}")
+            if done % max(1, total_episodes // 20) == 0 or done == total_episodes:
+                with small.container():
+                    a, b, c2 = st.columns(3)
+                    a.plotly_chart(single_series(df, "epsilon", "Epsilon", SERIES[2], "Epsilon", height=200),
+                                   width="stretch", config=PLOTLY_CONFIG, key=f"le_{ctx.run_id}_{done}")
+                    if df["mean_loss"].notna().any():
+                        b.plotly_chart(single_series(df, "mean_loss", "Loss", SERIES[1], "Loss", height=200),
+                                       width="stretch", config=PLOTLY_CONFIG, key=f"ll_{ctx.run_id}_{done}")
+                    c2.plotly_chart(single_series(df, "length", "Steps", SERIES[0], "Episode length", height=200),
+                                    width="stretch", config=PLOTLY_CONFIG, key=f"ln_{ctx.run_id}_{done}")
         return False
     return on_episode
 
 
 def render() -> None:
     svc = services()
-    hero("Training", "Configure an agent, start training and watch reward, ε, loss and episode length update live.")
+    hero("Training", "Configure an agent, start training and watch reward, ε, loss and episode length update live.",
+         eyebrow="Live learning")
 
     with st.form("train_form"):
         c1, c2, c3 = st.columns(3)
@@ -89,7 +137,7 @@ def render() -> None:
             if mode.startswith("Single"):
                 out = svc.training.train(cfg, int(eval_eps), progress=_live_panel(cfg, cfg.episodes))
                 st.success(f"Run {out.run_id} finished ({out.train.stopped_reason}).")
-                card_row([
+                card_grid([
                     metric_card("Untrained test mean", out.initial_eval.mean_return if out.initial_eval else None,
                                 "before learning, ε = 0"),
                     metric_card("Trained test mean", out.final_eval.mean_return,
@@ -111,23 +159,51 @@ def render() -> None:
         except ImportError as exc:
             st.error(f"A required package is missing: {exc}. Install PyTorch (CPU) for the DQN.")
 
-    section("Inspect a training run", "Charts are read from the SQLite database.")
-    runs = svc.experiments.trained_runs()
+    section("Inspect a training run",
+            "Every chart is read from the SQLite database · drag to zoom, double-click to reset.")
+    runs = data.trained_runs()
     if runs.empty:
-        empty_state("No training runs yet.", "sla train --config configs/frozenlake_qlearning.yaml")
+        empty_state("No training runs yet.", "sla train --config configs/frozenlake_qlearning.yaml",
+                    "Start a run with the form above — its curves will appear here.")
         return
     run_id = run_selector(runs, key="train_run")
-    ep = svc.db.query_episodes(run_id)
-    algo = svc.db.get_run(run_id)["algorithm"]
+    ep = data.episodes(run_id)
+    run = svc.db.get_run(run_id)
+    algo = run["algorithm"]
     color = AGENT_COLORS.get(LABELS.get(algo, ""), SERIES[0])
-    st.plotly_chart(learning_curve(ep, color=color, title="Reward and moving average"), width="stretch")
-    a, b, c = st.columns(3)
-    a.plotly_chart(single_series(ep, "epsilon", "Epsilon", SERIES[2], "Exploration (ε)"), width="stretch")
-    if ep["mean_loss"].notna().any():
-        b.plotly_chart(single_series(ep, "mean_loss", "Loss", SERIES[1], "Huber loss (moving avg 20)", window=20),
-                       width="stretch")
-    else:
-        with b:
-            empty_state("No loss for tabular Q-learning (it has no network).")
-    c.plotly_chart(single_series(ep, "length", "Steps", SERIES[0], "Episode length (moving avg 20)", window=20),
-                   width="stretch")
+    last = ep.tail(50)
+    loss = ep["mean_loss"].dropna()
+    card_grid([
+        metric_card("Episodes", len(ep), run["status"], "{:,}", icon="layers"),
+        metric_card("Best reward", float(ep["total_reward"].max()) if not ep.empty else None, "single episode",
+                    icon="trophy", accent="#f5b83d"),
+        metric_card("Moving average", float(last["total_reward"].mean()) if not ep.empty else None,
+                    f"last {len(last)} episodes", icon="avg", accent=SERIES[2]),
+        metric_card("Loss", float(loss.tail(50).mean()) if not loss.empty else ("n/a" if algo != "dqn" else None),
+                    "mean of last 50" if not loss.empty else "Q-learning has no network", "{:.4f}", icon="loss"),
+        metric_card("Epsilon", float(ep["epsilon"].iloc[-1]) if not ep.empty else None, "final exploration rate",
+                    "{:.3f}", icon="dice"),
+        metric_card("Episode length", float(last["length"].mean()) if not ep.empty else None, "mean of last 50",
+                    "{:,.1f}", icon="len"),
+    ])
+    trend = data.learning_trend(ep)
+    if trend:
+        word, c = TREND[trend[0]]
+        st.markdown(f'<div class="sla-badge" style="margin:.3rem 0 .6rem"><span class="sla-dot" style="--c:{c}"></span>'
+                    f'Training trend: {word} · {html.escape(trend[1])}</div>', unsafe_allow_html=True)
+    chart_card(learning_curve(ep, color=color, height=330), "Reward vs episode",
+               "faint = reward per episode · bold = moving average", key="tr_reward")
+    a, b, c = st.columns(3, gap="medium")
+    with a:
+        chart_card(single_series(ep, "epsilon", "Epsilon", SERIES[2], height=230), "Exploration (ε)",
+                   "probability of a random action", key="tr_eps")
+    with b:
+        if ep["mean_loss"].notna().any():
+            chart_card(single_series(ep, "mean_loss", "Loss", SERIES[1], window=20, height=230), "Huber loss",
+                       "moving average of 20", key="tr_loss")
+        else:
+            empty_state("No loss for tabular Q-learning.", next_step="Q-learning updates a table, not a network.",
+                        glyph="loss", tag="NOT APPLICABLE")
+    with c:
+        chart_card(single_series(ep, "length", "Steps", SERIES[0], window=20, height=230), "Episode length",
+                   "moving average of 20", key="tr_len")
