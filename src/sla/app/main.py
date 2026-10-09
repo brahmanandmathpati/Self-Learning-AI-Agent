@@ -14,9 +14,9 @@ if str(_SRC) not in sys.path:
 
 import streamlit as st  # noqa: E402
 
-from sla.app import data  # noqa: E402
+from sla.app import data, demo_seed  # noqa: E402
 from sla.app.components.states import error_state  # noqa: E402
-from sla.app.components.status_badge import badge, run_state  # noqa: E402
+from sla.app.components.status_badge import badge  # noqa: E402
 from sla.app.styles.theme import inject_css  # noqa: E402
 from sla.app.views import (  # noqa: E402
     ablation,
@@ -36,6 +36,15 @@ st.set_page_config(page_title="Self-Learning AI Agent · Lab", page_icon=str(ASS
                    initial_sidebar_state="expanded")
 inject_css()
 st.logo(str(ASSETS / "logo.svg"), icon_image=str(ASSETS / "icon.svg"), size="large")
+
+
+@st.cache_resource(show_spinner=False)
+def _seed_demo() -> bool:
+    """Once per server process: give the hosted app the committed results snapshot (see demo_seed)."""
+    return demo_seed.seed_if_needed()
+
+
+_seed_demo()
 
 
 def safe(render):
@@ -86,7 +95,7 @@ def sidebar_status() -> None:
         return
     ov = data.overview()
     latest = ov["latest_run"]
-    state = "running" if ov["running_runs"] else run_state(latest["status"] if latest else None)
+    state = "running" if ov["running_runs"] else "idle"
     state_badge = badge(state, {"running": "Training", "completed": "Completed", "idle": "Idle",
                                 "stopped": "Stopped", "failed": "Failed"}[state])
     algo = {"q_learning": "Q-learning", "dqn": "DQN"}.get(latest["algorithm"], "—") if latest else "—"
@@ -106,6 +115,14 @@ nav = st.navigation(PAGES)
 with st.sidebar:
     try:
         sidebar_status()
+        snap = demo_seed.snapshot_info()
+        if snap:
+            c = snap.get("counts", {})
+            st.markdown(f'<div class="sla-side" style="margin-top:.5rem"><div class="ttl">DATA</div>'
+                        f'<div style="color:var(--secondary)">Includes a read-only snapshot of real runs '
+                        f'from the project laptop: {c.get("experiments", 0)} experiments · {c.get("runs", 0)} '
+                        f'runs · {c.get("episodes", 0):,} episodes. New runs you start here are added on '
+                        f'top until the app restarts.</div></div>', unsafe_allow_html=True)
     except Exception as exc:  # noqa: BLE001
         error_state("Status unavailable", "the database could not be read.", "run `sla init-db`.", exc)
     st.caption("Q-learning · DQN · held-out evaluation")

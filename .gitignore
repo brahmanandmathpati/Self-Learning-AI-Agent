@@ -229,3 +229,6 @@ runs/
 *.npz
 hardware_*.json
 .streamlit/secrets.toml
+
+# Read-only results snapshot used to seed the hosted dashboard (see src/sla/app/demo_seed.py)
+!data/demo/sla_demo.db
