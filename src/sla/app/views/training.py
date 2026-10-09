@@ -24,11 +24,11 @@ TREND = {"improving": ("▲ Improving", "#22c55e"), "flat": ("■ Flat", "#f5b83
          "declining": ("▼ Declining", "#ef5350")}
 
 
-def _progress_html(done: int, total: int, run_id: str, live: bool) -> str:
+def _progress_html(done: int, total: int, run_id: str, live: bool, label: str = "") -> str:
     pct = 100 * min(done / max(total, 1), 1.0)
     state = badge("live", "Live training") if live else badge("completed", "Finished")
     return (f'<div class="sla-progress"><div class="row"><span>{state}</span>'
-            f'<span class="mono">{html.escape(run_id)}</span>'
+            f'<span class="mono">{html.escape(label)}{html.escape(run_id)}</span>'
             f'<span><b style="color:var(--ink)">{done:,}</b> / {total:,} episodes · {pct:.0f}%</span></div>'
             f'<div class="track"><div class="fill{" live" if live else ""}" '
             f'style="width:{pct:.1f}%"></div></div></div>')
@@ -53,24 +53,29 @@ def _live_cards(df: pd.DataFrame, info, agent: str) -> list[str]:
     ]
 
 
-def _live_panel(cfg, total_episodes: int):
-    """Placeholders updated from the training callback (throttled to ~60 redraws per run)."""
+def _live_panel(cfg, total_episodes: int, n_runs: int = 1):
+    """Placeholders updated from the training callback (throttled to ~25 redraws per run)."""
     head = st.empty()
     head.markdown(_progress_html(0, total_episodes, "starting…", True) + skeleton(6, 96), unsafe_allow_html=True)
     trend_ph = st.empty()
     chart = st.empty()
     small = st.empty()
     rows: list[dict] = []
+    state = {"run": None, "k": 0}  # each seed of an experiment gets a fresh panel
     color = AGENT_COLORS.get(LABELS.get(cfg.agent, ""), SERIES[0])
 
     def on_episode(info, ctx) -> bool:
+        if ctx.run_id != state["run"]:
+            state["run"], state["k"] = ctx.run_id, state["k"] + 1
+            rows.clear()
         rows.append({"episode": info.episode, "total_reward": info.total_reward, "length": info.length,
                      "epsilon": info.epsilon, "mean_loss": info.mean_loss})
         done = info.episode + 1
-        if done % max(1, total_episodes // 60) == 0 or done == total_episodes or done == 1:
+        if done % max(1, total_episodes // 25) == 0 or done == total_episodes or done == 1:
             df = pd.DataFrame(rows)
-            live = done < total_episodes
-            head.markdown(_progress_html(done, total_episodes, ctx.run_id, live)
+            live = done < total_episodes or state["k"] < n_runs
+            label = f"run {state['k']} / {n_runs} · " if n_runs > 1 else ""
+            head.markdown(_progress_html(done, total_episodes, ctx.run_id, live, label)
                           + '<div class="sla-grid">' + "".join(_live_cards(df, info, cfg.agent)) + "</div>",
                           unsafe_allow_html=True)
             trend = data.learning_trend(df)
@@ -82,7 +87,7 @@ def _live_panel(cfg, total_episodes: int):
             window = min(50, max(5, len(df) // 5))
             chart.plotly_chart(learning_curve(df, window=window, color=color, height=300), width="stretch",
                                config=PLOTLY_CONFIG, key=f"live_{ctx.run_id}_{done}")
-            if done % max(1, total_episodes // 20) == 0 or done == total_episodes:
+            if done == total_episodes:  # small charts once, at the end (keeps the live loop fast)
                 with small.container():
                     a, b, c2 = st.columns(3)
                     a.plotly_chart(single_series(df, "epsilon", "Epsilon", SERIES[2], "Epsilon", height=200),
@@ -128,7 +133,7 @@ def render() -> None:
             "stops training (the run is saved as *stopped*).", icon=":material/info:")
     if algorithm == "dqn":
         st.caption("DQN on CPU: roughly a few minutes per 600-episode run; a 5-seed experiment takes about "
-                   "five times longer. FrozenLake finishes in seconds.")
+                   "five times longer. A single FrozenLake run takes under a minute.")
 
     if submitted:
         try:
@@ -154,7 +159,8 @@ def render() -> None:
                 from sla.utils.validation import validate_seeds
                 seeds = validate_seeds([int(s) for s in seeds_text.replace(",", " ").split()])
                 total = cfg.episodes
-                out = svc.training.experiment(cfg, seeds, int(eval_eps), True, progress=_live_panel(cfg, total))
+                out = svc.training.experiment(cfg, seeds, int(eval_eps), True,
+                                              progress=_live_panel(cfg, total, len(seeds)))
                 st.success(f"Experiment #{out.experiment_id} finished: {len(out.runs)} seeds + random baseline. "
                            "See the Evaluation page for statistics.")
         except (SLAError, ValueError) as exc:
