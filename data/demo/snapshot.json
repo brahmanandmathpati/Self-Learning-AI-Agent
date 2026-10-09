@@ -1,0 +1,37 @@
+{
+  "created_at": "2026-10-09T07:58:51+00:00",
+  "source": "local experiment database (runs/sla.db) on the project laptop",
+  "runs_between": [
+    "2026-10-08T14:55:33+00:00",
+    "2026-10-08T16:55:33+00:00"
+  ],
+  "counts": {
+    "experiments": 3,
+    "runs": 36,
+    "episodes": 20314,
+    "evaluations": 344,
+    "ablation_results": 15,
+    "reflections": 15
+  },
+  "experiments": [
+    {
+      "id": 1,
+      "name": "q_learning on FrozenLake-v1",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 2,
+      "name": "dqn on CartPole-v1",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 3,
+      "name": "DQN ablation on CartPole-v1",
+      "kind": "ablation",
+      "status": "completed"
+    }
+  ],
+  "note": "Real results from sla pipeline / sla ablation (seeds 0-4). Read-only copy used to seed the hosted app."
+}
