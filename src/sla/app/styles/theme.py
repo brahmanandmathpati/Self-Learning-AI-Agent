@@ -237,6 +237,53 @@ button[data-baseweb="tab"] {{ font-weight:600; }}
   transform: translateY(-1px); box-shadow: 0 12px 26px -10px rgba(57,135,229,.95); }}
 div[data-testid="stPlotlyChart"] {{ border-radius: 10px; }}
 
+/* ---------- motion graphics ---------- */
+.stApp::after {{ content:""; position:fixed; inset:-20%; pointer-events:none; z-index:0;
+  background: radial-gradient(35% 30% at 20% 30%, rgba(57,135,229,.10), transparent 70%),
+              radial-gradient(30% 25% at 80% 70%, rgba(25,158,112,.08), transparent 70%),
+              radial-gradient(25% 20% at 60% 15%, rgba(217,89,38,.05), transparent 70%);
+  animation: sla-aurora 28s ease-in-out infinite alternate; }}
+@keyframes sla-aurora {{ 0% {{ transform: translate(0,0) rotate(0deg); }} 50% {{ transform: translate(3%,-2%) rotate(4deg); }}
+  100% {{ transform: translate(-3%,2%) rotate(-3deg); }} }}
+.sla-hero {{ isolation:isolate; }}
+.sla-hero::before {{ content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
+  background: conic-gradient(from var(--sla-a), transparent 0 70%, rgba(91,156,240,.9) 80%, rgba(25,158,112,.8) 88%, transparent 96%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask-composite: exclude; animation: sla-spin 6s linear infinite; }}
+@property --sla-a {{ syntax:'<angle>'; inherits:false; initial-value:0deg; }}
+@keyframes sla-spin {{ to {{ --sla-a: 360deg; }} }}
+.sla-hero h1 {{ background: linear-gradient(90deg, #f4f7fb 0%, #9cc3f7 40%, #f4f7fb 60%, #f4f7fb 100%);
+  background-size: 250% 100%; -webkit-background-clip:text; background-clip:text; color: transparent;
+  animation: sla-title 7s ease-in-out infinite; }}
+@keyframes sla-title {{ 0%,100% {{ background-position: 100% 0; }} 50% {{ background-position: 0 0; }} }}
+.sla-hero .art {{ width: 170px; height: 170px; flex: none; z-index:1; margin: -10px 0 -10px; }}
+.sla-loop {{ width:100%; height:100%; overflow:visible; }}
+.sla-ring {{ fill:none; stroke:#2a4a7a; stroke-width:.8; stroke-dasharray:2 3; transform-origin:50px 50px;
+  animation: sla-rot 30s linear infinite; }}
+.sla-ring2 {{ fill:none; stroke:#5b9cf0; stroke-width:1; opacity:.55; stroke-dasharray:40 130; transform-origin:50px 50px;
+  animation: sla-rot 5s linear infinite reverse; }}
+@keyframes sla-rot {{ to {{ transform: rotate(360deg); }} }}
+.sla-signal {{ filter: drop-shadow(0 0 3px #9cc3f7); }}
+.sla-node circle {{ animation: sla-blink 2s ease-in-out infinite; animation-delay: inherit; }}
+@keyframes sla-blink {{ 0%,100% {{ stroke-width:1.4; }} 50% {{ stroke-width:2.6; }} }}
+.sla-net {{ width:100%; height:auto; max-height:230px; }}
+.sla-edge {{ stroke: rgba(91,156,240,.38); stroke-width:.8; stroke-dasharray: 3 9; animation: sla-flow 3s linear infinite; }}
+@keyframes sla-flow {{ to {{ stroke-dashoffset: -24; }} }}
+.sla-neuron {{ animation: sla-fire 2.4s ease-in-out infinite; }}
+@keyframes sla-fire {{ 0%,100% {{ fill:#0e1320; }} 45% {{ fill:#1d3b66; }} }}
+.sla-card::after {{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.06) 45%, transparent 60%);
+  background-size: 250% 100%; background-position: 130% 0; transition: background-position .8s ease; }}
+.sla-card:hover::after {{ background-position: -30% 0; }}
+.sla-card .value {{ text-shadow: 0 0 18px rgba(91,156,240,.18); }}
+.sla-section h3::before {{ animation: sla-pulse-dot 2.4s ease-in-out infinite; }}
+@keyframes sla-pulse-dot {{ 0%,100% {{ box-shadow: 0 0 6px var(--accent); }} 50% {{ box-shadow: 0 0 16px var(--accent); }} }}
+.sla-verdict .icon {{ animation: sla-glow 2.6s ease-in-out infinite; }}
+@keyframes sla-glow {{ 0%,100% {{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 40%, transparent); }}
+  50% {{ box-shadow: 0 0 22px 2px color-mix(in srgb, var(--c) 35%, transparent); }} }}
+.sla-flow {{ display:grid; grid-template-columns: 1.1fr 1fr; gap:1rem; align-items:center; }}
+@media (max-width: 900px) {{ .sla-hero .art {{ display:none; }} .sla-flow {{ grid-template-columns: 1fr; }} }}
+
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {{
   .sla-hero {{ flex-direction:column; align-items:flex-start; }}
