@@ -310,14 +310,16 @@ div[data-testid="stForm"] {{ border:1px solid var(--border); border-radius: var(
 div[data-testid="stDataFrame"] {{ border:1px solid var(--border); border-radius: 14px; overflow:hidden; }}
 div[data-testid="stExpander"] details {{ border:1px solid var(--border) !important; border-radius:14px !important;
   background:#fff; }}
-.stButton > button[kind="primary"],
+.stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primaryFormSubmit"],
   .stFormSubmitButton > button[kind="primary"] {{ background: linear-gradient(135deg, #D9B866, var(--gold) 55%,
   #B8913A);
   color:#1A1306; border:0; border-radius:999px; font-weight:600; box-shadow: 0 8px 20px -10px rgba(169,131,47,.8);
   transition: transform .15s var(--ease), box-shadow .15s; }}
-.stButton > button[kind="primary"]:hover,
+.stButton > button[kind="primary"]:hover, .stFormSubmitButton > button[kind="primaryFormSubmit"]:hover,
   .stFormSubmitButton > button[kind="primary"]:hover {{ transform: translateY(-1px); color:#1A1306;
   box-shadow: var(--shadow-lg); }}
+.stButton > button[kind="primary"] p, .stFormSubmitButton > button[kind^="primary"] p {{ color:#1A1306;
+  font-weight:600; }}
 
 /* ---------- motion graphics (decorative) ---------- */
 .sla-loop {{ width:100%; height:100%; overflow:visible; }}
