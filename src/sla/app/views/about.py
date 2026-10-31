@@ -5,18 +5,19 @@ from __future__ import annotations
 import streamlit as st
 
 from sla import __version__
+from sla.app.components.landing import GITHUB, team
 from sla.app.components.ui import hero, section
 
 ARCH = """
 digraph G {
   rankdir=TB; bgcolor="transparent"; nodesep=0.35; ranksep=0.35;
-  node [shape=box, style="rounded,filled", fillcolor="#0e1320",
-  color="#2a3550", fontcolor="#f4f7fb", fontname="Helvetica", fontsize=11]; edge [color="#898781"];
+  node [shape=box, style="rounded,filled", fillcolor="#FFFFFF",
+  color="#D9CBA3", fontcolor="#0F172A", fontname="Helvetica", fontsize=11]; edge [color="#94A3B8"];
   UI [label="Streamlit dashboard\\n(app/views, components, charts)"];
   CLI [label="CLI  sla ..."];
   SVC [label="Service layer\\nTraining · Evaluation · Experiment\\nReflection · Checkpoint"];
   PIPE [label="Training pipeline\\n(train_run, run_experiment,\\nrun_ablation)"];
-  RUN [label="Runner + callbacks\\n(the only place learning happens)", fillcolor="#173a63", color="#5b9cf0"];
+  RUN [label="Runner + callbacks\\n(the only place learning happens)", fillcolor="#EEF0FF", color="#4F46E5"];
   ENV [label="Gymnasium env\\nFrozenLake / CartPole"];
   AG [label="Agents\\nRandom · Q-learning · DQN"];
   BUF [label="Replay buffer"];
@@ -32,7 +33,7 @@ digraph G {
 
 def render() -> None:
     hero("About the project", f"Final-year B.Tech CSE (AI) project · version {__version__}")
-    section("Objective")
+    section("Objective", kicker="Why")
     st.markdown("Build an agent that **starts with no trained policy and measurably improves through reinforcement "
                 "learning** — and prove it with held-out evaluation, statistics and an ablation study. Learning "
                 "happens only in the Q-table or network weights; LLM text, chat history or prompt changes are "
@@ -48,8 +49,6 @@ def render() -> None:
                     "| Statistics | SciPy (Welch's t-test), bootstrap CI |\n| Database | SQLite (versioned schema) |\n"
                     "| Explanation | Template + optional local Ollama (qwen2.5:1.5b) |\n"
                     "| Quality | pytest, ruff, GitHub Actions |")
-        section("Team")
-        st.markdown("- Brahmanand Mathpati\n- Atharv Gundale\n- Vedant Biradar\n- Somesh Badwane")
     with c2:
         section("Limitations")
         st.markdown("- Two small benchmark tasks; bounded single-task learning, not general intelligence.\n"
@@ -59,3 +58,12 @@ def render() -> None:
         section("Future work")
         st.markdown("- Double / dueling DQN and prioritised replay.\n- Harder environments (e.g. LunarLander).\n"
                     "- More seeds and hyper-parameter sweeps.\n- Live training in a background worker.")
+    section("Team", "Four students, one shared codebase.", kicker="People")
+    todo = '<span class="todo" title="TODO: add profile link">Profile link: TODO</span>'
+    team([
+        ("Brahmanand Mathpati", "Agent core — Q-learning, DQN, tuning, failure analysis",
+         f'<a href="{GITHUB}" target="_blank" rel="noopener">GitHub</a>'),
+        ("Atharv Gundale", "Environments, training runner and CLI, CI and release", todo),
+        ("Vedant Biradar", "Experience memory, evaluation, statistics, ablations", todo),
+        ("Somesh Badwane", "Reflection layer, grounding check, dashboard, demo", todo),
+    ])

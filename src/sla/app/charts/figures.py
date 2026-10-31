@@ -6,7 +6,13 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from sla.app.styles.theme import AGENT_COLORS, INK, SERIES, VARIANT_COLORS, VARIANT_LABELS
+from sla.app.styles.theme import (
+    AGENT_COLORS,
+    INK,
+    SERIES,
+    VARIANT_COLORS,
+    VARIANT_LABELS,
+)
 from sla.utils.summary import rolling_mean
 
 
@@ -18,7 +24,7 @@ def _layout(fig: go.Figure, title: str | None = None, x: str = "", y: str = "", 
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family='Inter, system-ui, -apple-system, "Segoe UI", sans-serif', color=INK["secondary"], size=12),
         hovermode="x unified" if fig.data and fig.data[0].type == "scatter" else "closest",
-        hoverlabel=dict(bgcolor="#141b2b", bordercolor="rgba(91,156,240,.5)", font_color=INK["primary"],
+        hoverlabel=dict(bgcolor="#FFFFFF", bordercolor="rgba(201,162,75,.6)", font_color=INK["primary"],
                         font_family="Inter, sans-serif"),
         showlegend=legend, transition=dict(duration=300, easing="cubic-in-out"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=11),
@@ -138,7 +144,7 @@ def frozenlake_map(desc: list[str], arrows: list[str] | None = None, values: np.
     n = len(desc)
     kinds = {"S": 0.15, "F": 0.15, "H": 0.0, "G": 1.0}
     z = [[kinds[c] for c in row] for row in desc]
-    colors = [[0, "#0a1322"], [0.14, "#0a1322"], [0.15, "#1a2840"], [0.99, "#1a2840"], [1.0, "#0e5c43"]]
+    colors = [[0, "#CBD5E1"], [0.14, "#CBD5E1"], [0.15, "#F1F5F9"], [0.99, "#F1F5F9"], [1.0, "#A7F3D0"]]
     fig = go.Figure(go.Heatmap(z=z, colorscale=colors, showscale=False, hoverinfo="skip", xgap=3, ygap=3))
     names = {"S": "START", "H": "HOLE", "G": "GOAL", "F": ""}
     for i, row in enumerate(desc):
@@ -161,5 +167,15 @@ def _alpha(hex_color: str, a: float) -> str:
     return f"rgba({r},{g},{b},{a})"
 
 
-__all__ = ["AGENT_COLORS", "VARIANT_COLORS", "VARIANT_LABELS", "learning_curve", "single_series", "validation_curve",
-           "mean_curves", "group_bars", "before_after", "frozenlake_map"]
+__all__ = [
+    "AGENT_COLORS",
+    "VARIANT_COLORS",
+    "VARIANT_LABELS",
+    "before_after",
+    "frozenlake_map",
+    "group_bars",
+    "learning_curve",
+    "mean_curves",
+    "single_series",
+    "validation_curve",
+]

@@ -15,6 +15,7 @@ if str(_SRC) not in sys.path:
 import streamlit as st  # noqa: E402
 
 from sla.app import data, demo_seed  # noqa: E402
+from sla.app.components.landing import footer  # noqa: E402
 from sla.app.components.states import error_state  # noqa: E402
 from sla.app.components.status_badge import badge  # noqa: E402
 from sla.app.styles.theme import inject_css  # noqa: E402
@@ -32,8 +33,9 @@ from sla.app.views import (  # noqa: E402
 
 ASSETS = Path(__file__).resolve().parent / "assets"
 
-st.set_page_config(page_title="Self-Learning AI Agent · Lab", page_icon=str(ASSETS / "icon.svg"), layout="wide",
-                   initial_sidebar_state="expanded")
+st.set_page_config(page_title="Self-Learning AI Agent — learns from experience",
+                   page_icon=str(ASSETS / "icon.svg"), layout="wide",
+                   initial_sidebar_state="auto")
 inject_css()
 st.logo(str(ASSETS / "logo.svg"), icon_image=str(ASSETS / "icon.svg"), size="large")
 
@@ -127,3 +129,4 @@ with st.sidebar:
         error_state("Status unavailable", "the database could not be read.", "run `sla init-db`.", exc)
     st.caption("Q-learning · DQN · held-out evaluation")
 nav.run()
+footer()
