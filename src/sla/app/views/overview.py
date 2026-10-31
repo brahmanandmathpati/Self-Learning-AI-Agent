@@ -7,6 +7,7 @@ import streamlit as st
 from sla.app import data
 from sla.app.charts.figures import learning_curve, validation_curve
 from sla.app.components.chart_card import chart_card
+from sla.app.components.landing import actions, features, stack, steps
 from sla.app.components.metric_card import card_grid, metric_card
 from sla.app.components.motion import learning_loop, neural_flow
 from sla.app.components.run_card import algo_label
@@ -17,14 +18,21 @@ from sla.app.styles.theme import AGENT_COLORS, SERIES
 
 STATE_TEXT = {"running": "Training", "completed": "Completed", "idle": "Idle", "stopped": "Stopped", "failed": "Failed"}
 
-PILLARS = [
-    ("Learning lives in the values",
-     "The Q-table (FrozenLake) or the network weights (CartPole) change after every reward."),
-    ("Frozen evaluation", "ε = 0 and no updates, on test seeds the agent never trained on."),
-    ("Before vs after", "The untrained and the trained policy play exactly the same test seeds."),
-    ("Against chance", "Trained agents vs a random agent: Welch's t-test and bootstrap 95% CI over 5 seeds."),
-    ("Ablation", "Removing replay or the target network shows which DQN parts matter."),
+STEPS = [("Observe", "The agent looks at the game: where it is, or how the pole is leaning."),
+         ("Choose", "It picks a move — sometimes a random one, to explore."),
+         ("Act", "The game reacts and gives a reward: points for good moves."),
+         ("Learn", "It updates its scores so good moves are chosen more often.")]
+
+FEATURES = [
+    ("brain", "Learns from zero", "Starts with no knowledge and improves only from rewards — no hand rules."),
+    ("cpu", "Deep Q-Network from scratch", "A small PyTorch neural network with replay memory and a target network."),
+    ("check", "Fair, frozen tests", "Learning switched off, 100 new games per seed, compared with a random player."),
+    ("flask", "Proof with statistics", "Five seeds, Welch's t-test and a 95% interval show the gain is not luck."),
+    ("layers", "Ablation study", "Removes replay or the target network to show which parts really matter."),
+    ("spark", "Explanations you can trust", "Plain-language notes where every number is checked against the database."),
 ]
+STACK = ["Python", "PyTorch", "Gymnasium", "NumPy", "SciPy", "SQLite", "Streamlit", "Plotly", "pytest",
+         "GitHub Actions"]
 
 
 def _featured_run(latest: dict | None) -> dict | None:
@@ -42,10 +50,12 @@ def render() -> None:
     ov = data.overview()
     latest = ov["latest_run"]
     state = "running" if ov["running_runs"] else "idle"
-    hero("SELF-LEARNING AI AGENT",
-         "An AI agent that learns from experience — and proves it on games it has never seen.",
-         badge("online", "System online") + badge(state, STATE_TEXT[state]), eyebrow="AI Learning Laboratory",
-         big=True, art=learning_loop())
+    hero("An AI agent that learns from experience.",
+         "It starts knowing nothing, learns two games from rewards alone, and proves it on games it has never seen.",
+         badge("online", "System online") + badge(state, STATE_TEXT[state]), eyebrow="Self-Learning AI Agent",
+         big=True, art=learning_loop(),
+         actions=actions([("Start training", "training", "gold"), ("See the proof", "evaluation", "outline")]))
+    section("At a glance", "Live numbers from the experiment database.", kicker="Results")
 
     featured = _featured_run(latest)
     detail = data.run_detail(featured["run_id"]) if featured else None
@@ -73,8 +83,13 @@ def render() -> None:
                     f"{algo} · seed {featured['seed']}" if featured else None, icon="globe", accent=SERIES[2]),
     ], min_width=150)
 
-    section("Featured run", "Newest completed training run. Training reward should rise as the policy improves; "
-            "validation uses the frozen policy.", badge(featured["status"]) if featured else "")
+    section("How it works", "The same four steps repeat thousands of times.", kicker="The learning loop")
+    steps(STEPS)
+    section("What makes it different", kicker="Features")
+    features(FEATURES)
+
+    section("Featured run", "The newest completed training run. Reward should rise as the agent improves.",
+            badge(featured["status"]) if featured else "", kicker="Learning curve")
     if featured is None:
         empty_state("No experiment data yet.", "sla train --config configs/frozenlake_qlearning.yaml",
                     "Run your first training experiment on the Training page to see learning results here.")
@@ -98,15 +113,13 @@ def render() -> None:
                 chart_card(validation_curve(vals, color=color, height=320), "Frozen-policy validation",
                            "greedy return (ε = 0) during training", key="ov_val")
 
-    section("Inside the agent", "Decorative animation of how a DQN turns a state into action scores.")
-    st.markdown('<div class="sla-panel sla-flow"><div>' + neural_flow() + '</div><div class="sub" '
-                'style="color:var(--secondary);font-size:.9rem;line-height:1.6">The agent sees a <b>state</b>, '
-                'passes it through a small neural network and gets one <b>Q-value</b> (score) per action. It picks '
-                'the highest score, receives a reward, and nudges the network so good actions score higher next '
-                'time. FrozenLake uses a simple table instead of a network.</div></div>', unsafe_allow_html=True)
-
-    section("How learning is proven here")
-    st.markdown('<div class="sla-grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">' + "".join(
-        f'<div class="sla-card"><div class="label"><span class="ic">{i}</span>{t}</div>'
-        f'<div class="sub" style="font-size:.84rem;color:var(--secondary)">{d}</div></div>'
-        for i, (t, d) in enumerate(PILLARS, 1)) + "</div>", unsafe_allow_html=True)
+    section("Inside the agent", "An illustration of how the network turns what it sees into a choice.",
+            kicker="Architecture")
+    st.markdown('<div class="sla-panel sla-flow"><div>' + neural_flow() + '</div><div><p style="margin-top:0">'
+                'The agent sees a <b>state</b>, passes it through a small neural network, and gets one '
+                '<b>score</b> for each possible move. It picks the best score, receives a reward, and adjusts the '
+                'network so good moves score higher next time. FrozenLake uses a simple score table instead of a '
+                'network.</p></div></div>',
+                unsafe_allow_html=True)
+    section("Built with", kicker="Tech stack")
+    stack(STACK)
