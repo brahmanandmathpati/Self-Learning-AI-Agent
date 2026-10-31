@@ -347,8 +347,124 @@ div[data-testid="stExpander"] details {{ border:1px solid var(--border) !importa
   .block-container {{ padding-left: 1rem; padding-right: 1rem; }}
 }}
 @media (max-width: 480px) {{ .sla-steps {{ grid-template-columns: 1fr; }} .sla-hero.big h1 {{ font-size: 1.85rem; }} }}
+/* ================= motion v2 — luxury touch-up (all decorative, CSS-only) ================= */
+/* ambient drifting light behind the whole app */
+.stApp::before {{ content:""; position:fixed; inset:-20%; z-index:0; pointer-events:none;
+  background: radial-gradient(520px 380px at 20% 30%, rgba(201,162,75,.10), transparent 70%),
+  radial-gradient(560px 420px at 80% 70%, rgba(79,70,229,.07), transparent 70%);
+  animation: sla-drift 26s ease-in-out infinite alternate; }}
+@keyframes sla-drift {{ 0% {{ transform: translate3d(0,0,0) scale(1); }}
+  50% {{ transform: translate3d(4%,-3%,0) scale(1.06); }} 100% {{ transform: translate3d(-3%,4%,0) scale(1); }} }}
+
+/* hero: aurora blobs, gold sparks, word-by-word headline, gold sheen */
+.sla-hero.big::before, .sla-hero.big::after {{ content:""; position:absolute; border-radius:50%; filter: blur(48px);
+  pointer-events:none; z-index:0; }}
+.sla-hero.big::before {{ width:360px; height:360px; right:-80px; top:-120px; background: rgba(201,162,75,.28);
+  animation: sla-blob 14s ease-in-out infinite alternate; }}
+.sla-hero.big::after {{ width:300px; height:300px; left:30%; bottom:-170px; background: rgba(79,70,229,.14);
+  animation: sla-blob 18s ease-in-out infinite alternate-reverse; }}
+@keyframes sla-blob {{ to {{ transform: translate(-40px, 30px) scale(1.15); }} }}
+.sla-hero > div:not(.sla-sparks) {{ position:relative; z-index:1; }}
+.sla-hero .w {{ display:inline-block; opacity:0; transform: translateY(.45em); filter: blur(6px);
+  animation: sla-word .8s var(--ease) forwards; }}
+@keyframes sla-word {{ to {{ opacity:1; transform:none; filter:none; }} }}
+.sla-hero.big h1 .gold {{ background: linear-gradient(100deg, var(--gold-d) 0%, #E8CC86 40%, var(--gold-d) 60%,
+  #B8913A 100%); background-size: 220% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation: sla-word .8s var(--ease) forwards, sla-sheen 5s ease-in-out 1.6s infinite; }}
+@keyframes sla-sheen {{ 0%,100% {{ background-position: 100% 0; }} 50% {{ background-position: 0 0; }} }}
+.sla-hero p, .sla-hero .right, .sla-actions {{ animation: sla-up .7s var(--ease) both; }}
+.sla-hero p {{ animation-delay: .55s; }} .sla-hero .right {{ animation-delay: .7s; }}
+.sla-actions {{ animation-delay: .85s; }}
+.sla-sparks {{ position:absolute; inset:0; pointer-events:none; z-index:0; }}
+.sla-sparks i {{ position:absolute; bottom:-10px; width:4px; height:4px; border-radius:50%;
+  background: radial-gradient(circle, #F3DFA6, var(--gold)); box-shadow: 0 0 8px rgba(201,162,75,.8); opacity:0;
+  animation: sla-rise var(--d, 9s) linear infinite; animation-delay: var(--t, 0s); }}
+@keyframes sla-rise {{ 0% {{ opacity:0; transform: translate(0,0) scale(.6); }} 15% {{ opacity:.9; }}
+  100% {{ opacity:0; transform: translate(var(--x, 20px), -340px) scale(1.1); }} }}
+
+/* gold CTA: idle glow + arrow nudge */
+.sla-btn.gold {{ animation: sla-glow 3.2s ease-in-out 1.5s infinite; }}
+@keyframes sla-glow {{ 0%,100% {{ box-shadow: 0 8px 20px -10px rgba(169,131,47,.8); }}
+  50% {{ box-shadow: 0 10px 30px -8px rgba(201,162,75,.95), 0 0 0 4px rgba(201,162,75,.12); }} }}
+.sla-btn .arr {{ display:inline-block; transition: transform .25s var(--ease); }}
+.sla-btn:hover .arr {{ transform: translateX(4px); }}
+.sla-btn:active {{ transform: translateY(0) scale(.98); }}
+
+/* learning loop: sweeping progress arc, breathing core, halos */
+.sla-arc {{ fill:none; stroke: url(#slaGold); stroke-width:1.6; stroke-linecap:round; stroke-dasharray: 264;
+  stroke-dashoffset: 264; transform-origin:50px 50px; transform: rotate(-90deg);
+  animation: sla-arc 4s var(--ease) infinite; }}
+@keyframes sla-arc {{ 0% {{ stroke-dashoffset:264; }} 70% {{ stroke-dashoffset:0; opacity:1; }}
+  100% {{ stroke-dashoffset:0; opacity:0; }} }}
+.sla-core {{ transform-origin:50px 50px; animation: sla-breathe 4s ease-in-out infinite; }}
+@keyframes sla-breathe {{ 0%,100% {{ transform: scale(1); opacity:.9; }} 50% {{ transform: scale(1.06); opacity:1; }} }}
+.sla-halo {{ fill:none; stroke-width:.8; transform-box: fill-box; transform-origin:center; opacity:0;
+  animation: sla-halo 4s ease-out infinite; }}
+@keyframes sla-halo {{ 0% {{ transform: scale(1); opacity:.7; }} 60%,100% {{ transform: scale(2.6); opacity:0; }} }}
+.sla-loop {{ filter: drop-shadow(0 10px 24px rgba(169,131,47,.18)); }}
+
+/* section headers: gold hairline draws in */
+.sla-section {{ border-top-color: transparent; position:relative; }}
+.sla-section::before {{ content:""; position:absolute; left:0; right:0; top:-1px; height:1px;
+  background: linear-gradient(90deg, var(--gold), rgba(201,162,75,.35) 40%, transparent);
+  transform-origin:left; animation: sla-draw 1.1s var(--ease) both; }}
+@keyframes sla-draw {{ from {{ transform: scaleX(0); }} }}
+
+/* KPI cards: shine line on top, icon float */
+.sla-card::after {{ content:""; position:absolute; left:18px; right:18px; top:0; height:2px; border-radius:2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity:0; transform: scaleX(.3);
+  transition: opacity .3s, transform .5s var(--ease); }}
+.sla-card:hover::after {{ opacity:1; transform: scaleX(1); }}
+.sla-card:hover .label .ic {{ animation: sla-bob 1.2s ease-in-out infinite; }}
+@keyframes sla-bob {{ 50% {{ transform: translateY(-3px); }} }}
+
+/* how it works: line draws, a pulse travels along it, numbers light up in turn */
+.sla-steps::before {{ transform-origin:left; animation: sla-draw 1.4s var(--ease) .2s both; }}
+.sla-steps::after {{ content:""; position:absolute; top:23px; left:12%; width:7px; height:7px; border-radius:50%;
+  background: var(--gold); box-shadow: 0 0 10px 2px rgba(201,162,75,.7);
+  animation: sla-travel 5s ease-in-out infinite; }}
+@keyframes sla-travel {{ 0% {{ left:12%; opacity:0; }} 10% {{ opacity:1; }} 90% {{ opacity:1; }}
+  100% {{ left:88%; opacity:0; }} }}
+.sla-step .n {{ animation: sla-lit 5s ease-in-out infinite; }}
+.sla-step:nth-child(2) .n {{ animation-delay: 1.25s; }} .sla-step:nth-child(3) .n {{ animation-delay: 2.5s; }}
+.sla-step:nth-child(4) .n {{ animation-delay: 3.75s; }}
+@keyframes sla-lit {{ 0%,30%,100% {{ background:#fff; color: var(--gold-d); }}
+  10% {{ background: linear-gradient(135deg,#E6C77A,var(--gold)); color:#1A1306;
+  box-shadow: 0 0 0 6px rgba(201,162,75,.15), var(--shadow); }} }}
+.sla-step:hover .n {{ transform: scale(1.08); transition: transform .25s var(--ease); }}
+
+/* features: gold gradient border on hover, icon turns gold and tilts */
+.sla-feature {{ position:relative; }}
+.sla-feature::before {{ content:""; position:absolute; inset:0; border-radius: inherit; padding:1px;
+  background: linear-gradient(135deg, var(--gold), rgba(201,162,75,0) 45%, rgba(79,70,229,.45));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; opacity:0; transition: opacity .35s; pointer-events:none; }}
+.sla-feature:hover::before {{ opacity:1; }}
+.sla-feature .fi {{ transition: transform .35s var(--ease), background .35s, color .35s; }}
+.sla-feature:hover .fi {{ transform: rotate(-8deg) scale(1.08); background: var(--gold-soft); color: var(--gold-d); }}
+
+/* tech chips + team */
+.sla-stack span {{ transition: transform .2s var(--ease), background .2s, box-shadow .2s;
+  animation: sla-up .5s var(--ease) both; }}
+.sla-stack span:hover {{ transform: translateY(-2px); background: var(--gold-soft); box-shadow: var(--shadow); }}
+.sla-member .av {{ position:relative; }}
+.sla-member .av::before {{ content:""; position:absolute; inset:-5px; border-radius:50%;
+  background: conic-gradient(from 0deg, var(--gold), transparent 30%, var(--indigo) 55%, transparent 75%, var(--gold));
+  -webkit-mask: radial-gradient(circle, transparent 61%, #000 62%);
+  mask: radial-gradient(circle, transparent 61%, #000 62%);
+  opacity:.35; animation: sla-rot 8s linear infinite; }}
+.sla-member:hover .av::before {{ opacity:1; animation-duration: 2.5s; }}
+
+@media (max-width: 900px) {{ .sla-steps::after {{ display:none; }}
+  .sla-hero.big::before {{ width:220px; height:220px; }} }}
+/* scroll-reveal where the browser supports scroll-driven animations */
+@supports (animation-timeline: view()) {{
+  .sla-feature, .sla-member, .sla-step, .sla-panel, div[class*="st-key-card"] {{
+    animation: sla-up linear both; animation-timeline: view(); animation-range: entry 0% entry 140px; }}
+}}
 @media (prefers-reduced-motion: reduce) {{ *, *::before, *::after {{ animation: none !important;
-  transition: none !important; }} }}
+  transition: none !important; }}
+  .sla-hero .w {{ opacity:1; transform:none; filter:none; }} .sla-arc {{ stroke-dashoffset:0; }} }}
 </style>
 """
 

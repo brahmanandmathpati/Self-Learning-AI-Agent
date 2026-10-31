@@ -19,7 +19,8 @@ def actions(buttons: Sequence[tuple[str, str, str]]) -> str:
     out = []
     for label, href, kind in buttons:
         target = ' target="_blank" rel="noopener"' if href.startswith("http") else ' target="_self"'
-        out.append(f'<a class="sla-btn {kind}" href="{html.escape(href)}"{target}>{html.escape(label)}</a>')
+        arrow = ' <span class="arr" aria-hidden="true">→</span>' if kind == "gold" else ""
+        out.append(f'<a class="sla-btn {kind}" href="{html.escape(href)}"{target}>{html.escape(label)}{arrow}</a>')
     return '<div class="sla-actions">' + "".join(out) + "</div>"
 
 
