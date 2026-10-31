@@ -8,6 +8,7 @@ from sla.app import data
 from sla.app.charts.figures import learning_curve, validation_curve
 from sla.app.components.chart_card import chart_card
 from sla.app.components.metric_card import card_grid, metric_card
+from sla.app.components.motion import learning_loop, neural_flow
 from sla.app.components.run_card import algo_label
 from sla.app.components.section_header import hero, section
 from sla.app.components.states import empty_state
@@ -44,7 +45,7 @@ def render() -> None:
     hero("SELF-LEARNING AI AGENT",
          "An AI agent that learns from experience — and proves it on games it has never seen.",
          badge("online", "System online") + badge(state, STATE_TEXT[state]), eyebrow="AI Learning Laboratory",
-         big=True)
+         big=True, art=learning_loop())
 
     featured = _featured_run(latest)
     detail = data.run_detail(featured["run_id"]) if featured else None
@@ -96,6 +97,13 @@ def render() -> None:
             else:
                 chart_card(validation_curve(vals, color=color, height=320), "Frozen-policy validation",
                            "greedy return (ε = 0) during training", key="ov_val")
+
+    section("Inside the agent", "Decorative animation of how a DQN turns a state into action scores.")
+    st.markdown('<div class="sla-panel sla-flow"><div>' + neural_flow() + '</div><div class="sub" '
+                'style="color:var(--secondary);font-size:.9rem;line-height:1.6">The agent sees a <b>state</b>, '
+                'passes it through a small neural network and gets one <b>Q-value</b> (score) per action. It picks '
+                'the highest score, receives a reward, and nudges the network so good actions score higher next '
+                'time. FrozenLake uses a simple table instead of a network.</div></div>', unsafe_allow_html=True)
 
     section("How learning is proven here")
     st.markdown('<div class="sla-grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">' + "".join(

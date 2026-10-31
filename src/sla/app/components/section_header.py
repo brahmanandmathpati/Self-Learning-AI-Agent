@@ -8,10 +8,12 @@ import streamlit as st
 
 
 def hero(title: str, subtitle: str, right_html: str = "", eyebrow: str = "AI Learning Laboratory",
-         big: bool = False) -> None:
+         big: bool = False, art: str = "") -> None:
     eb = f'<div class="eyebrow">{html.escape(eyebrow)}</div>' if eyebrow else ""
     st.markdown(f'<div class="sla-hero{" big" if big else ""}"><div>{eb}<h1>{html.escape(title)}</h1>'
-                f'<p>{html.escape(subtitle)}</p></div><div class="right">{right_html}</div></div>',
+                f'<p>{html.escape(subtitle)}</p><div class="right" '
+                f'style="justify-content:flex-start;margin-top:.8rem">{right_html}</div></div>'
+                + (f'<div class="art">{art}</div>' if art else '') + '</div>',
                 unsafe_allow_html=True)
 
 
