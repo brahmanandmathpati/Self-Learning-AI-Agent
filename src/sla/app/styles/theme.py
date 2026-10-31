@@ -463,7 +463,8 @@ div[data-testid="stExpander"] details {{ border:1px solid var(--border) !importa
     animation: sla-up linear both; animation-timeline: view(); animation-range: entry 0% entry 140px; }}
 }}
 @media (prefers-reduced-motion: reduce) {{ *, *::before, *::after {{ animation: none !important;
-  transition: none !important; }} }}
+  transition: none !important; }}
+  .sla-hero .w {{ opacity:1; transform:none; filter:none; }} .sla-arc {{ stroke-dashoffset:0; }} }}
 </style>
 """
 
