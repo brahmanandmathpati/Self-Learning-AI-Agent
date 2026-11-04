@@ -1,0 +1,16 @@
+variant,seed,run_id,final_mean,final_std,success_rate
+full,0,cartpole_dqn_s0_20261008-214734_full,429.44,57.47787748342836,0.31
+full,1,cartpole_dqn_s1_20261008-215234_full,487.22,40.94424990154295,0.89
+full,2,cartpole_dqn_s2_20261008-215909_full,212.92,96.02725446455293,0.0
+full,3,cartpole_dqn_s3_20261008-220238_full,500.0,0.0,1.0
+full,4,cartpole_dqn_s4_20261008-220552_full,500.0,0.0,1.0
+no_replay,0,cartpole_dqn_s0_20261008-222142_no_replay,74.54,49.40797911268988,0.0
+no_replay,1,cartpole_dqn_s1_20261008-222233_no_replay,84.87,69.71422451695206,0.01
+no_replay,2,cartpole_dqn_s2_20261008-222312_no_replay,24.04,3.7441153828374465,0.0
+no_replay,3,cartpole_dqn_s3_20261008-222350_no_replay,178.09,50.9992343079776,0.0
+no_replay,4,cartpole_dqn_s4_20261008-222429_no_replay,72.43,15.34161334410433,0.0
+no_target,0,cartpole_dqn_s0_20261008-222510_no_target,9.38,0.745385806143369,0.0
+no_target,1,cartpole_dqn_s1_20261008-222515_no_target,9.34,0.7644605941446557,0.0
+no_target,2,cartpole_dqn_s2_20261008-222520_no_target,9.34,0.7644605941446557,0.0
+no_target,3,cartpole_dqn_s3_20261008-222524_no_target,9.38,0.745385806143369,0.0
+no_target,4,cartpole_dqn_s4_20261008-222529_no_target,9.38,0.745385806143369,0.0
