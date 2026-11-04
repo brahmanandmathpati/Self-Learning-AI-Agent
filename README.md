@@ -196,6 +196,16 @@ Every run records its seed, full config (hyper-parameters), environment, algorit
 2. A deterministic template turns the facts into a note; optionally a local Ollama model writes it instead, receiving **only** the facts.
 3. `reflection/grounding.py` extracts every number from the note and rejects it unless it matches a fact (±0.01). Rejected LLM notes are kept for transparency and the template is shown.
 
+## Documentation
+
+- **Project documentation (PDF, 46 pages):** [docs/Self-Learning-AI-Agent_Project_Documentation.pdf](docs/Self-Learning-AI-Agent_Project_Documentation.pdf)
+  — the full report: idea, architecture, agents, evaluation and statistics, ablation, reflection, database, website,
+  accounts and security, Vision Lab, real results, testing, deployment, user guide, glossary and viva questions.
+- **Same content in Markdown:** [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md) (figures in `docs/images/`).
+- **Beginner's guide:** [docs/Self-Learning-AI-Agent_Complete_Guide.pdf](docs/Self-Learning-AI-Agent_Complete_Guide.pdf)
+
+Every number in the documentation comes from the committed results database `data/demo/sla_demo.db` or `results/`.
+
 ## Testing
 
 ```bash
