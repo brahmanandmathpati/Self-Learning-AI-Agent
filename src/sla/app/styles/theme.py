@@ -49,7 +49,7 @@ code, pre, .mono {{ font-family: "JetBrains Mono", ui-monospace, monospace !impo
   radial-gradient(900px 480px at -5% 105%, #EFEEFB 0%, transparent 60%), var(--page); color: var(--ink); }}
 header[data-testid="stHeader"] {{ background: rgba(250,248,244,.72); backdrop-filter: saturate(160%) blur(14px);
   -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--hair); }}
-.block-container {{ padding-top: 4.2rem; padding-bottom: 2rem; max-width: 1200px; position:relative; z-index:1; }}
+.block-container {{ padding-top: 4.6rem; padding-bottom: 2rem; max-width: 1200px; }}
 h1, h2, h3, h4 {{ color: var(--ink); letter-spacing: -0.01em; }}
 p, li {{ color: var(--secondary); line-height: 1.65; }}
 a {{ color: var(--indigo); }}
@@ -385,9 +385,143 @@ div[class*="st-key-card_auth"] {{ padding: 1.6rem 1.6rem 1rem; border:1px solid 
 .sla-me .kind.guest {{ background: var(--indigo-soft); color: var(--indigo); }}
 @media (max-width: 900px) {{ .sla-auth-brand h1 {{ font-size: 2rem; }} .sla-auth-art {{ display:none; }} }}
 
+/* ================= v3: top navbar, auth corner, landing sections ================= */
+header[data-testid="stHeader"] {{ height: 3.75rem; }}
+header[data-testid="stHeader"] a, header[data-testid="stHeader"] button {{ font-weight: 500; }}
+/* top-right corner: Log in / Sign up or the avatar menu */
+div.st-key-topauth {{ position: fixed; top: .62rem; right: 3.6rem; z-index: 1000002; width: auto !important;
+  gap: .5rem; }}
+div.st-key-topauth .stButton > button[kind="tertiary"] {{ color: var(--ink); font-weight: 600; padding: .4rem .8rem; }}
+div.st-key-topauth .stButton > button[kind="tertiary"]:hover {{ color: var(--gold-d); }}
+div.st-key-topauth .stButton > button[kind="primary"] {{ padding: .42rem 1.1rem; min-height: 2.3rem; }}
+div.st-key-topauth [data-testid="stPopover"] > div > button, div.st-key-topauth [data-testid="stPopoverButton"] {{
+  width: 2.5rem; height: 2.5rem; min-height: 2.5rem; padding: 0; border-radius: 50%; border: 1px solid var(--hair);
+  background: linear-gradient(135deg, #FFF8E8, var(--gold-soft)); color: var(--gold-d); font-family: var(--serif);
+  font-weight: 600; box-shadow: var(--shadow); }}
+div.st-key-topauth [data-testid="stPopoverButton"] svg, div.st-key-topauth [data-testid="stPopover"] button svg {{
+  display: none; }}
+div[data-testid="stPopoverBody"] {{ border-radius: 16px; border: 1px solid var(--hair); min-width: 260px; }}
+/* log-in dialog */
+div[data-testid="stDialog"] div[role="dialog"] {{ border-radius: 22px; border-top: 3px solid var(--gold);
+  box-shadow: 0 30px 80px -30px rgba(15,23,42,.45); animation: sla-pop .28s var(--ease) both; }}
+@keyframes sla-pop {{ from {{ opacity: 0; transform: translateY(10px) scale(.98); }} to {{ opacity: 1;
+  transform: none; }} }}
+div[data-testid="stDialog"] h2, div[data-testid="stDialog"] [data-testid="stHeading"] {{ font-family: var(--serif); }}
+/* hero (native container so page links keep the session) */
+div.st-key-hero {{ position: relative; overflow: hidden; padding: 2.6rem 2.6rem 2.3rem; border: 1px solid var(--hair);
+  border-radius: 24px; margin-bottom: 1.2rem; box-shadow: var(--shadow);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FBF6EC 55%, #F3F1FD 100%); }}
+div.st-key-hero::before, div.st-key-hero::after {{ content: ""; position: absolute; border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none; }}
+div.st-key-hero::before {{ width: 360px; height: 360px; right: -80px; top: -120px; background: rgba(201,162,75,.28);
+  animation: sla-blob 14s ease-in-out infinite alternate; }}
+div.st-key-hero::after {{ width: 300px; height: 300px; left: 30%; bottom: -170px; background: rgba(79,70,229,.14);
+  animation: sla-blob 18s ease-in-out infinite alternate-reverse; }}
+div.st-key-hero > div {{ position: relative; z-index: 1; }}
+.sla-hero-copy .eyebrow {{ font-size: .72rem; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-d);
+  font-weight: 600; display: flex; align-items: center; gap: .6rem; }}
+.sla-hero-copy .eyebrow::before {{ content: ""; width: 28px; height: 1px; background: var(--gold); }}
+.sla-hero-copy h1 {{ font-family: var(--serif); font-size: 3.2rem; line-height: 1.08; letter-spacing: -.02em;
+  font-weight: 600; margin: .7rem 0 0; color: var(--ink); padding: 0; }}
+.sla-hero-copy .w {{ display: inline-block; opacity: 0; transform: translateY(.45em); filter: blur(6px);
+  animation: sla-word .8s var(--ease) forwards; }}
+.sla-hero-copy .w.gold {{ background: linear-gradient(100deg, var(--gold-d) 0%, #E8CC86 40%, var(--gold-d) 60%,
+  #B8913A 100%); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sla-word .8s var(--ease) forwards, sla-sheen 5s ease-in-out 1.6s infinite; }}
+.sla-hero-copy p {{ font-size: 1.08rem; max-width: 600px; margin: .8rem 0 .9rem;
+  animation: sla-up .7s var(--ease) .55s both; }}
+.sla-hero-copy .chips {{ display: flex; flex-wrap: wrap; gap: .5rem; animation: sla-up .7s var(--ease) .7s both; }}
+.sla-hero-art {{ width: 100%; max-width: 250px; aspect-ratio: 1; margin: 0 auto; }}
+div.st-key-hero_cta {{ gap: .7rem; margin-top: .6rem; animation: sla-up .7s var(--ease) .85s both; }}
+/* pill links (st.page_link) */
+div[class*="st-key-cta_"] {{ width: auto !important; flex: 0 0 auto !important; }}
+div.st-key-hero_cta, div.st-key-proof_cta, div.st-key-cta_actions {{ justify-content: flex-start !important;
+  flex-wrap: wrap !important; }}
+div.st-key-topauth [data-testid="stPopover"] [data-testid="stIconMaterial"],
+div.st-key-topauth [data-testid="stPopover"] button > div > div:last-child:not(:first-child) {{ display: none; }}
+div.st-key-topauth [data-testid="stPopover"] button {{ justify-content: center; min-width: 2.5rem; }}
+div[class*="st-key-cta_"] [data-testid="stPageLink"] a, div[class*="st-key-cta_"] a.sla-btn {{ position: relative;
+  overflow: hidden; display: inline-flex; padding: .55rem 1.25rem; border-radius: 999px; text-decoration: none;
+  transition: transform .2s var(--ease), box-shadow .2s; }}
+div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a {{
+  background: linear-gradient(135deg, #D9B866, var(--gold) 55%, #B8913A);
+  box-shadow: 0 8px 20px -10px rgba(169,131,47,.8);
+  animation: sla-glow 3.2s ease-in-out 1.5s infinite; }}
+div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a span,
+  div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a p {{
+  color: #1A1306 !important; font-weight: 600; }}
+div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a {{ background: #fff;
+  border: 1px solid rgba(15,23,42,.16); }}
+div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a span,
+  div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a p {{
+  color: var(--ink) !important; font-weight: 600; }}
+div[class*="st-key-cta_"] [data-testid="stPageLink"] a:hover {{ transform: translateY(-1px);
+  box-shadow: var(--shadow-lg); }}
+div[class*="st-key-cta_"] [data-testid="stPageLink"] a::after {{ content: ""; position: absolute; inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%);
+  transform: translateX(-120%); transition: transform .7s var(--ease); }}
+div[class*="st-key-cta_"] [data-testid="stPageLink"] a:hover::after {{ transform: translateX(120%); }}
+div.st-key-proof_cta, div.st-key-cta_actions {{ gap: .7rem; }}
+/* status line, proof table, architecture */
+.sla-status {{ font-size: .86rem; color: var(--muted); margin: .2rem 0 0; }}
+.sla-status b {{ color: var(--ink); }}
+.sla-proof {{ border: 1px solid var(--border); border-radius: var(--radius); background: #fff;
+  box-shadow: var(--shadow);
+  overflow-x: auto; margin-bottom: .7rem; }}
+.sla-proof table {{ width: 100%; border-collapse: collapse; font-size: .92rem; }}
+.sla-proof th {{ text-align: left; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold-d);
+  padding: .85rem 1rem; border-bottom: 1px solid var(--hair); white-space: nowrap; }}
+.sla-proof td {{ padding: .8rem 1rem; border-bottom: 1px solid var(--border); color: var(--ink);
+  font-variant-numeric: tabular-nums; white-space: nowrap; }}
+.sla-proof tr:last-child td {{ border-bottom: 0; }}
+.sla-proof td small {{ color: var(--muted); }}
+.sla-arch {{ display: grid; gap: .5rem; }}
+.sla-arch .lay {{ position: relative; display: flex; justify-content: space-between; gap: 1rem; align-items: center;
+  padding: .7rem 1rem; border-radius: 14px; background: #fff; border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  animation: sla-up .5s var(--ease) both; }}
+.sla-arch .lay:nth-child(4) {{ border-color: var(--hair); background: #FFFBF2; }}
+.sla-arch .lay b {{ font-size: .92rem; color: var(--ink); }}
+.sla-arch .lay span {{ font-size: .8rem; color: var(--muted); text-align: right; }}
+.sla-arch .lay:not(:last-child)::after {{ content: ""; position: absolute; left: 50%; bottom: -.5rem; width: 1px;
+  height: .5rem; background: var(--gold); }}
+.sla-flowbox p {{ font-size: .9rem; margin: .6rem 0 0; }}
+/* FAQ */
+div[data-testid="stExpander"] details summary p {{ font-weight: 600; color: var(--ink); }}
+div[data-testid="stExpander"] details:hover {{ border-color: var(--hair) !important; }}
+/* final call-to-action band */
+div.st-key-ctaband {{ margin-top: 2.6rem; padding: 2.4rem 2.6rem; border-radius: 24px; position: relative;
+  overflow: hidden;
+  background: radial-gradient(600px 300px at 90% 0%, rgba(201,162,75,.35), transparent 70%), linear-gradient(135deg,
+  #0F172A, #1E293B);
+  border: 1px solid rgba(201,162,75,.4); box-shadow: var(--shadow-lg); }}
+.sla-cta-copy .eyebrow {{ font-size: .7rem; letter-spacing: .24em; text-transform: uppercase; color: #E8CC86;
+  font-weight: 600; }}
+.sla-cta-copy h2 {{ font-family: var(--serif); color: #FFFFFF; font-size: 2rem; font-weight: 600; margin: .4rem 0 .3rem;
+  padding: 0; }}
+.sla-cta-copy p {{ color: #CBD5E1; margin: 0 0 .9rem; }}
+div.st-key-ctaband div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a {{ background: transparent;
+  border-color: rgba(255,255,255,.35); }}
+div.st-key-ctaband div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a span,
+div.st-key-ctaband div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a p {{ color: #FFFFFF !important; }}
+/* phones and small tablets: the corner moves into the page flow */
+@media (max-width: 768px) {{
+  div.st-key-topauth {{ position: static; margin: -.4rem 0 .6rem; justify-content: flex-end; }}
+  div.st-key-hero {{ padding: 1.6rem 1.3rem; }}
+  .sla-hero-copy h1 {{ font-size: 2.1rem; }}
+  .sla-hero-art {{ max-width: 190px; }}
+  div.st-key-ctaband {{ padding: 1.8rem 1.4rem; }}
+  .sla-cta-copy h2 {{ font-size: 1.5rem; }}
+  .sla-arch .lay {{ flex-direction: column; align-items: flex-start; gap: .1rem; }}
+  .sla-arch .lay span {{ text-align: left; }}
+}}
+
 /* ================= motion v2 — luxury touch-up (all decorative, CSS-only) ================= */
 /* ambient drifting light behind the whole app */
-.stApp::before {{ content:""; position:fixed; inset:-20%; z-index:0; pointer-events:none;
+.stApp {{ isolation: isolate; }}
+.stApp::before {{ content:""; position:fixed; inset:-20%; z-index:-1; pointer-events:none;
   background: radial-gradient(520px 380px at 20% 30%, rgba(201,162,75,.10), transparent 70%),
   radial-gradient(560px 420px at 80% 70%, rgba(79,70,229,.07), transparent 70%);
   animation: sla-drift 26s ease-in-out infinite alternate; }}

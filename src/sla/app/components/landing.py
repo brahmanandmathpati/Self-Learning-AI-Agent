@@ -12,6 +12,14 @@ from sla.app.components.icons import icon
 GITHUB = "https://github.com/brahmanandmathpati/Self-Learning-AI-Agent"
 LIVE = "https://self-learning-ai-agent-final-year-project.streamlit.app/"
 REPORT = ""  # TODO: link to the hosted project report PDF (e.g. a GitHub release asset)
+_TODO = '<span class="todo" title="TODO: add profile link">Profile link: TODO</span>'
+TEAM = [
+    ("Brahmanand Mathpati", "Agent core — Q-learning, DQN, tuning, failure analysis",
+     f'<a href="{GITHUB}" target="_blank" rel="noopener">GitHub</a>'),
+    ("Atharv Gundale", "Environments, training runner and CLI, CI and release", _TODO),
+    ("Vedant Biradar", "Experience memory, evaluation, statistics, ablations", _TODO),
+    ("Somesh Badwane", "Reflection layer, grounding check, dashboard, demo", _TODO),
+]
 
 
 def actions(buttons: Sequence[tuple[str, str, str]]) -> str:
@@ -62,3 +70,31 @@ def footer() -> None:
         f'Vedant Biradar, Somesh Badwane</div></div>'
         f'<nav aria-label="Footer"><a href="{GITHUB}" target="_blank" rel="noopener">GitHub</a>'
         f'<a href="{LIVE}" target="_blank" rel="noopener">Live app</a>{report}</nav></footer>', unsafe_allow_html=True)
+
+
+def results_table(rows: Sequence[tuple[str, str, str, str, str, str]]) -> None:
+    """Proof table: (game, agent, trained, random, gain, p-value) — values come from stored experiments."""
+    head = "".join(f"<th>{h}</th>" for h in ("Game", "Agent", "Trained", "Random", "Gain (95% CI)", "Welch p"))
+    body = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rows)
+    st.markdown(f'<div class="sla-proof"><table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>',
+                unsafe_allow_html=True)
+
+
+_LAYERS = [("Dashboard &amp; CLI", "Streamlit pages · sla commands"),
+           ("Services", "training · evaluation · reflection"),
+           ("Training pipeline", "runs, experiments, ablations"), ("Runner", "the only place learning happens"),
+           ("Agents ⇄ Environments", "Q-learning · DQN ⇄ FrozenLake · CartPole"),
+           ("SQLite + checkpoints", "every episode, test and note is stored")]
+
+
+def architecture() -> str:
+    """Layered architecture as a simple animated stack (decorative + informative)."""
+    rows = "".join(f'<div class="lay" style="animation-delay:{i * 0.08:.2f}s"><b>{t}</b><span>{d}</span></div>'
+                   for i, (t, d) in enumerate(_LAYERS))
+    return f'<div class="sla-arch">{rows}</div>'
+
+
+def faq(items: Sequence[tuple[str, str]]) -> None:
+    for q, a in items:
+        with st.expander(q):
+            st.markdown(a)
