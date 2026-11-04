@@ -518,6 +518,14 @@ div.st-key-ctaband div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a
   .sla-arch .lay span {{ text-align: left; }}
 }}
 
+/* ---------- next steps: team photos, share card, cookie helper ---------- */
+.sla-member .av {{ overflow: hidden; }}
+.sla-member .av img {{ width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }}
+.sla-share {{ display: flex; flex-direction: column; gap: .2rem; margin-bottom: .4rem; }}
+.sla-share b {{ font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--ink); }}
+.sla-share span {{ color: var(--muted); font-size: .86rem; }}
+div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidden; }}
+
 /* ================= motion v2 — luxury touch-up (all decorative, CSS-only) ================= */
 /* ambient drifting light behind the whole app */
 .stApp {{ isolation: isolate; }}

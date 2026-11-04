@@ -154,8 +154,18 @@ and open a dialog; once signed in, the corner shows your initials with a menu (n
   `.streamlit/secrets.toml.example`).
 - **Continue as guest** keeps view-only access and shows a "Guest · view only" badge.
 
-On Streamlit Community Cloud the app's disk is reset when it restarts, so email accounts created on the live site
-do not survive a restart (Google sign-in is not affected). Refreshing the browser tab also signs an email user out.
+- **Keep me signed in** (on by default) stores a random token in a 30-day cookie; only its SHA-256 hash is kept
+  in the database, and signing out deletes it. Refreshing the tab or coming back later keeps you signed in.
+- **Forgot password?** emails a single-use reset link that works for 30 minutes, once `[smtp]` settings are added
+  (any SMTP server; Gmail with an App password works). Resetting signs the account out on every device.
+- **Share this run**: the Run explorer shows a link like `…/runs?run=<run_id>`; anyone can open it, view-only.
+- **Team photos**: drop `first-last.jpg` files into `src/sla/app/assets/team/` (see the README there).
+
+**Accounts that survive restarts.** By default accounts are stored in `runs/users.db`, which Streamlit Community
+Cloud wipes when the app restarts. To keep them, create a free PostgreSQL database (for example a Supabase project)
+and add its connection URL as `[accounts] url` in the app's Secrets. If that database cannot be reached, the app
+falls back to the local file and keeps working. All optional settings are described in
+`.streamlit/secrets.toml.example`.
 
 ## Experiments and reproducibility
 

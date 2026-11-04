@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import html
+
 import streamlit as st
 
-from sla.app import data
+from sla.app import data, routes
 from sla.app.charts.figures import learning_curve
 from sla.app.components.chart_card import chart_card
 from sla.app.components.run_card import algo_label, flatten, kv_grid, run_header
@@ -23,6 +25,9 @@ def render() -> None:
         empty_state("No runs stored yet.", "sla train --config configs/frozenlake_qlearning.yaml",
                     "Train an agent on the Training page; every run is listed here.")
         return
+    shared = st.query_params.get("run")
+    if shared and shared in set(runs["run_id"]) and "explorer_run" not in st.session_state:
+        st.session_state["selected_run"] = shared  # opened from a "share this run" link
     f1, f2, f3 = st.columns(3)
     env = f1.multiselect("Environment", sorted(runs["env"].unique()))
     algo = f2.multiselect("Algorithm", sorted(runs["algorithm"].unique()))
@@ -39,6 +44,8 @@ def render() -> None:
         empty_state("No runs match these filters.", next_step="Clear one of the filters above.", glyph="eye")
         return
     run_id = run_selector(view, key="explorer_run")
+    if st.query_params.get("run") != run_id:
+        st.query_params["run"] = run_id  # the address bar always holds a shareable link to this run
     d = data.run_detail(run_id)
     run = d["run"]
     run_header(run)
@@ -107,3 +114,14 @@ def render() -> None:
             st.dataframe(d["metrics"], hide_index=True, width="stretch")
     with tabs[5]:
         st.code(d["log_tail"] or "No log file found.", language="text")
+    _share(run_id)
+
+
+def _share(run_id: str) -> None:
+    """A public, view-only link to this run (anyone can open it; no account needed)."""
+    url = f"{routes.base_url()}runs?run={run_id}"
+    with st.container(key="card_share"):
+        st.markdown(f'<div class="sla-share"><b>Share this run</b><span>Anyone with this link can view run '
+                    f'<code>{html.escape(run_id)}</code> — view-only, no account needed.</span></div>',
+                    unsafe_allow_html=True)
+        st.code(url, language=None)
