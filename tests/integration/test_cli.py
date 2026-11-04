@@ -1,6 +1,7 @@
 import yaml
 
 from sla.cli import main
+from sla.database.store import SCHEMA_VERSION
 
 
 def small_config(tmp_path, episodes=100):
@@ -49,4 +50,4 @@ def test_evaluate_non_run_folder_error(tmp_path, capsys):
 
 def test_init_db(tmp_path, capsys):
     assert main(["init-db", "--db", str(tmp_path / "n.db")]) == 0
-    assert "schema version 1" in capsys.readouterr().out
+    assert f"schema version {SCHEMA_VERSION}" in capsys.readouterr().out

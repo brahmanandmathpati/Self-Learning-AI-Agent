@@ -32,6 +32,7 @@ FEATURES = [
     ("flask", "Proof with statistics", "Five seeds, Welch's t-test and a 95% interval show the gain is not luck."),
     ("layers", "Ablation study", "Removes replay or the target network to show which parts really matter."),
     ("spark", "Explanations you can trust", "Plain-language notes where every number is checked against the database."),
+    ("eye", "Vision Lab", "Teach it hand gestures live from your webcam, photos or videos — and reward it with a 👍."),
 ]
 FAQ = [
     ("What is reinforcement learning?",
@@ -49,6 +50,9 @@ FAQ = [
     ("Does the AI explanation make up numbers?",
      "No. Every number in a written insight is checked against facts computed from the database; a note with a "
      "number that is not in the facts is rejected."),
+    ("Does the Vision Lab store my face?",
+     "No. The camera picture is processed in memory to find 21 hand points, and only those numbers are kept. Pictures "
+     "are saved only if you tick “save images”, and “Delete my data” removes everything."),
     ("Do I need an account?",
      "No. You can look at every page as a visitor. Log in (or sign up) to start training, write insights and "
      "rate them."),
@@ -191,6 +195,7 @@ def render() -> None:
     steps(STEPS)
     section("What makes it different", kicker="Features")
     features(FEATURES)
+    routes.link("vision", "Teach the agent with your hands →", "outline", "vision")
 
     section("Live from the lab", "The newest completed training run. Reward should rise as the agent improves.",
             badge(featured["status"]) if featured else "", kicker="Live demo")

@@ -8,7 +8,8 @@ import pytest
 pytest.importorskip("streamlit")
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
-PAGES = ["overview", "training", "comparison", "evaluation", "ablation", "explorer", "reflection", "environment",
+PAGES = ["overview", "training", "vision", "comparison", "evaluation", "ablation", "explorer", "reflection",
+         "environment",
          "about"]
 
 

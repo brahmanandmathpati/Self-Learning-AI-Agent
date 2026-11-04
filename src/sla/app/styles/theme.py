@@ -526,6 +526,34 @@ div.st-key-ctaband div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a
 .sla-share span {{ color: var(--muted); font-size: .86rem; }}
 div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidden; }}
 
+/* ---------- Vision Lab: live prediction panel and the FrozenLake board ---------- */
+.sla-pred {{ border: 1px solid var(--border); border-radius: var(--radius); background: #fff; padding: 1rem 1.1rem;
+  box-shadow: var(--shadow); }}
+.sla-pred.empty {{ color: var(--muted); font-size: .9rem; }}
+.sla-pred .top {{ font-family: var(--serif); font-size: 1.6rem; font-weight: 600; color: var(--ink);
+  margin-bottom: .5rem; }}
+.sla-pred .row {{ display: grid; grid-template-columns: 8.5rem 1fr 2.6rem; gap: .5rem; align-items: center;
+  font-size: .82rem;
+  color: var(--secondary); margin-top: .3rem; }}
+.sla-pred .bar {{ height: .45rem; border-radius: 99px; background: var(--surface2); overflow: hidden; }}
+.sla-pred .bar i {{ display: block; height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--gold), #E6C77A);
+  transition: width .3s var(--ease); }}
+.sla-pred .row b {{ color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }}
+.sla-lake {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; max-width: 360px; margin: .6rem 0; }}
+.sla-lake .cell {{ position: relative; aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center;
+  justify-content: center; font-size: 1.3rem; color: var(--ink); background: #F1F5F9;
+  border: 1px solid var(--border); }}
+.sla-lake .cell.hole {{ background: #CBD5E1; font-size: .7rem; letter-spacing: .1em; color: #334155; }}
+.sla-lake .cell.goal {{ background: #A7F3D0; font-size: .7rem; letter-spacing: .1em; }}
+.sla-lake .cell.here {{ outline: 2px solid var(--gold); background: #FFFBF2;
+  animation: sla-lit-cell 1.6s ease-in-out infinite; }}
+@keyframes sla-lit-cell {{ 50% {{ box-shadow: 0 0 0 6px rgba(201,162,75,.18); }} }}
+.sla-lake .prop {{ position: absolute; right: .3rem; bottom: .15rem; font-size: .9rem; color: var(--gold-d); }}
+
+.stButton > button[kind="primary"]:disabled, .stFormSubmitButton > button[kind^="primary"]:disabled {{
+  opacity: .45; box-shadow: none; cursor: not-allowed; animation: none; }}
+
 /* ================= motion v2 — luxury touch-up (all decorative, CSS-only) ================= */
 /* ambient drifting light behind the whole app */
 .stApp {{ isolation: isolate; }}

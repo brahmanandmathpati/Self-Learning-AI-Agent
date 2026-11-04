@@ -25,6 +25,8 @@ digraph G {
   DB [label="SQLite\\nexperiments · runs · episodes\\nmetrics · evaluations\\nablation · reflections", shape=cylinder];
   EV [label="Evaluation\\nfrozen policy · stats"];
   RF [label="Reflection\\nfacts → template / Ollama\\n→ number check"];
+  VL [label="Vision Lab\\nMediaPipe hand points →\\nk-NN / MLP · gestures = reward"];
+  UI -> VL; VL -> AG; VL -> DB;
   UI -> SVC; CLI -> SVC; SVC -> PIPE; PIPE -> RUN; RUN -> ENV [dir=both]; RUN -> AG [dir=both];
   AG -> BUF [dir=both]; RUN -> CK; RUN -> DB; PIPE -> EV; EV -> DB; CK -> EV; SVC -> RF; RF -> DB; SVC -> DB;
 }

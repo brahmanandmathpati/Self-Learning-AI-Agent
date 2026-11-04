@@ -167,6 +167,25 @@ and add its connection URL as `[accounts] url` in the app's Secrets. If that dat
 falls back to the local file and keeps working. All optional settings are described in
 `.streamlit/secrets.toml.example`.
 
+### Vision Lab: learn gestures live
+
+**Vision Lab** (top navbar) teaches the agent hand gestures from the webcam, photos or short videos:
+
+1. **Teach with gestures:** pick a class (👍 👎 ✋ ✊ by default, editable), press Record and hold the gesture. MediaPipe
+   finds 21 hand points; they are centred on the wrist and scaled by hand size (42 numbers), so the learner sees the
+   *shape* of the hand, not pixels. k-NN learns from every sample instantly; a small PyTorch network trains on demand.
+2. **Photos & videos:** upload images or videos (≤ 30 s, sampled at 5 fps) to add samples, or test on new files with a
+   frame-by-frame prediction timeline.
+3. **Gestures teach the agent:** FrozenLake proposes a move, and your 👍 (+1) or 👎 (−1) is the reward the Q-table
+   learns from. Sessions can be saved as runs with variant `human_feedback`.
+4. **Results & model card:** accuracy on a held-out 20% of your samples, a 95% bootstrap interval, the chance level, a
+   confusion matrix and a learning curve, plus limits and privacy notes. Members can save, load and export models.
+
+Only hand-point numbers are kept (no faces or pictures unless "save images" is ticked), and "Delete my data" removes
+them. Local install: `pip install -e ".[vision]"`. The hand model (7.8 MB) downloads once into `runs/models/`. On
+Streamlit Cloud, live video usually needs a TURN server (see `[webrtc]` in `.streamlit/secrets.toml.example`);
+snapshots, photos and videos work without it.
+
 ## Experiments and reproducibility
 
 Every run records its seed, full config (hyper-parameters), environment, algorithm, start/end time, status, git commit SHA, checkpoint paths and metrics in SQLite, plus `config.yaml`, `metrics.json` and `run.log` in `runs/<run_id>/`. See [`docs/experiments.md`](docs/experiments.md) and [`docs/evaluation.md`](docs/evaluation.md).
