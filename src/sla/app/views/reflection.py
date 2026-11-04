@@ -6,7 +6,7 @@ import json
 
 import streamlit as st
 
-from sla.app import data
+from sla.app import auth, data
 from sla.app.components.reflection_card import data_sources, insight_card
 from sla.app.components.selectors import run_selector
 from sla.app.components.ui import badge, empty_state, error_state, hero, section
@@ -47,8 +47,9 @@ def render() -> None:
             st.caption("Ollama is not reachable from this server, so notes are written by the template — "
                        "they use exactly the same facts.")
     with c2:
-        generate = st.button("Generate insight", type="primary", width="stretch")
-    if generate:
+        generate = st.button("Generate insight", type="primary", width="stretch", disabled=not auth.can_act())
+    auth.member_gate("generate and rate insights", "refl")
+    if generate and auth.can_act():
         with st.spinner("Writing the note and checking every number against the facts…"):
             result = svc.reflection.generate(run_id, use_llm=use_llm)
         if result.rejected:
@@ -89,7 +90,7 @@ def render() -> None:
             accurate = b.radio("Accurate?", ["Yes", "No"], horizontal=True) == "Yes"
             useful = st.slider("Usefulness", 1, 5, 3)
             comment = st.text_input("Comment (optional, max 500 characters)")
-            if st.form_submit_button("Save rating"):
+            if st.form_submit_button("Save rating", disabled=not auth.can_act()) and auth.can_act():
                 try:
                     svc.reflection.rate(int(note_id), accurate, int(useful), comment)
                     st.success("Rating saved.")

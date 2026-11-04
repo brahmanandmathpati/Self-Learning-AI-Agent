@@ -18,6 +18,11 @@ def db_path() -> Path:
     return _path("SLA_DB", PROJECT_ROOT / "runs" / "sla.db")
 
 
+def users_db_path() -> Path:
+    """SQLite file for dashboard sign-in accounts (env SLA_USERS_DB, default runs/users.db; never committed)."""
+    return _path("SLA_USERS_DB", PROJECT_ROOT / "runs" / "users.db")
+
+
 def config_dir() -> Path:
     """Folder with the YAML experiment configs (env SLA_CONFIG_DIR)."""
     return _path("SLA_CONFIG_DIR", PROJECT_ROOT / "configs")

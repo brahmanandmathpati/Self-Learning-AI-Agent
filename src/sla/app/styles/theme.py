@@ -349,6 +349,42 @@ div[data-testid="stExpander"] details {{ border:1px solid var(--border) !importa
   .block-container {{ padding-left: 1rem; padding-right: 1rem; }}
 }}
 @media (max-width: 480px) {{ .sla-steps {{ grid-template-columns: 1fr; }} .sla-hero.big h1 {{ font-size: 1.85rem; }} }}
+/* ---------- sign-in screen, guest lock, user card ---------- */
+.sla-auth-brand .eyebrow {{ font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color: var(--gold-d);
+  font-weight:600; display:flex; align-items:center; gap:.6rem; }}
+.sla-auth-brand .eyebrow::before {{ content:""; width:28px; height:1px; background: var(--gold); }}
+.sla-auth-brand h1 {{ font-family: var(--serif); font-size: 2.7rem; line-height:1.1; font-weight:600; margin:.6rem 0 0;
+  animation: sla-up .7s var(--ease) both; }}
+.sla-auth-brand h1 .gold {{ color: var(--gold-d); }}
+.sla-auth-brand p {{ font-size:1.02rem; max-width: 470px; animation: sla-up .7s var(--ease) .15s both; }}
+.sla-auth-art {{ width: 210px; height: 210px; margin: .4rem 0 .6rem; }}
+.sla-auth-list {{ list-style:none; padding:0; margin:0; display:grid; gap:.55rem; }}
+.sla-auth-list li {{ display:flex; gap:.6rem; align-items:flex-start; color: var(--secondary); font-size:.9rem; }}
+.sla-auth-list li svg {{ flex:none; margin-top:.2rem; color: var(--gold-d); }}
+div[class*="st-key-card_auth"] {{ padding: 1.6rem 1.6rem 1rem; border:1px solid var(--hair);
+  box-shadow: var(--shadow-lg);
+  border-top: 3px solid var(--gold); }}
+.sla-auth-head h3 {{ font-family: var(--serif); font-size:1.6rem; font-weight:600; margin:0; }}
+.sla-auth-head p {{ margin:.2rem 0 .4rem; color: var(--muted); font-size:.9rem; }}
+.sla-or {{ display:flex; align-items:center; gap:.8rem; color: var(--muted); font-size:.75rem; letter-spacing:.2em;
+  text-transform:uppercase; margin:.5rem 0 .6rem; }}
+.sla-or::before, .sla-or::after {{ content:""; flex:1; height:1px; background: var(--hair); }}
+.sla-lock {{ display:flex; gap:.6rem; align-items:center; padding:.7rem 1rem; border-radius:14px;
+  border:1px dashed rgba(169,131,47,.55); background: #FFFBF2; color: var(--secondary); font-size:.9rem; }}
+.sla-lock svg {{ color: var(--gold-d); flex:none; }}
+.sla-me {{ display:flex; gap:.7rem; align-items:center; margin-bottom:.5rem; }}
+.sla-me .av {{ width:2.4rem; height:2.4rem; flex:none; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-family: var(--serif); font-weight:600; color: var(--gold-d);
+  background: linear-gradient(135deg,#FFF8E8,var(--gold-soft)); border:1px solid var(--hair); }}
+.sla-me b {{ display:block; color: var(--ink); font-size:.9rem; line-height:1.2; }}
+.sla-me small {{ display:block; color: var(--muted); font-size:.72rem; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; max-width: 11rem; }}
+.sla-me .kind {{ display:inline-block; margin:.15rem 0; font-size:.62rem; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; padding:.1rem .45rem; border-radius:99px; background: var(--gold-soft);
+  color: var(--gold-d); }}
+.sla-me .kind.guest {{ background: var(--indigo-soft); color: var(--indigo); }}
+@media (max-width: 900px) {{ .sla-auth-brand h1 {{ font-size: 2rem; }} .sla-auth-art {{ display:none; }} }}
+
 /* ================= motion v2 — luxury touch-up (all decorative, CSS-only) ================= */
 /* ambient drifting light behind the whole app */
 .stApp::before {{ content:""; position:fixed; inset:-20%; z-index:0; pointer-events:none;

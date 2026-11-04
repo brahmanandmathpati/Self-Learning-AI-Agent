@@ -8,7 +8,7 @@ from dataclasses import replace
 import pandas as pd
 import streamlit as st
 
-from sla.app import data
+from sla.app import auth, data
 from sla.app.charts.figures import learning_curve, single_series
 from sla.app.components.chart_card import PLOTLY_CONFIG, chart_card
 from sla.app.components.selectors import run_selector
@@ -106,6 +106,7 @@ def render() -> None:
     hero("Training", "Configure an agent, start training and watch reward, ε, loss and episode length update live.",
          eyebrow="Live learning")
 
+    allowed = auth.member_gate("start training and run experiments", "train")
     with st.form("train_form"):
         c1, c2, c3 = st.columns(3)
         env_name = c1.selectbox("Environment", ["FrozenLake-v1", "CartPole-v1"])
@@ -128,14 +129,14 @@ def render() -> None:
             if env_name == "FrozenLake-v1":
                 slippery = st.checkbox("Slippery ice (stochastic transitions)",
                                        bool(preset.env_kwargs.get("is_slippery", False)))
-        submitted = st.form_submit_button("Start training", type="primary")
+        submitted = st.form_submit_button("Start training", type="primary", disabled=not allowed)
     st.info("Stay on this page while training runs. Switching to another page, refreshing or closing the tab "
             "stops training (the run is saved as *stopped*).", icon=":material/info:")
     if algorithm == "dqn":
         st.caption("DQN on CPU: roughly a few minutes per 600-episode run; a 5-seed experiment takes about "
                    "five times longer. A single FrozenLake run takes under a minute.")
 
-    if submitted:
+    if submitted and allowed:
         try:
             cfg = replace(preset, episodes=int(episodes), seed=int(seed), learning_rate=float(lr), gamma=float(gamma),
                           epsilon_end=float(eps_end), epsilon_decay_steps=int(decay))
