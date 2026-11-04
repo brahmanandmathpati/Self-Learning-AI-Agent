@@ -95,3 +95,63 @@ def test_overview_has_all_landing_sections():
                   "Train your first agent in under a minute."):
         assert title in text, title
     assert len(at.expander) >= 6  # FAQ
+
+
+def _store():
+    import os
+
+    from sla.accounts import AccountStore
+    return AccountStore(os.environ["SLA_USERS_DB"])
+
+
+def test_keep_me_signed_in_issues_a_remember_token():
+    _store().create("keep@example.com", "Keep Me", "password1")
+    at = _app()
+    _button(at, "Log in").click().run()
+    _text(at, "Email").input("keep@example.com")
+    _text(at, "Password").input("password1")
+    _button(at, "Log in", skip_key="nav_login").click().run()
+    token = at.session_state["sla_remember_token"]
+    assert _store().account_for_token(token, "remember").email == "keep@example.com"
+
+
+def test_forgot_password_says_when_email_is_not_set_up():
+    at = _app()
+    _button(at, "Log in").click().run()
+    _button(at, "Forgot password?").click().run()
+    assert not at.exception, at.exception
+    assert any("not set up" in i.value for i in at.info)
+
+
+def test_reset_link_lets_the_user_choose_a_new_password():
+    store = _store()
+    acc = store.create("reset@example.com", "Re Set", "old-password")
+    token = store.issue_token(acc.user_id, "reset")
+    at = AppTest.from_file(MAIN, default_timeout=60)
+    at.query_params["reset"] = token
+    at.run()
+    _text(at, "New password (at least 8 characters)").input("new-password-1")
+    _text(at, "Confirm new password").input("new-password-1")
+    _button(at, "Save new password").click().run()
+    assert not at.exception, at.exception
+    assert at.session_state["sla_user"]["email"] == "reset@example.com"
+    assert store.verify("reset@example.com", "old-password") is None
+    assert store.verify("reset@example.com", "new-password-1") is not None
+    assert store.account_for_token(token, "reset") is None  # single use
+
+
+def test_run_explorer_offers_a_share_link():
+    import os
+    from dataclasses import replace
+
+    from sla.database.store import Database
+    from sla.training.config import config_from_dict
+    from sla.training.pipeline import run_experiment
+    cfg = config_from_dict({"env_name": "FrozenLake-v1", "env_kwargs": {"is_slippery": False},
+                            "agent": "q_learning", "episodes": 60, "seed": 0, "eval_every": 30,
+                            "eval_episodes": 3, "checkpoint_every": 30, "run_root": os.environ["SLA_RUN_ROOT"]})
+    run_experiment(replace(cfg), [0], Database(os.environ["SLA_DB"]), final_eval_episodes=3)
+    at = AppTest.from_string("from sla.app.views import explorer\nexplorer.render()", default_timeout=60).run()
+    assert not at.exception, at.exception
+    assert "Share this run" in _md(at)
+    assert any("runs?run=" in c.value for c in at.code)

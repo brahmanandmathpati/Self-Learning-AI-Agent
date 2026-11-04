@@ -8,6 +8,7 @@ is rendered on its own (unit tests), no pages are registered and a plain link is
 from __future__ import annotations
 
 import html
+from urllib.parse import urlsplit
 
 import streamlit as st
 
@@ -27,3 +28,18 @@ def link(name: str, label: str, kind: str = "gold", key: str = "") -> None:
         else:
             st.markdown(f'<a class="sla-btn {kind}" href="{html.escape(name)}" target="_self">{html.escape(label)}</a>',
                         unsafe_allow_html=True)
+
+
+LIVE = "https://self-learning-ai-agent-final-year-project.streamlit.app/"
+
+
+def base_url() -> str:
+    """scheme://host/ of the page the visitor is on (falls back to the live app address)."""
+    try:
+        url = st.context.url
+        parts = urlsplit(url if isinstance(url, str) else "")
+        if parts.scheme and parts.netloc:
+            return f"{parts.scheme}://{parts.netloc}/"
+    except Exception:  # noqa: BLE001 - st.context.url is unavailable in bare/test mode
+        pass
+    return LIVE
