@@ -28,3 +28,4 @@ def _isolated_paths(tmp_path, monkeypatch):
     """Never let a test touch the real runs/ folder or database."""
     monkeypatch.setenv("SLA_DB", str(tmp_path / "env.db"))
     monkeypatch.setenv("SLA_RUN_ROOT", str(tmp_path / "runs"))
+    monkeypatch.setenv("SLA_USERS_DB", str(tmp_path / "users.db"))

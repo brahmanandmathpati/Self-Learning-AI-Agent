@@ -136,9 +136,23 @@ Optional (explanations by a local LLM): install [Ollama](https://ollama.com) and
 
 **Try it online:** [self-learning-ai-agent-final-year-project.streamlit.app](https://self-learning-ai-agent-final-year-project.streamlit.app/) (hosted on Streamlit Community Cloud; the hosted database starts empty, so train a run on the Training page first).
 
-`sla dashboard` opens a dark, multi-page experimentation dashboard: **Overview**, **Training** (start runs and watch reward, moving average, ε, loss and episode length live), **Agent comparison**, **Evaluation** (5-seed results, CI, Welch's t-test, before/after), **Ablation**, **Run explorer** (config, evaluations, checkpoints, logs), **Reflection** (notes, facts, validation status, ratings), **Environments** and **About**. Every number is read from the database; empty sections say NOT RUN.
+`sla dashboard` opens a light, multi-page experimentation dashboard: **Overview**, **Training** (start runs and watch reward, moving average, ε, loss and episode length live), **Agent comparison**, **Evaluation** (5-seed results, CI, Welch's t-test, before/after), **Ablation**, **Run explorer** (config, evaluations, checkpoints, logs), **Reflection** (notes, facts, validation status, ratings), **Environments** and **About**. Every number is read from the database; empty sections say NOT RUN.
 
 <!-- Screenshots: add docs/screenshots/*.png after the first real experiments. -->
+
+### Sign-in and guest mode
+
+The dashboard opens on a sign-in screen with three choices:
+
+- **Sign in / Create account** — email and password. Passwords are stored only as salted PBKDF2-SHA256 hashes in
+  `runs/users.db` (git-ignored, separate from the experiment database). Members can use every feature.
+- **Continue with Google** — shown only when Google OAuth secrets are configured (see
+  `.streamlit/secrets.toml.example`).
+- **Continue as guest** — view-only: every page and result is visible, but starting training, generating insights
+  and saving ratings are locked.
+
+On Streamlit Community Cloud the app's disk is reset when it restarts, so email accounts created on the live site
+do not survive a restart (Google sign-in is not affected).
 
 ## Experiments and reproducibility
 

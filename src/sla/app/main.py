@@ -14,7 +14,7 @@ if str(_SRC) not in sys.path:
 
 import streamlit as st  # noqa: E402
 
-from sla.app import data, demo_seed  # noqa: E402
+from sla.app import auth, data, demo_seed  # noqa: E402
 from sla.app.components.landing import footer  # noqa: E402
 from sla.app.components.states import error_state  # noqa: E402
 from sla.app.components.status_badge import badge  # noqa: E402
@@ -53,6 +53,9 @@ def safe(render):
     """Show a friendly error card instead of a traceback; details stay in the log / developer expander."""
     @functools.wraps(render)
     def wrapper() -> None:
+        if not auth.current_user():  # nobody signed in yet: show the sign-in / guest screen instead of the page
+            auth.login_screen()
+            return
         try:
             render()
         except Exception as exc:  # noqa: BLE001 - Streamlit control-flow exceptions are BaseException
@@ -116,6 +119,7 @@ def sidebar_status() -> None:
 nav = st.navigation(PAGES)
 with st.sidebar:
     try:
+        auth.sidebar_card()
         sidebar_status()
         snap = demo_seed.snapshot_info()
         if snap:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from sla.app import data
+from sla.app import auth, data
 from sla.app.charts.figures import learning_curve, validation_curve
 from sla.app.components.chart_card import chart_card
 from sla.app.components.landing import actions, features, stack, steps
@@ -50,9 +50,13 @@ def render() -> None:
     ov = data.overview()
     latest = ov["latest_run"]
     state = "running" if ov["running_runs"] else "idle"
+    user = auth.current_user()
+    first = user["name"].split()[0] if user and user["kind"] != "guest" else ""
+    who = badge("info", "Guest · view only") if user and user["kind"] == "guest" else ""
     hero("An AI agent that learns from experience.",
          "It starts knowing nothing, learns two games from rewards alone, and proves it on games it has never seen.",
-         badge("online", "System online") + badge(state, STATE_TEXT[state]), eyebrow="Self-Learning AI Agent",
+         badge("online", "System online") + badge(state, STATE_TEXT[state]) + who,
+         eyebrow=f"Welcome back, {first}" if first else "Self-Learning AI Agent",
          big=True, art=learning_loop(),
          actions=actions([("Start training", "training", "gold"), ("See the proof", "evaluation", "outline")]))
     section("At a glance", "Live numbers from the experiment database.", kicker="Results")
