@@ -109,6 +109,7 @@ _LAYERS = [("Dashboard &amp; CLI", "Streamlit pages · sla commands"),
            ("Services", "training · evaluation · reflection"),
            ("Training pipeline", "runs, experiments, ablations"), ("Runner", "the only place learning happens"),
            ("Agents ⇄ Environments", "Q-learning · DQN ⇄ FrozenLake · CartPole"),
+           ("Vision Lab", "hand points → k-NN / small network · gestures as rewards"),
            ("SQLite + checkpoints", "every episode, test and note is stored")]
 
 

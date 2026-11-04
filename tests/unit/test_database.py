@@ -89,3 +89,13 @@ def test_failed_run_records_error(db):
     db.start_run("r", "CartPole-v1", "dqn", 0, {})
     db.finish_run("r", "failed", error="TrainingError: boom")
     assert db.get_run("r")["status"] == "failed" and "boom" in db.get_run("r")["error"]
+
+
+def test_vision_models_crud_is_owner_scoped(db):
+    mid = db.save_vision_model("g", "knn", ["a", "b"], 20, 0.95, {"chance": 0.5}, {"kind": "knn", "X": [], "y": []},
+                               owner="me@example.com")
+    assert db.get_vision_model(mid)["classes"] == ["a", "b"]
+    assert len(db.list_vision_models("me@example.com")) == 1
+    assert db.delete_vision_models("someone@else.com", mid) == 0  # cannot delete another person's model
+    assert db.delete_vision_models("me@example.com") == 1
+    assert db.list_vision_models("me@example.com").empty

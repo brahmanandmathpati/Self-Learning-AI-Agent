@@ -27,6 +27,7 @@ from sla.app.views import (  # noqa: E402
     overview,
     reflection,
     training,
+    vision,
 )
 
 ASSETS = Path(__file__).resolve().parent / "assets"
@@ -70,11 +71,13 @@ _ANALYSIS = [
     st.Page(safe(explorer.render), title="Run explorer", icon=":material/manage_search:", url_path="runs"),
     st.Page(safe(reflection.render), title="Reflection", icon=":material/psychology:", url_path="reflection"),
 ]
+_VISION = st.Page(safe(vision.render), title="Vision Lab", icon=":material/back_hand:", url_path="vision")
 _ENVS = st.Page(safe(environment.render), title="Environments", icon=":material/grid_on:", url_path="environments")
 _ABOUT = st.Page(safe(about.render), title="About", icon=":material/info:", url_path="about")
-# Top navbar: Overview · Training · Environments · About · Analysis ▾ ("" = pages without a dropdown).
-PAGES = {"": [_OVERVIEW, _TRAINING, _ENVS, _ABOUT], "Analysis": _ANALYSIS}
-routes.register({"overview": _OVERVIEW, "training": _TRAINING, "environments": _ENVS, "about": _ABOUT,
+# Top navbar: Overview · Training · Vision Lab · Environments · About · Analysis ▾ ("" = pages without a dropdown).
+PAGES = {"": [_OVERVIEW, _TRAINING, _VISION, _ENVS, _ABOUT], "Analysis": _ANALYSIS}
+routes.register({"overview": _OVERVIEW, "training": _TRAINING, "vision": _VISION, "environments": _ENVS,
+                 "about": _ABOUT,
                  "comparison": _ANALYSIS[0], "evaluation": _ANALYSIS[1], "ablation": _ANALYSIS[2],
                  "runs": _ANALYSIS[3], "reflection": _ANALYSIS[4]})
 

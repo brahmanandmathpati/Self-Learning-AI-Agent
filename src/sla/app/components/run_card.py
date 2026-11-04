@@ -15,7 +15,7 @@ ALGO = {"q_learning": "Q-learning", "dqn": "DQN", "random": "Random"}
 def algo_label(algorithm: str | None, variant: str | None = None) -> str:
     name = ALGO.get(algorithm or "", algorithm or "—")
     if variant and variant not in ("full",):
-        name += f" · {variant}"
+        name += " · human feedback (gestures)" if variant == "human_feedback" else f" · {variant}"
     return name
 
 

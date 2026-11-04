@@ -121,6 +121,22 @@ CREATE TABLE feedback (
     created_at  TEXT NOT NULL
 );
 """,
+    # v2: Vision Lab — saved gesture models (landmark features only, never images). Human-feedback RL runs use the
+    # existing runs/episodes tables with variant = 'human_feedback'.
+    2: """
+CREATE TABLE vision_models (
+    model_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT NOT NULL,
+    kind         TEXT NOT NULL,              -- knn | mlp
+    classes_json TEXT NOT NULL,
+    n_samples    INTEGER NOT NULL,
+    accuracy     REAL,                       -- held-out accuracy at save time
+    metrics_json TEXT,
+    model_json   TEXT NOT NULL,              -- learner state + the landmark samples it was trained on
+    owner        TEXT,
+    created_at   TEXT NOT NULL
+);
+""",
 }
 SCHEMA_VERSION = max(MIGRATIONS)
 
@@ -241,6 +257,44 @@ class Database:
     def list_runs(self, experiment_id: int | None = None) -> pd.DataFrame:
         sql = "SELECT * FROM runs" + (" WHERE experiment_id = ?" if experiment_id is not None else "")
         return self._df(sql + " ORDER BY started_at DESC", (experiment_id,) if experiment_id is not None else ())
+
+    # ------------------------------------------------------------ vision lab
+    def save_vision_model(self, name: str, kind: str, classes: list[str], n_samples: int, accuracy: float | None,
+                          metrics: dict[str, Any], model: dict[str, Any], owner: str | None = None) -> int:
+        with self._connect() as con:
+            cur = con.execute(
+                "INSERT INTO vision_models (name, kind, classes_json, n_samples, accuracy, metrics_json, model_json,"
+                " owner, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (name, kind, _json(classes), n_samples, accuracy, _json(metrics), _json(model), owner, now()))
+            return int(cur.lastrowid)
+
+    def list_vision_models(self, owner: str | None = None) -> pd.DataFrame:
+        sql = ("SELECT model_id, name, kind, classes_json, n_samples, accuracy, owner, created_at FROM vision_models")
+        params: tuple = ()
+        if owner is not None:
+            sql, params = sql + " WHERE owner = ?", (owner,)
+        with self._connect() as con:
+            return pd.read_sql_query(sql + " ORDER BY model_id DESC", con, params=params)
+
+    def get_vision_model(self, model_id: int) -> dict[str, Any] | None:
+        with self._connect() as con:
+            row = con.execute("SELECT * FROM vision_models WHERE model_id = ?", (model_id,)).fetchone()
+        if row is None:
+            return None
+        out = dict(row)
+        out["classes"] = json.loads(out.pop("classes_json"))
+        out["metrics"] = json.loads(out.pop("metrics_json") or "{}")
+        out["model"] = json.loads(out.pop("model_json"))
+        return out
+
+    def delete_vision_models(self, owner: str, model_id: int | None = None) -> int:
+        """Delete one model (or all of an owner's models). Only the owner's rows are touched."""
+        with self._connect() as con:
+            if model_id is None:
+                cur = con.execute("DELETE FROM vision_models WHERE owner = ?", (owner,))
+            else:
+                cur = con.execute("DELETE FROM vision_models WHERE owner = ? AND model_id = ?", (owner, model_id))
+            return int(cur.rowcount)
 
     def delete_run(self, run_id: str) -> None:
         with self._connect() as con:

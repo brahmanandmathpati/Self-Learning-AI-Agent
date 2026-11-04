@@ -161,6 +161,46 @@ def frozenlake_map(desc: list[str], arrows: list[str] | None = None, values: np.
     return _layout(fig, None, "", "", height, legend=False)
 
 
+def confusion_heatmap(classes: list[str], matrix: list[list[int]], height: int = 320) -> go.Figure:
+    """Rows = true class, columns = predicted class (held-out samples)."""
+    fig = go.Figure(go.Heatmap(z=matrix, x=classes, y=classes, colorscale=[[0, "#FFFFFF"], [1, "#C9A24B"]],
+                               showscale=False, text=matrix, texttemplate="%{text}", xgap=2, ygap=2,
+                               hovertemplate="true %{y}<br>predicted %{x}<br>%{z} samples<extra></extra>"))
+    fig.update_yaxes(autorange="reversed")
+    return _layout(fig, None, "Predicted", "True", height, legend=False)
+
+
+def accuracy_curve(curves: dict[str, list[tuple[int, float]]], chance: float, height: int = 300) -> go.Figure:
+    """Held-out accuracy vs number of training samples, one line per learner, with the chance level."""
+    fig = go.Figure()
+    for (name, pts), color in zip(curves.items(), (SERIES[0], SERIES[1], SERIES[2])):
+        if pts:
+            fig.add_trace(go.Scatter(x=[p[0] for p in pts], y=[p[1] for p in pts], name=name, mode="lines+markers",
+                                     line=dict(color=color, width=2.4)))
+    fig.add_hline(y=chance, line=dict(color=INK["muted"], dash="dot"), annotation_text="chance",
+                  annotation_position="bottom right")
+    fig.update_yaxes(range=[0, 1.05], tickformat=".0%")
+    return _layout(fig, None, "Training samples", "Held-out accuracy", height)
+
+
+def prediction_timeline(times: list[float], labels: list[str | None], conf: list[float],
+                        height: int = 260) -> go.Figure:
+    """Predicted gesture for each sampled video frame (marker size = confidence)."""
+    shown = [lbl or "no hand" for lbl in labels]
+    fig = go.Figure(go.Scatter(x=times, y=shown, mode="markers+lines", line=dict(color=_alpha(SERIES[0], .35)),
+                               marker=dict(size=[6 + 12 * c for c in conf], color=SERIES[0]),
+                               hovertemplate="%{x:.1f}s · %{y}<extra></extra>"))
+    return _layout(fig, None, "Time (s)", "", height, legend=False)
+
+
+def reward_bars(history: list[dict], height: int = 260) -> go.Figure:
+    """Human reward per episode; gold bars reached the goal."""
+    fig = go.Figure(go.Bar(x=[h["episode"] for h in history], y=[h["total_reward"] for h in history],
+                           marker_color=["#C9A24B" if h["end_reason"] == "goal" else "#94A3B8" for h in history],
+                           hovertemplate="episode %{x}<br>reward %{y}<extra></extra>"))
+    return _layout(fig, None, "Episode", "Human reward", height, legend=False)
+
+
 def _alpha(hex_color: str, a: float) -> str:
     h = hex_color.lstrip("#")
     r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
