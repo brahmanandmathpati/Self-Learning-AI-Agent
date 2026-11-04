@@ -5,7 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from sla import __version__
-from sla.app.components.landing import GITHUB, team
+from sla.app.components.landing import TEAM, team
 from sla.app.components.ui import hero, section
 
 ARCH = """
@@ -59,11 +59,4 @@ def render() -> None:
         st.markdown("- Double / dueling DQN and prioritised replay.\n- Harder environments (e.g. LunarLander).\n"
                     "- More seeds and hyper-parameter sweeps.\n- Live training in a background worker.")
     section("Team", "Four students, one shared codebase.", kicker="People")
-    todo = '<span class="todo" title="TODO: add profile link">Profile link: TODO</span>'
-    team([
-        ("Brahmanand Mathpati", "Agent core — Q-learning, DQN, tuning, failure analysis",
-         f'<a href="{GITHUB}" target="_blank" rel="noopener">GitHub</a>'),
-        ("Atharv Gundale", "Environments, training runner and CLI, CI and release", todo),
-        ("Vedant Biradar", "Experience memory, evaluation, statistics, ablations", todo),
-        ("Somesh Badwane", "Reflection layer, grounding check, dashboard, demo", todo),
-    ])
+    team(TEAM)

@@ -140,19 +140,22 @@ Optional (explanations by a local LLM): install [Ollama](https://ollama.com) and
 
 <!-- Screenshots: add docs/screenshots/*.png after the first real experiments. -->
 
-### Sign-in and guest mode
+### Navigation, log in and guest mode
 
-The dashboard opens on a sign-in screen with three choices:
+The dashboard has a sticky top navbar: **Overview · Training · Environments · About · Analysis ▾** (Agent
+comparison, Evaluation, Ablation, Run explorer, Reflection). **Log in** and **Sign up** sit in the top-right corner
+and open a dialog; once signed in, the corner shows your initials with a menu (name, role, Sign out).
 
-- **Sign in / Create account** — email and password. Passwords are stored only as salted PBKDF2-SHA256 hashes in
-  `runs/users.db` (git-ignored, separate from the experiment database). Members can use every feature.
-- **Continue with Google** — shown only when Google OAuth secrets are configured (see
+- Everyone can open every page and see every result straight away (view-only).
+- **Sign up / Log in** with email and password unlocks starting training, generating insights and saving ratings.
+  Passwords are stored only as salted PBKDF2-SHA256 hashes in `runs/users.db` (git-ignored, separate from the
+  experiment database).
+- **Continue with Google** appears only when Google OAuth secrets are configured (see
   `.streamlit/secrets.toml.example`).
-- **Continue as guest** — view-only: every page and result is visible, but starting training, generating insights
-  and saving ratings are locked.
+- **Continue as guest** keeps view-only access and shows a "Guest · view only" badge.
 
 On Streamlit Community Cloud the app's disk is reset when it restarts, so email accounts created on the live site
-do not survive a restart (Google sign-in is not affected).
+do not survive a restart (Google sign-in is not affected). Refreshing the browser tab also signs an email user out.
 
 ## Experiments and reproducibility
 

@@ -11,3 +11,7 @@ headless = true
 
 [browser]
 gatherUsageStats = false
+
+[client]
+# Keep the header clean so the Log in / Sign up corner has room (hides the developer "Deploy" button).
+toolbarMode = "minimal"
