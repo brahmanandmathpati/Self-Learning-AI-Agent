@@ -196,6 +196,16 @@ Every run records its seed, full config (hyper-parameters), environment, algorit
 2. A deterministic template turns the facts into a note; optionally a local Ollama model writes it instead, receiving **only** the facts.
 3. `reflection/grounding.py` extracts every number from the note and rejects it unless it matches a fact (±0.01). Rejected LLM notes are kept for transparency and the template is shown.
 
+## Documentation
+
+- **Project documentation (PDF, 46 pages):** [docs/Self-Learning-AI-Agent_Project_Documentation.pdf](docs/Self-Learning-AI-Agent_Project_Documentation.pdf)
+  — the full report: idea, architecture, agents, evaluation and statistics, ablation, reflection, database, website,
+  accounts and security, Vision Lab, real results, testing, deployment, user guide, glossary and viva questions.
+- **Same content in Markdown:** [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md) (figures in `docs/images/`).
+- **Beginner's guide:** [docs/Self-Learning-AI-Agent_Complete_Guide.pdf](docs/Self-Learning-AI-Agent_Complete_Guide.pdf)
+
+Every number in the documentation comes from the committed results database `data/demo/sla_demo.db` or `results/`.
+
 ## Testing
 
 ```bash
@@ -248,12 +258,17 @@ runs/               run folders and the database (git-ignored)
 
 ## Team
 
-| Member | Main contribution |
-| --- | --- |
-| Brahma | Agent core: Q-learning, DQN, tuning, failure analysis |
-| Atharv | Environment layer, training runner and CLI, CI, release |
-| Vedant | Experience memory, evaluation harness, statistics, ablations |
-| Somesh | Reflection layer, grounding validator, dashboard, demo |
+| | Member | Main contribution | LinkedIn | GitHub |
+| --- | --- | --- | --- | --- |
+| <img src="src/sla/app/assets/team/brahmanand-mathpati.jpg" width="56" alt="Brahmanand Mathpati"> | **Brahmanand Mathpati** | Agent core (Q-learning, DQN), repository and live app owner | [brahmanand-mathpati](https://www.linkedin.com/in/brahmanand-mathpati) | [brahmanandmathpati](https://github.com/brahmanandmathpati) |
+| <img src="src/sla/app/assets/team/atharv-gundale.jpg" width="56" alt="Atharv Gundale"> | **Atharv Gundale** | Environment layer, training runner, CI and release | [atharv-gundale](https://www.linkedin.com/in/atharv-gundale-a688002aa/) | [atharvangundale-code](https://github.com/atharvangundale-code) |
+| <img src="src/sla/app/assets/team/vedant-biradar.jpg" width="56" alt="Vedant Biradar"> | **Vedant Biradar** | Experience memory, evaluation, statistics and ablation | [vedant-biradar](https://www.linkedin.com/in/vedant-biradar-272144380/) | [Vedantbiradar24](https://github.com/Vedantbiradar24) |
+| <img src="src/sla/app/assets/team/somesh-badwane.jpg" width="56" alt="Somesh Badwane"> | **Somesh Badwane** | Reflection layer, grounding validator, dashboard and demo | [somesh-badwane](https://www.linkedin.com/in/somesh-badwane-590b0b2a4/) | [someshbadwane22](https://github.com/someshbadwane22) |
+
+**College:** Mahatma Basveshwar Education Society's College of Engineering, Ambajogai — Dr. Babasaheb Ambedkar
+Technological University (DBATU), Lonere · B.Tech Computer Science and Engineering (AI Specialization), 2023–2027 ·
+Academic year 2026–27.
+**Project guide:** Prof. N. R. Ranjhol, Assistant Professor · **Head of Department:** Dr. Sushil Kulkarni.
 
 ---
 

@@ -201,6 +201,11 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-member .links {{ font-size:.8rem; color: var(--muted); }}
 .sla-member .links a {{ color: var(--indigo, #4F46E5); font-weight:600; text-decoration:none; }}
 .sla-member .links .todo {{ font-style: italic; }}
+.sla-member .av {{ width:84px; height:84px; border:2px solid var(--gold, #C9A24B);
+  box-shadow: 0 0 0 4px #fff, 0 6px 18px -8px rgba(15,23,42,.35); }}
+.sla-college {{ text-align:center; font-size:.84rem !important; color: var(--muted); margin:1.4rem auto 0;
+  max-width:820px; line-height:1.7; padding-top:1rem; border-top:1px solid var(--hair); }}
+.sla-college b {{ font-family: var(--serif); color: var(--ink); font-size:1rem; font-weight:600; }}
 
 /* ---------- footer ---------- */
 .sla-footer {{ margin-top: 3rem; padding: 1.6rem 0 .4rem; border-top: 1px solid var(--hair); display:flex;
