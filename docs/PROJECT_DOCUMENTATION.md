@@ -5,7 +5,8 @@
 Final-year B.Tech project · Computer Science and Engineering (AI Specialization) · 2023–2027
 
 - **Team:** Brahmanand Mathpati · Atharv Gundale · Vedant Biradar · Somesh Badwane
-- **College:** TODO: full college name
+- **College:** Mahatma Basveshwar Education Society's College of Engineering, Ambajogai — Dr. Babasaheb Ambedkar Technological University (DBATU), Lonere
+- **Academic year:** 2026–27 · **Project guide:** Prof. N. R. Ranjhol, Assistant Professor · **Head of Department:** Dr. Sushil Kulkarni
 - **Live app:** <https://self-learning-ai-agent-final-year-project.streamlit.app/>
 - **GitHub:** <https://github.com/brahmanandmathpati/Self-Learning-AI-Agent>
 - **PDF version:** [Self-Learning-AI-Agent_Project_Documentation.pdf](Self-Learning-AI-Agent_Project_Documentation.pdf)
@@ -56,26 +57,34 @@ Document by **Brahmanand Mathpati**
 
 **Certificate.** This is to certify that the project report titled **“Self-Learning AI Agent”** is a bona fide record of
 the work carried out by Brahmanand Mathpati, Atharv Gundale, Vedant Biradar and Somesh Badwane, students of B.Tech
-Computer Science and Engineering (AI Specialization), in partial fulfilment of the requirements for the award of the
-degree of Bachelor of Technology during the academic year **TODO: 2026–27**, under my guidance.
+Computer Science and Engineering (AI Specialization) at Mahatma Basveshwar Education Society's College of Engineering, Ambajogai, affiliated to Dr. Babasaheb Ambedkar Technological University (DBATU), Lonere, in partial fulfilment of the requirements for the award of the
+degree of Bachelor of Technology during the academic year **2026–27**, under my guidance.
 
 | | |
 |---|---|
-| Project guide | **TODO: guide’s name and designation** |
-| Head of Department | **TODO: HOD’s name** |
-| Date / place | **TODO** |
+| Project guide | **Prof. N. R. Ranjhol**, Assistant Professor · Signature: <span class="sig"></span> |
+| Head of Department | **Dr. Sushil Kulkarni** · Signature: <span class="sig"></span> |
+| Department | Computer Science and Engineering (AI Specialization) |
+| Place | Ambajogai |
+| Date | <span class="sig"></span> |
 
 **Declaration.** We declare that this report describes our own work. Every result in it was produced by the code in
 the project repository and can be reproduced from the committed results database (`data/demo/sla_demo.db`).
 Sources we used are listed in the References.
 
-Signatures: Brahmanand Mathpati · Atharv Gundale · Vedant Biradar · Somesh Badwane — **TODO: sign and date**
+| Student | Signature | Date |
+|---|---|---|
+| Brahmanand Mathpati | | |
+| Atharv Gundale | | |
+| Vedant Biradar | | |
+| Somesh Badwane | | |
 
 <a id="acknowledgement"></a>
 ## Acknowledgement
 
-We thank our project guide, **TODO: guide’s name**, for steady guidance and honest feedback; our Head of Department,
-**TODO: HOD’s name**, and the faculty of the Department of Computer Science and Engineering for their support; and our
+We thank our project guide, **Prof. N. R. Ranjhol**, Assistant Professor, for steady guidance and honest feedback; our
+Head of Department, **Dr. Sushil Kulkarni**, and the faculty of the Department of Computer Science and Engineering for
+their support; **Mahatma Basveshwar Education Society's College of Engineering, Ambajogai** and **Dr. Babasaheb Ambedkar Technological University (DBATU), Lonere** for the opportunity and facilities to carry out this project; and our
 families and friends for their patience. We also thank the open-source communities behind Gymnasium, PyTorch,
 Streamlit, Plotly, SciPy and MediaPipe, whose free tools made this project possible.
 
@@ -974,14 +983,25 @@ hands.
 <a id="s30"></a>
 ## 30. Team contributions
 
-| Member | Main responsibilities |
-|---|---|
-| **Brahmanand Mathpati** | Agent core: Q-learning and DQN, tuning, failure analysis; repository and live app owner; this document |
-| **Atharv Gundale** | Environment layer, training runner and CLI, continuous integration, release |
-| **Vedant Biradar** | Experience memory, evaluation harness, statistics, ablation study |
-| **Somesh Badwane** | Reflection layer, grounding validator, dashboard, demo |
+| | Member | Main responsibilities | LinkedIn | GitHub |
+|---|---|---|---|---|
+| <img class="face" src="images/team/brahmanand-mathpati.jpg" alt="Brahmanand Mathpati"> | **Brahmanand Mathpati** | Agent core: Q-learning and DQN, tuning, failure analysis; repository and live app owner; this document | [brahmanand-mathpati](https://www.linkedin.com/in/brahmanand-mathpati) | [brahmanandmathpati](https://github.com/brahmanandmathpati) |
+| <img class="face" src="images/team/atharv-gundale.jpg" alt="Atharv Gundale"> | **Atharv Gundale** | Environment layer, training runner and CLI, continuous integration, release | [atharv-gundale-a688002aa](https://www.linkedin.com/in/atharv-gundale-a688002aa/) | [atharvangundale-code](https://github.com/atharvangundale-code) |
+| <img class="face" src="images/team/vedant-biradar.jpg" alt="Vedant Biradar"> | **Vedant Biradar** | Experience memory, evaluation harness, statistics, ablation study | [vedant-biradar-272144380](https://www.linkedin.com/in/vedant-biradar-272144380/) | [Vedantbiradar24](https://github.com/Vedantbiradar24) |
+| <img class="face" src="images/team/somesh-badwane.jpg" alt="Somesh Badwane"> | **Somesh Badwane** | Reflection layer, grounding validator, dashboard, demo | [somesh-badwane-590b0b2a4](https://www.linkedin.com/in/somesh-badwane-590b0b2a4/) | [someshbadwane22](https://github.com/someshbadwane22) |
 
 *Table 17 — Team contributions.*
+
+The same team details appear on the website (Overview and About pages), with each photo, the LinkedIn and GitHub links
+(they open in a new tab) and the college line below the cards (`TEAM` and `team()` in `app/components/landing.py`).
+
+![Figure 28 — Team section on the website (desktop).](images/team_section.jpg)
+
+*Figure 28 — Team section on the website (desktop): photos, roles, profile links and the college details.*
+
+![Figure 29 — Team section at phone width (390 px).](images/team_mobile.jpg)
+
+*Figure 29 — Team section at phone width (390 px), shown as two halves side by side.*
 
 <a id="s31"></a>
 ## 31. Glossary

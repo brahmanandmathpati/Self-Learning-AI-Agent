@@ -17,22 +17,32 @@ REPORT = ""  # TODO: link to the hosted project report PDF (e.g. a GitHub releas
 TEAM_PHOTOS = Path(__file__).resolve().parents[1] / "assets" / "team"
 
 
+COLLEGE = "Mahatma Basveshwar Education Society's College of Engineering, Ambajogai"
+UNIVERSITY = "Dr. Babasaheb Ambedkar Technological University (DBATU), Lonere"
+DEPARTMENT = "Computer Science and Engineering (AI Specialization)"
+ACADEMIC_YEAR = "2026–27"
+GUIDE = "Prof. N. R. Ranjhol, Assistant Professor"
+HOD = "Dr. Sushil Kulkarni"
+
+
 def _links(github: str = "", linkedin: str = "") -> str:
-    """Profile links; a missing one shows a TODO so it is easy to spot and fill in."""
-    out = []
-    for label, url in (("GitHub", github), ("LinkedIn", linkedin)):
-        out.append(f'<a href="{html.escape(url)}" target="_blank" rel="noopener">{label}</a>' if url
-                   else f'<span class="todo" title="TODO: add {label} link">{label}: TODO</span>')
+    """Profile links that open in a new tab; a missing link is simply not shown (no broken links)."""
+    out = [f'<a href="{html.escape(url)}" target="_blank" rel="noopener">{label}</a>'
+           for label, url in (("GitHub", github), ("LinkedIn", linkedin)) if url]
     return " · ".join(out)
 
 
-# (name, role, links). Photos: put <first-last>.jpg/.png/.webp in src/sla/app/assets/team/ (e.g. atharv-gundale.jpg).
+# (name, role, links). Photos: <first-last>.jpg/.png/.webp in src/sla/app/assets/team/ (e.g. atharv-gundale.jpg).
+# To add a teammate's profile later, fill in _links("https://github.com/<user>", "https://www.linkedin.com/in/<id>").
 TEAM = [
-    ("Brahmanand Mathpati", "Agent core — Q-learning, DQN, tuning, failure analysis",
+    ("Brahmanand Mathpati", "Agent core (Q-learning, DQN), repository and live app owner",
      _links("https://github.com/brahmanandmathpati", "https://www.linkedin.com/in/brahmanand-mathpati")),
-    ("Atharv Gundale", "Environments, training runner and CLI, CI and release", _links()),
-    ("Vedant Biradar", "Experience memory, evaluation, statistics, ablations", _links()),
-    ("Somesh Badwane", "Reflection layer, grounding check, dashboard, demo", _links()),
+    ("Atharv Gundale", "Environment layer, training runner, CI and release",
+     _links("https://github.com/atharvangundale-code", "https://www.linkedin.com/in/atharv-gundale-a688002aa/")),
+    ("Vedant Biradar", "Experience memory, evaluation, statistics and ablation",
+     _links("https://github.com/Vedantbiradar24", "https://www.linkedin.com/in/vedant-biradar-272144380/")),
+    ("Somesh Badwane", "Reflection layer, grounding validator, dashboard and demo",
+     _links("https://github.com/someshbadwane22", "https://www.linkedin.com/in/somesh-badwane-590b0b2a4/")),
 ]
 
 
@@ -80,10 +90,15 @@ def team(members: Sequence[tuple[str, str, str]]) -> None:
     cards = []
     for name, role, links in members:
         face = photo(name) or "".join(p[0] for p in name.split()[:2]).upper()
+        link_row = f'<div class="links">{links}</div>' if links else ""
         cards.append(f'<div class="sla-member"><div class="av" aria-hidden="true">{face}</div>'
                      f'<h4>{html.escape(name)}</h4>'
-                     f'<div class="role">{html.escape(role)}</div><div class="links">{links}</div></div>')
+                     f'<div class="role">{html.escape(role)}</div>{link_row}</div>')
     st.markdown('<div class="sla-team">' + "".join(cards) + "</div>", unsafe_allow_html=True)
+    st.markdown(f'<div class="sla-college"><b>{html.escape(COLLEGE)}</b><br>{html.escape(UNIVERSITY)} · '
+                f'B.Tech {html.escape(DEPARTMENT)} · Academic year {ACADEMIC_YEAR}<br>'
+                f'Project guide: {html.escape(GUIDE)} · Head of Department: {html.escape(HOD)}</div>',
+                unsafe_allow_html=True)
 
 
 def footer() -> None:
@@ -92,7 +107,7 @@ def footer() -> None:
     st.markdown(
         f'<footer class="sla-footer"><div><div class="brand">Self-Learning AI Agent</div>'
         f'<div>Final-year B.Tech CSE (AI) project · © 2026 Brahmanand Mathpati, Atharv Gundale, '
-        f'Vedant Biradar, Somesh Badwane</div></div>'
+        f'Vedant Biradar, Somesh Badwane</div><div>{html.escape(COLLEGE)} · DBATU</div></div>'
         f'<nav aria-label="Footer"><a href="{GITHUB}" target="_blank" rel="noopener">GitHub</a>'
         f'<a href="{LIVE}" target="_blank" rel="noopener">Live app</a>{report}</nav></footer>', unsafe_allow_html=True)
 
