@@ -44,9 +44,14 @@ FAQ = [
     ("How do you prove it really learned?",
      "Learning is switched off and the agent plays games it has never seen, 5 times with different seeds. It is "
      "compared with its untrained self and a random player using Welch's t-test and a 95% confidence interval."),
-    ("Why two games?",
-     "FrozenLake has 16 squares, so a simple score table works (Q-learning). CartPole has endless situations, so a "
-     "neural network is needed (DQN)."),
+    ("Why several games and algorithms?",
+     "FrozenLake (16 squares), Taxi (500 situations) and CliffWalking (48 squares) are small enough for a score "
+     "table, so three table methods are compared there: Q-learning, SARSA and Expected SARSA. CartPole has endless "
+     "situations, so a neural network is needed (DQN)."),
+    ("What is the difference between Q-learning and SARSA?",
+     "Q-learning learns as if it will always pick the best move next. SARSA learns from the move it really makes, "
+     "random exploring moves included. On CliffWalking that makes SARSA walk a safer path away from the cliff edge, "
+     "while Q-learning learns the shortest path right along the edge."),
     ("Does the AI explanation make up numbers?",
      "No. Every number in a written insight is checked against facts computed from the database; a note with a "
      "number that is not in the facts is rejected."),

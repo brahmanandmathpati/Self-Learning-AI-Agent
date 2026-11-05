@@ -138,27 +138,41 @@ def before_after(per_seed: pd.DataFrame, title: str | None = None, height: int =
     return fig
 
 
-def frozenlake_map(desc: list[str], arrows: list[str] | None = None, values: np.ndarray | None = None,
-                   height: int = 360) -> go.Figure:
-    """FrozenLake grid; optional greedy-policy arrows and state values from a trained Q-table."""
-    n = len(desc)
-    kinds = {"S": 0.15, "F": 0.15, "H": 0.0, "G": 1.0}
-    z = [[kinds[c] for c in row] for row in desc]
-    colors = [[0, "#CBD5E1"], [0.14, "#CBD5E1"], [0.15, "#F1F5F9"], [0.99, "#F1F5F9"], [1.0, "#A7F3D0"]]
-    fig = go.Figure(go.Heatmap(z=z, colorscale=colors, showscale=False, hoverinfo="skip", xgap=3, ygap=3))
-    names = {"S": "START", "H": "HOLE", "G": "GOAL", "F": ""}
+def grid_map(desc: list[str], arrows: list[str] | None = None, values: np.ndarray | None = None,
+             height: int = 360, names: dict[str, str] | None = None, path: set[int] | None = None) -> go.Figure:
+    """Grid world (FrozenLake, CliffWalking); optional greedy-policy arrows, state values and a highlighted path.
+
+    Letters: S start, F free, H hole / C cliff (dangerous), G goal. Cells are numbered row by row.
+    """
+    cols = len(desc[0])
+    kinds = {"S": 0.15, "F": 0.15, "H": 0.0, "C": 0.0, "G": 1.0}
+    z = [[0.5 if path and (i * cols + j) in path and c in "SF" else kinds[c] for j, c in enumerate(row)]
+         for i, row in enumerate(desc)]
+    colors = [[0, "#CBD5E1"], [0.14, "#CBD5E1"], [0.15, "#F1F5F9"], [0.49, "#F1F5F9"], [0.5, "#F5ECD7"],
+              [0.99, "#F5ECD7"], [1.0, "#A7F3D0"]]
+    fig = go.Figure(go.Heatmap(z=z, colorscale=colors, zmin=0, zmax=1, showscale=False, hoverinfo="skip",
+                               xgap=3, ygap=3))
+    labels = {"S": "START", "H": "HOLE", "C": "CLIFF", "G": "GOAL", "F": "", **(names or {})}
+    small = cols > 6
     for i, row in enumerate(desc):
         for j, c in enumerate(row):
-            text = names[c]
-            k = i * n + j
+            text = labels[c]
+            k = i * cols + j
             if arrows and c in "SF":
-                text = f"{arrows[k]}" + (f"<br><span style='font-size:10px'>V={values[k]:.2f}</span>"
-                                         if values is not None else "")
+                text = f"{arrows[k]}" + (f"<br><span style='font-size:{8 if small else 10}px'>V={values[k]:.1f}</span>"
+                                         if values is not None and not small else "")
             fig.add_annotation(x=j, y=i, text=text, showarrow=False,
-                               font=dict(color=INK["primary"], size=18 if arrows and c in "SF" else 11))
+                               font=dict(color=INK["primary"], size=(15 if small else 18) if arrows and c in "SF"
+                                         else (8 if small else 11)))
     fig.update_yaxes(autorange="reversed", showticklabels=False, showgrid=False, zeroline=False)
     fig.update_xaxes(showticklabels=False, showgrid=False, zeroline=False, scaleanchor="y")
     return _layout(fig, None, "", "", height, legend=False)
+
+
+def frozenlake_map(desc: list[str], arrows: list[str] | None = None, values: np.ndarray | None = None,
+                   height: int = 360) -> go.Figure:
+    """FrozenLake grid; optional greedy-policy arrows and state values from a trained Q-table."""
+    return grid_map(desc, arrows, values, height)
 
 
 def confusion_heatmap(classes: list[str], matrix: list[list[int]], height: int = 320) -> go.Figure:
@@ -213,6 +227,7 @@ __all__ = [
     "VARIANT_LABELS",
     "before_after",
     "frozenlake_map",
+    "grid_map",
     "group_bars",
     "learning_curve",
     "mean_curves",

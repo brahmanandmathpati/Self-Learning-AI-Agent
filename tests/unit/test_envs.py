@@ -66,3 +66,40 @@ def test_random_agent_runs_ten_episodes():
             obs, r, term, trunc, _ = env.step(agent.act(obs))
             done = term or trunc
     env.close()
+
+
+def test_taxi_and_cliffwalking_spaces_and_time_limits():
+    taxi = make_env("Taxi-v4")
+    assert taxi.observation_space.n == 500 and taxi.action_space.n == 6
+    assert taxi.spec.max_episode_steps == 200
+    taxi.close()
+    cliff = make_env("CliffWalking-v1")
+    assert cliff.observation_space.n == 48 and cliff.action_space.n == 4
+    assert cliff.spec.max_episode_steps == 200
+    cliff.close()
+
+
+def test_new_end_reasons():
+    assert end_reason("Taxi-v4", True, False, 20.0, 0) == "delivered"
+    assert end_reason("CliffWalking-v1", True, False, -1.0, 47) == "goal"
+    assert end_reason("Taxi-v4", False, True, -1.0, 0) == "truncated"
+
+
+def test_success_means_reaching_the_goal_on_taxi_and_cliffwalking():
+    from sla.agents.q_learning import QLearningAgent
+    from sla.evaluation.evaluate import evaluate_agent
+    # An untrained agent on CliffWalking almost never reaches the goal within 200 steps
+    agent = QLearningAgent(48, 4, seed=0)
+    res = evaluate_agent(agent, "CliffWalking-v1", n_episodes=3, max_steps=200)
+    assert 0.0 <= res.success_rate <= 1.0
+    # A hand-written optimal path (up, right x11, down) always reaches the goal: success 100%, return -13
+    class Path:
+        def __init__(self):
+            self.moves = []
+
+        def act(self, obs, explore=False):
+            if not self.moves:
+                self.moves = [0] + [1] * 11 + [2]
+            return self.moves.pop(0)
+    res = evaluate_agent(Path(), "CliffWalking-v1", n_episodes=2, max_steps=200)
+    assert res.success_rate == 1.0 and res.mean_return == -13.0

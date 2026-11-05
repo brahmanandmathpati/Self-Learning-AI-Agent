@@ -1,0 +1,19 @@
+# Q-learning on CliffWalking-v1: 4x12 grid, 48 states, 4 actions. Start bottom-left, goal bottom-right,
+# the cliff between them. Rewards: -1 per step, -100 for stepping off the cliff (back to the start).
+# Exploration stays at a constant 10% (the classic Sutton & Barto Example 6.6 set-up), which is what makes
+# SARSA learn a safer path than Q-learning. Same settings for Q-learning, SARSA and Expected SARSA.
+env_name: CliffWalking-v1
+agent: q_learning
+episodes: 500
+seed: 0
+gamma: 0.99
+learning_rate: 0.5          # alpha (the grid is deterministic, so bigger steps are safe)
+epsilon_start: 0.1
+epsilon_end: 0.1
+epsilon_decay_steps: 1      # constant epsilon
+max_steps_per_episode: 200
+max_wall_clock_s: 600
+eval_every: 25
+eval_episodes: 20
+checkpoint_every: 100
+run_root: runs

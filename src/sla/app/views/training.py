@@ -15,9 +15,11 @@ from sla.app.components.selectors import run_selector
 from sla.app.components.ui import badge, card_grid, empty_state, hero, metric_card, section, skeleton
 from sla.app.state import services
 from sla.app.styles.theme import AGENT_COLORS, SERIES
+from sla.catalog import ALGO_LABELS, env_label
+from sla.training.config import ALLOWED_ENVS
 from sla.utils.errors import SLAError
 
-LABELS = {"q_learning": "Q-learning", "dqn": "DQN"}
+LABELS = ALGO_LABELS
 
 
 TREND = {"improving": ("▲ Improving", "#22c55e"), "flat": ("■ Flat", "#f5b83d"),
@@ -37,7 +39,7 @@ def _progress_html(done: int, total: int, run_id: str, live: bool, label: str = 
 def _live_cards(df: pd.DataFrame, info, agent: str) -> list[str]:
     last = df.tail(50)
     if agent != "dqn":
-        loss = metric_card("Loss", "n/a", "tabular Q-learning has no network", icon="loss")
+        loss = metric_card("Loss", "n/a", "table-based agents have no network", icon="loss")
     elif info.mean_loss is None:
         loss = metric_card("Loss", "warming up", "filling the replay buffer", icon="loss")
     else:
@@ -109,7 +111,7 @@ def render() -> None:
     allowed = auth.member_gate("start training and run experiments", "train")
     with st.form("train_form"):
         c1, c2, c3 = st.columns(3)
-        env_name = c1.selectbox("Environment", ["FrozenLake-v1", "CartPole-v1"])
+        env_name = c1.selectbox("Environment", list(ALLOWED_ENVS), format_func=lambda e: f"{env_label(e)} ({e})")
         algorithms = svc.training.algorithms_for(env_name)
         algorithm = c2.selectbox("Algorithm", algorithms, format_func=lambda a: LABELS.get(a, a))
         mode = c3.selectbox("Mode", ["Single run", "Multi-seed experiment (+ random baseline)"])
@@ -123,7 +125,9 @@ def render() -> None:
             h1, h2, h3, h4 = st.columns(4)
             lr = h1.number_input("Learning rate α", 1e-5, 1.0, float(preset.learning_rate), format="%.5f")
             gamma = h2.number_input("Discount γ", 0.5, 1.0, float(preset.gamma), format="%.3f")
-            eps_end = h3.number_input("Final ε", 0.0, 1.0, float(preset.epsilon_end), format="%.3f")
+            eps_end = h3.number_input("Final ε", 0.0, float(preset.epsilon_start), float(preset.epsilon_end),
+                                      format="%.3f", help="Exploration rate at the end (cannot exceed the start value "
+                                      f"{preset.epsilon_start:g}).")
             decay = h4.number_input("ε decay steps", 100, 1_000_000, preset.epsilon_decay_steps, step=500)
             slippery = None
             if env_name == "FrozenLake-v1":
@@ -135,6 +139,11 @@ def render() -> None:
     if algorithm == "dqn":
         st.caption("DQN on CPU: roughly a few minutes per 600-episode run; a 5-seed experiment takes about "
                    "five times longer. A single FrozenLake run takes under a minute.")
+    elif env_name == "Taxi-v4":
+        st.caption("Taxi: a 6,000-episode table-based run takes about a minute on a laptop CPU.")
+    elif env_name == "CliffWalking-v1":
+        st.caption("CliffWalking keeps exploration at a constant 10% (the classic textbook set-up), so you can see "
+                   "SARSA choose a safer path than Q-learning. A run takes a few seconds.")
 
     if submitted and allowed:
         try:

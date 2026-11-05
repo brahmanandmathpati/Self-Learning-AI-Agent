@@ -90,6 +90,8 @@ def validate_transition(state: Any, action: Any, reward: Any, next_state: Any,
 # Expected reward per step for each environment (used by the runner callback).
 REWARD_RANGES: dict[str, tuple[float, float]] = {
     "FrozenLake-v1": (0.0, 1.0),
+    "Taxi-v4": (-10.0, 20.0),           # -1 per step, -10 illegal pick-up/drop-off, +20 delivery
+    "CliffWalking-v1": (-100.0, -1.0),  # -1 per step, -100 for stepping off the cliff
     "CartPole-v1": (0.0, 1.0),
 }
 

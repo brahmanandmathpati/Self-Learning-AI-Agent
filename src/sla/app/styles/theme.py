@@ -21,7 +21,8 @@ INDIGO = "#4F46E5"
 ACCENT = INDIGO
 SERIES = ["#3987e5", "#d95926", "#199e70"]
 STATUS = {"good": "#15803D", "warning": "#B45309", "serious": "#C2410C", "critical": "#B91C1C", "info": INDIGO}
-AGENT_COLORS = {"Q-learning": SERIES[0], "DQN": SERIES[1], "Random": "#94A3B8"}
+AGENT_COLORS = {"Q-learning": SERIES[0], "DQN": SERIES[1], "SARSA": SERIES[2], "Expected SARSA": "#8b5cf6",
+                "Random": "#94A3B8"}
 VARIANT_COLORS = {"full": SERIES[0], "no_replay": SERIES[1], "no_target": SERIES[2]}
 VARIANT_LABELS = {"full": "Full DQN", "no_replay": "No replay", "no_target": "No target network"}
 

@@ -28,6 +28,9 @@ log = get_logger(__name__)
 EVAL_SEED_BASE = 10_000_000   # "validation" seeds: periodic evaluation + picking the best checkpoint
 TEST_SEED_BASE = 20_000_000   # "test" seeds: final evaluation only, never used to pick checkpoints
 SUCCESS_THRESHOLDS = {"FrozenLake-v1": 1.0, "CartPole-v1": 500.0}
+# Games where "success" means the episode really ended at the goal (terminated, not cut off by the time limit):
+# Taxi = passenger delivered, CliffWalking = goal reached.
+SUCCESS_ON_TERMINATION = ("Taxi-v4", "CliffWalking-v1")
 
 
 @dataclass
@@ -59,10 +62,11 @@ def evaluate_agent(agent: Agent, env_name: str, env_kwargs: dict[str, Any] | Non
     env = make_env(env_name, **(env_kwargs or {}))
     returns: list[float] = []
     lengths: list[int] = []
+    reached: list[bool] = []
     try:
         for i in range(n_episodes):
             state, _ = env.reset(seed=seed_base + i)
-            total, steps, done = 0.0, 0, False
+            total, steps, done, terminated = 0.0, 0, False, False
             while not done and steps < max_steps:
                 action = policy.act(state, explore=False)
                 state, reward, terminated, truncated, _ = env.step(action)
@@ -71,11 +75,15 @@ def evaluate_agent(agent: Agent, env_name: str, env_kwargs: dict[str, Any] | Non
                 done = terminated or truncated
             returns.append(total)
             lengths.append(steps)
+            reached.append(bool(terminated))
     finally:
         env.close()
     arr = np.asarray(returns)
-    threshold = SUCCESS_THRESHOLDS.get(env_name, float("inf"))
-    return EvalResult(float(arr.mean()), float(arr.std()), float(np.mean(arr >= threshold)),
+    if env_name in SUCCESS_ON_TERMINATION:
+        success = float(np.mean(reached))
+    else:
+        success = float(np.mean(arr >= SUCCESS_THRESHOLDS.get(env_name, float("inf"))))
+    return EvalResult(float(arr.mean()), float(arr.std()), success,
                       n_episodes, returns, float(np.median(arr)), float(np.mean(lengths)), lengths)
 
 

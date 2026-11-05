@@ -17,10 +17,11 @@ from typing import Any
 
 import yaml
 
+from sla.catalog import CONTINUOUS_ENVS, TABULAR_AGENTS, TABULAR_ENVS
 from sla.utils.errors import ConfigError
 
-ALLOWED_ENVS = ("FrozenLake-v1", "CartPole-v1")
-ALLOWED_AGENTS = ("random", "q_learning", "dqn")
+ALLOWED_ENVS = ("FrozenLake-v1", "Taxi-v4", "CliffWalking-v1", "CartPole-v1")
+ALLOWED_AGENTS = ("random", "q_learning", "sarsa", "expected_sarsa", "dqn")
 
 
 @dataclass
@@ -83,6 +84,11 @@ def validate_config(cfg: RunConfig) -> RunConfig:
     """Raise ConfigError (naming the bad key) if any value is wrong."""
     _check(cfg.env_name in ALLOWED_ENVS, "env_name", f"must be one of {ALLOWED_ENVS}, got {cfg.env_name!r}")
     _check(cfg.agent in ALLOWED_AGENTS, "agent", f"must be one of {ALLOWED_AGENTS}, got {cfg.agent!r}")
+    _check(not (cfg.agent in TABULAR_AGENTS and cfg.env_name in CONTINUOUS_ENVS), "agent",
+           f"{cfg.agent} keeps a table with one row per state, so it needs a game with countable states "
+           f"{TABULAR_ENVS}, not {cfg.env_name}")
+    _check(not (cfg.agent == "dqn" and cfg.env_name not in CONTINUOUS_ENVS), "agent",
+           f"dqn expects a vector of numbers as the state; use it on {CONTINUOUS_ENVS}")
     positive_ints = ("episodes", "max_steps_per_episode", "eval_every", "eval_episodes", "checkpoint_every",
                      "epsilon_decay_steps")
     for key in positive_ints:

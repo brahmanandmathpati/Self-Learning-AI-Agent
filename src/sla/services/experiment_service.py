@@ -8,6 +8,7 @@ from typing import Any
 
 import pandas as pd
 
+from sla.catalog import ALGO_LABELS
 from sla.database.store import Database
 
 
@@ -125,7 +126,7 @@ class ExperimentService:
 def _label(row: pd.Series) -> str:
     if row["algorithm"] == "random":
         return "Random"
-    name = {"q_learning": "Q-learning", "dqn": "DQN"}.get(row["algorithm"], row["algorithm"])
+    name = ALGO_LABELS.get(row["algorithm"], row["algorithm"])
     variant = row.get("variant")
     if isinstance(variant, str) and variant and variant not in ("full", "baseline"):
         name += f" ({variant})"

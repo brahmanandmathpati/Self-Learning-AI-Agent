@@ -8,8 +8,9 @@ from typing import Any
 import streamlit as st
 
 from sla.app.components.status_badge import badge
+from sla.catalog import ALGO_LABELS
 
-ALGO = {"q_learning": "Q-learning", "dqn": "DQN", "random": "Random"}
+ALGO = ALGO_LABELS
 
 
 def algo_label(algorithm: str | None, variant: str | None = None) -> str:

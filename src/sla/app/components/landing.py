@@ -123,7 +123,8 @@ def results_table(rows: Sequence[tuple[str, str, str, str, str, str]]) -> None:
 _LAYERS = [("Dashboard &amp; CLI", "Streamlit pages · sla commands"),
            ("Services", "training · evaluation · reflection"),
            ("Training pipeline", "runs, experiments, ablations"), ("Runner", "the only place learning happens"),
-           ("Agents ⇄ Environments", "Q-learning · DQN ⇄ FrozenLake · CartPole"),
+           ("Agents ⇄ Environments",
+            "Q-learning · SARSA · Expected SARSA · DQN ⇄ FrozenLake · Taxi · CliffWalking · CartPole"),
            ("Vision Lab", "hand points → k-NN / small network · gestures as rewards"),
            ("SQLite + checkpoints", "every episode, test and note is stored")]
 

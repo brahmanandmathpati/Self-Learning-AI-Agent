@@ -1,0 +1,10 @@
+# Random baseline on Taxi-v4 (no learning)
+env_name: Taxi-v4
+agent: random
+episodes: 200
+seed: 0
+max_steps_per_episode: 200
+eval_every: 100
+eval_episodes: 20
+checkpoint_every: 100
+run_root: runs
