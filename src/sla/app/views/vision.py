@@ -22,7 +22,7 @@ from sla.app.charts.figures import accuracy_curve, confusion_heatmap, prediction
 from sla.app.components.chart_card import chart_card
 from sla.app.components.metric_card import card_grid, metric_card
 from sla.app.components.section_header import hero, section
-from sla.app.components.states import empty_state
+from sla.app.components.states import empty_state, error_state
 from sla.app.state import services
 from sla.vision.learners import evaluate, load_learner
 
@@ -111,7 +111,8 @@ def _teach(live: vl.LiveState) -> None:
         empty_state("The camera is off.", next_step="Tick the consent box above to start.", glyph="eye",
                     tag="CAMERA OFF")
         return
-    live.det = vl.detector()
+    if not _load_detector(live):
+        return
     modes = (["Live video", "Snapshots"] if vl.webrtc_available() else ["Snapshots"])
     mode = st.segmented_control("Camera mode", modes, default=modes[0], key="vl_mode")
     rec_class = st.selectbox("Class to record", live.classes, key="vl_rec_class")
@@ -141,6 +142,19 @@ def _teach(live: vl.LiveState) -> None:
     with right:
         _live_panel(live)
     _train_controls(live)
+
+
+def _load_detector(live: vl.LiveState) -> bool:
+    """Start the MediaPipe hand model; on failure show a clear card (not the generic database error)."""
+    try:
+        live.det = vl.detector()
+        return True
+    except (OSError, ImportError, RuntimeError) as exc:
+        error_state("The hand-tracking model could not start on this server.",
+                    "a system library that MediaPipe needs is missing (for example libEGL / libGLES on Linux).",
+                    "the app owner should check packages.txt (libegl1, libgles2) and reboot the app. "
+                    "Charts, results and the other pages still work.", exc)
+        return False
 
 
 def _decode(data: bytes) -> np.ndarray:
@@ -212,8 +226,7 @@ def _uploads(live: vl.LiveState) -> None:
                 default = _guess_label(f.name, live.classes)
                 labels[f.name] = st.selectbox(f.name, live.classes, index=live.classes.index(default),
                                               key=f"vl_lab_{i}_{f.name}")
-        if st.button("Add to training data", key="vl_add_up", type="primary"):
-            live.det = vl.detector()
+        if st.button("Add to training data", key="vl_add_up", type="primary") and _load_detector(live):
             added, frames, misses = 0, 0, 0
             with st.spinner("Finding hands…"):
                 for f in files:
@@ -239,7 +252,8 @@ def _uploads(live: vl.LiveState) -> None:
         empty_state("The learner has no samples yet.", next_step="Add training samples first (webcam or upload).",
                     glyph="inbox")
         return
-    live.det = vl.detector()
+    if not _load_detector(live):
+        return
     times, labels, conf, last_img = [], [], [], None
     for t, rgb in _media_frames(test):
         out, pred = live.process(rgb, "test", record=False)
