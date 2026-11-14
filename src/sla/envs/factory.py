@@ -15,6 +15,8 @@ from sla.utils.errors import EnvError
 SUPPORTED_ENVS: dict[str, dict[str, Any]] = {
     # name: default keyword arguments passed to gymnasium.make
     "FrozenLake-v1": {"map_name": "4x4", "is_slippery": False},
+    "Taxi-v4": {},                                   # Gymnasium already ends an episode after 200 steps
+    "CliffWalking-v1": {"max_episode_steps": 200},   # no built-in time limit, so add one
     "CartPole-v1": {},
 }
 
@@ -26,7 +28,7 @@ def make_env(name: str, seed: int | None = None, render_mode: str | None = None,
     """Create a supported Gymnasium environment.
 
     Args:
-        name: "FrozenLake-v1" or "CartPole-v1".
+        name: one of SUPPORTED_ENVS ("FrozenLake-v1", "Taxi-v4", "CliffWalking-v1", "CartPole-v1").
         seed: if given, seeds the action space so random actions repeat.
         render_mode: None, "human" (window) or "rgb_array" (frames for GIFs).
         **kwargs: overrides for the defaults in SUPPORTED_ENVS.
@@ -48,6 +50,9 @@ def end_reason(env_name: str, terminated: bool, truncated: bool, reward: float,
     """Explain why an episode ended, for logs and failure analysis.
 
     FrozenLake: "goal", "hole" or "truncated".
+    Taxi:       "delivered" (passenger dropped at the right place) or "truncated" (200 steps).
+    CliffWalking: "goal" or "truncated" (falling off the cliff costs -100 and sends you back to the start,
+                  but does not end the episode).
     CartPole:   "position" (cart left the track), "angle" (pole fell) or "truncated".
     """
     if truncated and not terminated:
@@ -56,6 +61,10 @@ def end_reason(env_name: str, terminated: bool, truncated: bool, reward: float,
         return "running"
     if env_name == "FrozenLake-v1":
         return "goal" if reward > 0 else "hole"
+    if env_name == "Taxi-v4":
+        return "delivered"
+    if env_name == "CliffWalking-v1":
+        return "goal"
     if env_name == "CartPole-v1":
         x = float(state[0])
         return "position" if abs(x) > CARTPOLE_X_LIMIT else "angle"

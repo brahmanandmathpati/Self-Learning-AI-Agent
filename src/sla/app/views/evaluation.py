@@ -13,8 +13,9 @@ from sla.app.components.chart_card import chart_card
 from sla.app.components.selectors import experiment_selector
 from sla.app.components.ui import NOT_RUN, card_grid, empty_state, fmt_num, hero, metric_card, section, verdict
 from sla.app.styles.theme import AGENT_COLORS
+from sla.catalog import ALGO_LABELS
 
-LABELS = {"q_learning": "Q-learning", "dqn": "DQN"}
+LABELS = ALGO_LABELS
 
 
 def _supports(cmp: dict | None) -> bool:

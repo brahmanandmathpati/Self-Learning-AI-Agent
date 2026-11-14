@@ -18,8 +18,8 @@ digraph G {
   SVC [label="Service layer\\nTraining · Evaluation · Experiment\\nReflection · Checkpoint"];
   PIPE [label="Training pipeline\\n(train_run, run_experiment,\\nrun_ablation)"];
   RUN [label="Runner + callbacks\\n(the only place learning happens)", fillcolor="#EEF0FF", color="#4F46E5"];
-  ENV [label="Gymnasium env\\nFrozenLake / CartPole"];
-  AG [label="Agents\\nRandom · Q-learning · DQN"];
+  ENV [label="Gymnasium env\\nFrozenLake · Taxi · CliffWalking\\nCartPole"];
+  AG [label="Agents\\nRandom · Q-learning · SARSA\\nExpected SARSA · DQN"];
   BUF [label="Replay buffer"];
   CK [label="Checkpoints\\n(best / latest)"];
   DB [label="SQLite\\nexperiments · runs · episodes\\nmetrics · evaluations\\nablation · reflections", shape=cylinder];

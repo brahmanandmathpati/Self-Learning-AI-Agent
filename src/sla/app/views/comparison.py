@@ -1,4 +1,7 @@
-"""Agent comparison: Random vs Q-learning vs DQN on held-out test seeds (completed multi-seed experiments)."""
+"""Agent comparison: Random vs Q-learning, SARSA, Expected SARSA and DQN on held-out test seeds.
+
+Uses completed multi-seed experiments only.
+"""
 
 from __future__ import annotations
 
@@ -12,10 +15,13 @@ from sla.app.components.metric_card import card_grid
 from sla.app.components.section_header import hero, section
 from sla.app.components.states import empty_state
 from sla.app.styles.theme import AGENT_COLORS
+from sla.catalog import ALGO_LABELS
 
-LABELS = {"q_learning": "Q-learning", "dqn": "DQN"}
+LABELS = ALGO_LABELS
 WHY = {
     "Q-learning": "Keeps a table of action values for every square and updates it from each reward.",
+    "SARSA": "Like Q-learning, but learns from the move it really makes next, so it plays it safe while exploring.",
+    "Expected SARSA": "Averages over every possible next move (weighted by how likely it is) — steadier updates.",
     "DQN": "A neural network estimates action values; replay memory and a target network keep learning stable.",
     "Random": "Picks actions by chance — the score you get with no learning at all.",
 }

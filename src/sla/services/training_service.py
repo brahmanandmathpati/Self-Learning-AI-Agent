@@ -13,7 +13,17 @@ from sla.training.pipeline import ExperimentOutcome, RunOutcome, resume_run, run
 
 PRESETS: dict[tuple[str, str], str] = {
     ("FrozenLake-v1", "q_learning"): "frozenlake_qlearning.yaml",
+    ("FrozenLake-v1", "sarsa"): "frozenlake_sarsa.yaml",
+    ("FrozenLake-v1", "expected_sarsa"): "frozenlake_expected_sarsa.yaml",
     ("FrozenLake-v1", "random"): "frozenlake_random.yaml",
+    ("Taxi-v4", "q_learning"): "taxi_qlearning.yaml",
+    ("Taxi-v4", "sarsa"): "taxi_sarsa.yaml",
+    ("Taxi-v4", "expected_sarsa"): "taxi_expected_sarsa.yaml",
+    ("Taxi-v4", "random"): "taxi_random.yaml",
+    ("CliffWalking-v1", "q_learning"): "cliffwalking_qlearning.yaml",
+    ("CliffWalking-v1", "sarsa"): "cliffwalking_sarsa.yaml",
+    ("CliffWalking-v1", "expected_sarsa"): "cliffwalking_expected_sarsa.yaml",
+    ("CliffWalking-v1", "random"): "cliffwalking_random.yaml",
     ("CartPole-v1", "dqn"): "cartpole_dqn.yaml",
     ("CartPole-v1", "random"): "cartpole_random.yaml",
 }

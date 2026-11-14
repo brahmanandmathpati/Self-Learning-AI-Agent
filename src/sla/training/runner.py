@@ -86,12 +86,13 @@ def build_agent(cfg: RunConfig, env: Any) -> Agent:
         return RandomAgent(n_actions, seed=cfg.seed)
     from sla.agents.schedules import LinearSchedule
     schedule = LinearSchedule(cfg.epsilon_start, cfg.epsilon_end, cfg.epsilon_decay_steps)
-    if cfg.agent == "q_learning":
+    if cfg.agent in ("q_learning", "sarsa", "expected_sarsa"):
         from sla.agents.q_learning import QLearningAgent
+        from sla.agents.sarsa import ExpectedSarsaAgent, SarsaAgent
         if not hasattr(env.observation_space, "n"):
-            raise ValueError("Tabular Q-learning needs a discrete observation space (e.g. FrozenLake)")
-        return QLearningAgent(int(env.observation_space.n), n_actions, cfg.learning_rate,
-                              cfg.gamma, schedule, seed=cfg.seed)
+            raise ValueError(f"Tabular {cfg.agent} needs a discrete observation space (e.g. FrozenLake, Taxi)")
+        cls = {"q_learning": QLearningAgent, "sarsa": SarsaAgent, "expected_sarsa": ExpectedSarsaAgent}[cfg.agent]
+        return cls(int(env.observation_space.n), n_actions, cfg.learning_rate, cfg.gamma, schedule, seed=cfg.seed)
     if cfg.agent == "dqn":
         from sla.agents.dqn import DQNAgent
         obs_dim = int(np.prod(env.observation_space.shape))

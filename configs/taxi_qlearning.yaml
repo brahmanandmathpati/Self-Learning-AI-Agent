@@ -1,0 +1,18 @@
+# Q-learning on Taxi-v4: 5x5 city, 500 states (taxi square x passenger place x destination), 6 actions.
+# Rewards: -1 per step, -10 for an illegal pick-up/drop-off, +20 for delivering the passenger.
+# Gymnasium ends an episode after 200 steps. Same settings for Q-learning, SARSA and Expected SARSA.
+env_name: Taxi-v4
+agent: q_learning
+episodes: 6000
+seed: 0
+gamma: 0.99
+learning_rate: 0.1          # alpha
+epsilon_start: 1.0
+epsilon_end: 0.05
+epsilon_decay_steps: 150000 # environment steps (roughly the first 1,000 episodes)
+max_steps_per_episode: 200
+max_wall_clock_s: 1800
+eval_every: 200
+eval_episodes: 100          # validation games (500 situations need more than 20 to pick the best checkpoint fairly)
+checkpoint_every: 500
+run_root: runs

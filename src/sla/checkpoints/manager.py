@@ -27,6 +27,12 @@ def _agent_class(name: str) -> type[Agent]:
     if name == "q_learning":
         from sla.agents.q_learning import QLearningAgent
         return QLearningAgent
+    if name == "sarsa":
+        from sla.agents.sarsa import SarsaAgent
+        return SarsaAgent
+    if name == "expected_sarsa":
+        from sla.agents.sarsa import ExpectedSarsaAgent
+        return ExpectedSarsaAgent
     if name == "dqn":
         from sla.agents.dqn import DQNAgent
         return DQNAgent
