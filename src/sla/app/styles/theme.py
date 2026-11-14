@@ -1,8 +1,8 @@
 
-"""Design system: tokens + global CSS — bright "luxury tech" theme.
+"""Design system: tokens + global CSS — "deep violet" theme (see docs/design.md).
 
-Palette (CSS variables in :root): ivory background, ink headings, slate body text, champagne-gold accent,
-sapphire/indigo used sparingly for AI elements. SERIES are the categorical chart colours (identity follows the
+Palette (CSS variables in :root): lilac-mist background, void/plum headings, indigo actions, lavender and orchid
+accents, one coral highlight (see docs/design.md). SERIES are the categorical chart colours (identity follows the
 entity, never its rank). Status colours are always paired with an icon/label. Every animation is CSS-only and
 switched off under ``prefers-reduced-motion``.
 """
@@ -12,12 +12,13 @@ from __future__ import annotations
 import streamlit as st
 
 INK = {
-    "page": "#FAF8F4", "surface": "#FFFFFF", "surface_2": "#F6F2EA", "primary": "#0F172A",
-    "secondary": "#475569", "muted": "#64748B", "grid": "rgba(15,23,42,0.07)", "axis": "rgba(15,23,42,0.18)",
-    "border": "rgba(15,23,42,0.08)",
+    "page": "#F9F6FA", "surface": "#FFFFFF", "surface_2": "#F1EBF6", "primary": "#040207",
+    "secondary": "#5A4763", "muted": "#6B5B73", "grid": "rgba(65,35,78,0.07)", "axis": "rgba(65,35,78,0.18)",
+    "border": "rgba(65,35,78,0.12)",
 }
-GOLD = "#C9A24B"
-INDIGO = "#4F46E5"
+GOLD = "#C9A24B"  # kept only for the team-avatar ring and walked-path fill
+VOID, MIST, PLUM, LAVENDER, CORAL, ORCHID = "#040207", "#F9F6FA", "#41234E", "#AF98E4", "#C96B4B", "#9965E8"
+INDIGO = "#4632C9"
 ACCENT = INDIGO
 SERIES = ["#3987e5", "#d95926", "#199e70"]
 STATUS = {"good": "#15803D", "warning": "#B45309", "serious": "#C2410C", "critical": "#B91C1C", "info": INDIGO}
@@ -30,15 +31,17 @@ CSS = f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 :root {{
-  --page:{INK['page']}; --band:#F4EFE6; --surface:#FFFFFF; --surface2:{INK['surface_2']};
+  --page:{INK['page']}; --band:#F1EBF6; --surface:#FFFFFF; --surface2:{INK['surface_2']};
   --ink:{INK['primary']}; --secondary:{INK['secondary']}; --muted:{INK['muted']};
-  --border:{INK['border']}; --hair:rgba(201,162,75,.35);
-  --gold:{GOLD}; --gold-d:#A9832F; --gold-soft:#F5ECD7; --indigo:{INDIGO}; --indigo-soft:#EEF0FF; --accent:{INDIGO};
+  --border:{INK['border']}; --hair:rgba(175,152,228,.45);
+  --gold:#AF98E4; --gold-d:#4632C9; --gold-soft:#EDE7FA; --indigo:{INDIGO}; --indigo-soft:#EDE7FA;
+  --void:{VOID}; --mist:{MIST}; --plum:{PLUM}; --lavender:{LAVENDER};
+   --coral:{CORAL}; --orchid:{ORCHID}; --coral-text:#B4562F; --avatar-ring:#C9A24B; --accent:{INDIGO};
   --blue:{SERIES[0]}; --orange:{SERIES[1]}; --aqua:{SERIES[2]};
   --good:{STATUS['good']}; --warn:{STATUS['warning']}; --bad:{STATUS['critical']};
-  --radius:18px; --ease:cubic-bezier(.2,.7,.2,1);
-  --shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -12px rgba(15,23,42,.10);
-  --shadow-lg: 0 2px 4px rgba(15,23,42,.04), 0 20px 40px -18px rgba(15,23,42,.18);
+  --radius:20px; --ease:cubic-bezier(.2,.7,.2,1);
+  --shadow: 0 1px 2px rgba(4,2,7,.05), 0 12px 32px -16px rgba(65,35,78,.28);
+  --shadow-lg: 0 2px 4px rgba(4,2,7,.05), 0 22px 44px -18px rgba(65,35,78,.38);
   --serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
 }}
 html, body, [class*="css"], .stMarkdown, button, input, textarea, select {{ font-family: "Inter", system-ui,
@@ -46,9 +49,9 @@ html, body, [class*="css"], .stMarkdown, button, input, textarea, select {{ font
 code, pre, .mono {{ font-family: "JetBrains Mono", ui-monospace, monospace !important; }}
 
 /* ---------- canvas ---------- */
-.stApp {{ background: radial-gradient(1100px 520px at 90% -8%, #F6ECD6 0%, transparent 60%),
+.stApp {{ background: radial-gradient(1100px 520px at 90% -8%, #EAE0FA 0%, transparent 60%),
   radial-gradient(900px 480px at -5% 105%, #EFEEFB 0%, transparent 60%), var(--page); color: var(--ink); }}
-header[data-testid="stHeader"] {{ background: rgba(250,248,244,.72); backdrop-filter: saturate(160%) blur(14px);
+header[data-testid="stHeader"] {{ background: rgba(249,246,250,.78); backdrop-filter: saturate(160%) blur(14px);
   -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--hair); }}
 .block-container {{ padding-top: 4.6rem; padding-bottom: 2rem; max-width: 1200px; }}
 h1, h2, h3, h4 {{ color: var(--ink); letter-spacing: -0.01em; }}
@@ -70,7 +73,7 @@ a {{ color: var(--indigo); }}
 .sla-hero {{ position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between;
   gap:1.5rem;
   padding: 2rem 2.2rem; border:1px solid var(--hair); border-radius: 24px; margin-bottom: 1.6rem;
-  background: linear-gradient(135deg, #FFFFFF 0%, #FBF6EC 55%, #F3F1FD 100%); box-shadow: var(--shadow); }}
+  background: linear-gradient(135deg, #FFFFFF 0%, #F3EEFA 55%, #EEE9FB 100%); box-shadow: var(--shadow); }}
 .sla-hero .eyebrow {{ font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color: var(--gold-d);
   font-weight:600;
   margin-bottom:.6rem; display:flex; align-items:center; gap:.6rem; }}
@@ -87,9 +90,9 @@ a {{ color: var(--indigo); }}
   padding:.72rem 1.25rem;
   border-radius: 999px; font-weight:600; font-size:.92rem; text-decoration:none !important;
   transition: transform .2s var(--ease), box-shadow .2s; }}
-.sla-btn.gold {{ background: linear-gradient(135deg, #D9B866, var(--gold) 55%, #B8913A); color: #1A1306 !important;
-  box-shadow: 0 8px 20px -10px rgba(169,131,47,.8); }}
-.sla-btn.outline {{ background: #fff; color: var(--ink) !important; border: 1px solid rgba(15,23,42,.16); }}
+.sla-btn.gold {{ background: linear-gradient(135deg, #AF98E4, var(--gold) 55%, #4632C9); color: #FFFFFF !important;
+  box-shadow: 0 8px 20px -10px rgba(70,50,201,.8); }}
+.sla-btn.outline {{ background: #fff; color: var(--ink) !important; border: 1px solid rgba(65,35,78,.16); }}
 .sla-btn:hover {{ transform: translateY(-1px); box-shadow: var(--shadow-lg); }}
 .sla-btn::after {{ content:""; position:absolute; inset:0;
   background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%);
@@ -141,7 +144,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 /* ---------- badges ---------- */
 .sla-badge {{ display:inline-flex; align-items:center; gap:.45rem; padding: .3rem .75rem; border-radius: 999px;
   font-size: .72rem; font-weight: 650;
-  letter-spacing:.08em; text-transform:uppercase; border:1px solid rgba(15,23,42,.10); background: #fff;
+  letter-spacing:.08em; text-transform:uppercase; border:1px solid rgba(65,35,78,.10); background: #fff;
   color: var(--ink); white-space:nowrap; }}
 .sla-dot {{ width:.5rem; height:.5rem; border-radius:50%; display:inline-block; background: var(--c, var(--muted)); }}
 .sla-dot.pulse {{ animation: sla-pulse 1.8s ease-out infinite; }}
@@ -195,15 +198,15 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-member .av {{ width:76px; height:76px; margin:0 auto .9rem; border-radius:50%; display:flex; align-items:center;
   justify-content:center;
   font-family: var(--serif); font-size:1.6rem; font-weight:600; color: var(--gold-d);
-  background: linear-gradient(135deg, #FFF8E8, var(--gold-soft));
+  background: linear-gradient(135deg, #F6F2FC, var(--gold-soft));
   border:1px solid var(--hair); }}
 .sla-member h4 {{ margin:0; font-size:1.05rem; font-weight:650; }}
 .sla-member .role {{ font-size:.84rem; color: var(--secondary); margin:.35rem 0 .7rem; line-height:1.5; }}
 .sla-member .links {{ font-size:.8rem; color: var(--muted); }}
 .sla-member .links a {{ color: var(--indigo, #4F46E5); font-weight:600; text-decoration:none; }}
 .sla-member .links .todo {{ font-style: italic; }}
-.sla-member .av {{ width:84px; height:84px; border:2px solid var(--gold, #C9A24B);
-  box-shadow: 0 0 0 4px #fff, 0 6px 18px -8px rgba(15,23,42,.35); }}
+.sla-member .av {{ width:84px; height:84px; border:2px solid var(--avatar-ring);
+  box-shadow: 0 0 0 4px #fff, 0 6px 18px -8px rgba(65,35,78,.35); }}
 .sla-college {{ text-align:center; font-size:.84rem !important; color: var(--muted); margin:1.4rem auto 0;
   max-width:820px; line-height:1.7; padding-top:1rem; border-top:1px solid var(--hair); }}
 .sla-college b {{ font-family: var(--serif); color: var(--ink); font-size:1rem; font-weight:600; }}
@@ -231,7 +234,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-rank {{ display:inline-flex; align-items:center; justify-content:center; min-width:1.9rem; height:1.9rem;
   padding:0 .4rem; border-radius:9px;
   font-weight:700; font-size:.85rem; background: var(--surface2); color: var(--secondary); }}
-.sla-rank.first {{ background: linear-gradient(135deg, #E6C77A, var(--gold)); color:#1A1306; }}
+.sla-rank.first {{ background: linear-gradient(135deg, #AF98E4, var(--gold)); color:#FFFFFF; }}
 .sla-cmp-head {{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }}
 .sla-cmp-name {{ display:flex; align-items:center; gap:.55rem; font-weight:650; color: var(--ink); font-size:1rem; }}
 .sla-swatch {{ width:.7rem; height:.7rem; border-radius:3px; background: var(--c); display:inline-block; }}
@@ -249,8 +252,8 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-progress .track {{ height:.5rem; border-radius:99px; background: var(--surface2); overflow:hidden;
   margin-top:.7rem; }}
 .sla-progress .fill {{ height:100%; border-radius:99px; transition: width .4s var(--ease);
-  background: linear-gradient(90deg, var(--gold), #E6C77A); }}
-.sla-progress .fill.live {{ background-image: linear-gradient(90deg, var(--gold), #E6C77A),
+  background: linear-gradient(90deg, var(--gold), #AF98E4); }}
+.sla-progress .fill.live {{ background-image: linear-gradient(90deg, var(--gold), #AF98E4),
   repeating-linear-gradient(45deg, rgba(255,255,255,.45) 0 8px, transparent 8px 16px);
   background-blend-mode: overlay; animation: sla-stripes 1s linear infinite; }}
 @keyframes sla-stripes {{ to {{ background-position: 0 0, 32px 0; }} }}
@@ -260,7 +263,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 @keyframes sla-shimmer {{ 0% {{ background-position: 100% 50%; }} 100% {{ background-position: 0 50%; }} }}
 
 /* ---------- empty / error ---------- */
-.sla-empty {{ border:1px dashed rgba(169,131,47,.45); border-radius: var(--radius); padding: 1.8rem 1.4rem;
+.sla-empty {{ border:1px dashed rgba(70,50,201,.45); border-radius: var(--radius); padding: 1.8rem 1.4rem;
   text-align:center; background: rgba(255,255,255,.7); }}
 .sla-empty .glyph {{ width:3rem; height:3rem; margin:0 auto .8rem; border-radius:14px; display:flex;
   align-items:center; justify-content:center;
@@ -278,7 +281,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 
 /* ---------- insight (reflection) ---------- */
 .sla-insight {{ border-radius: 20px; padding: 1.4rem 1.5rem 1.2rem; border:1px solid var(--hair);
-  background: linear-gradient(135deg, #FFFFFF, #FBF6EC 70%, #F3F1FD); box-shadow: var(--shadow); }}
+  background: linear-gradient(135deg, #FFFFFF, #F3EEFA 70%, #EEE9FB); box-shadow: var(--shadow); }}
 .sla-insight .h {{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; flex-wrap:wrap; }}
 .sla-insight .k {{ font-size:.72rem; font-weight:700; letter-spacing:.22em; color: var(--gold-d); display:flex;
   gap:.5rem; align-items:center; }}
@@ -300,7 +303,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-env-row .sla-card .value {{ font-family:"Inter",sans-serif; font-size:1rem; font-weight:600; line-height:1.45; }}
 
 /* ---------- sidebar & widgets ---------- */
-section[data-testid="stSidebar"] {{ background: #FFFDF8; border-right: 1px solid var(--hair); }}
+section[data-testid="stSidebar"] {{ background: #FBF8FD; border-right: 1px solid var(--hair); }}
 section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] {{ border-radius:10px; transition: background .15s; }}
 section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {{
   background: var(--gold-soft); }}
@@ -317,14 +320,14 @@ div[data-testid="stDataFrame"] {{ border:1px solid var(--border); border-radius:
 div[data-testid="stExpander"] details {{ border:1px solid var(--border) !important; border-radius:14px !important;
   background:#fff; }}
 .stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primaryFormSubmit"],
-  .stFormSubmitButton > button[kind="primary"] {{ background: linear-gradient(135deg, #D9B866, var(--gold) 55%,
-  #B8913A);
-  color:#1A1306; border:0; border-radius:999px; font-weight:600; box-shadow: 0 8px 20px -10px rgba(169,131,47,.8);
+  .stFormSubmitButton > button[kind="primary"] {{ background: linear-gradient(135deg, #AF98E4, var(--gold) 55%,
+  #4632C9);
+  color:#FFFFFF; border:0; border-radius:999px; font-weight:600; box-shadow: 0 8px 20px -10px rgba(70,50,201,.8);
   transition: transform .15s var(--ease), box-shadow .15s; }}
 .stButton > button[kind="primary"]:hover, .stFormSubmitButton > button[kind="primaryFormSubmit"]:hover,
-  .stFormSubmitButton > button[kind="primary"]:hover {{ transform: translateY(-1px); color:#1A1306;
+  .stFormSubmitButton > button[kind="primary"]:hover {{ transform: translateY(-1px); color:#FFFFFF;
   box-shadow: var(--shadow-lg); }}
-.stButton > button[kind="primary"] p, .stFormSubmitButton > button[kind^="primary"] p {{ color:#1A1306;
+.stButton > button[kind="primary"] p, .stFormSubmitButton > button[kind^="primary"] p {{ color:#FFFFFF;
   font-weight:600; }}
 
 /* ---------- motion graphics (decorative) ---------- */
@@ -334,15 +337,15 @@ div[data-testid="stExpander"] details {{ border:1px solid var(--border) !importa
 .sla-ring2 {{ fill:none; stroke: var(--indigo); stroke-width:1; opacity:.45; stroke-dasharray:40 130;
   transform-origin:50px 50px; animation: sla-rot 6s linear infinite reverse; }}
 @keyframes sla-rot {{ to {{ transform: rotate(360deg); }} }}
-.sla-signal {{ filter: drop-shadow(0 0 3px rgba(201,162,75,.9)); }}
+.sla-signal {{ filter: drop-shadow(0 0 3px rgba(175,152,228,.9)); }}
 .sla-node circle {{ animation: sla-blink 2.2s ease-in-out infinite; animation-delay: inherit; }}
 @keyframes sla-blink {{ 0%,100% {{ stroke-width:1.4; }} 50% {{ stroke-width:2.6; }} }}
 .sla-net {{ width:100%; height:auto; max-height:230px; }}
-.sla-edge {{ stroke: rgba(79,70,229,.30); stroke-width:.8; stroke-dasharray: 3 9;
+.sla-edge {{ stroke: rgba(70,50,201,.30); stroke-width:.8; stroke-dasharray: 3 9;
   animation: sla-flow 3s linear infinite; }}
 @keyframes sla-flow {{ to {{ stroke-dashoffset: -24; }} }}
 .sla-neuron {{ animation: sla-fire 2.4s ease-in-out infinite; }}
-@keyframes sla-fire {{ 0%,100% {{ fill:#FFFFFF; }} 45% {{ fill:#F5ECD7; }} }}
+@keyframes sla-fire {{ 0%,100% {{ fill:#FFFFFF; }} 45% {{ fill:#EDE7FA; }} }}
 .sla-flow {{ display:grid; grid-template-columns: 1.1fr 1fr; gap:1.2rem; align-items:center; }}
 
 /* ---------- responsive ---------- */
@@ -376,12 +379,12 @@ div[class*="st-key-card_auth"] {{ padding: 1.6rem 1.6rem 1rem; border:1px solid 
   text-transform:uppercase; margin:.5rem 0 .6rem; }}
 .sla-or::before, .sla-or::after {{ content:""; flex:1; height:1px; background: var(--hair); }}
 .sla-lock {{ display:flex; gap:.6rem; align-items:center; padding:.7rem 1rem; border-radius:14px;
-  border:1px dashed rgba(169,131,47,.55); background: #FFFBF2; color: var(--secondary); font-size:.9rem; }}
+  border:1px dashed rgba(70,50,201,.55); background: #F8F5FD; color: var(--secondary); font-size:.9rem; }}
 .sla-lock svg {{ color: var(--gold-d); flex:none; }}
 .sla-me {{ display:flex; gap:.7rem; align-items:center; margin-bottom:.5rem; }}
 .sla-me .av {{ width:2.4rem; height:2.4rem; flex:none; border-radius:50%; display:flex; align-items:center;
   justify-content:center; font-family: var(--serif); font-weight:600; color: var(--gold-d);
-  background: linear-gradient(135deg,#FFF8E8,var(--gold-soft)); border:1px solid var(--hair); }}
+  background: linear-gradient(135deg,#F6F2FC,var(--gold-soft)); border:1px solid var(--hair); }}
 .sla-me b {{ display:block; color: var(--ink); font-size:.9rem; line-height:1.2; }}
 .sla-me small {{ display:block; color: var(--muted); font-size:.72rem; overflow:hidden; text-overflow:ellipsis;
   white-space:nowrap; max-width: 11rem; }}
@@ -402,27 +405,27 @@ div.st-key-topauth .stButton > button[kind="tertiary"]:hover {{ color: var(--gol
 div.st-key-topauth .stButton > button[kind="primary"] {{ padding: .42rem 1.1rem; min-height: 2.3rem; }}
 div.st-key-topauth [data-testid="stPopover"] > div > button, div.st-key-topauth [data-testid="stPopoverButton"] {{
   width: 2.5rem; height: 2.5rem; min-height: 2.5rem; padding: 0; border-radius: 50%; border: 1px solid var(--hair);
-  background: linear-gradient(135deg, #FFF8E8, var(--gold-soft)); color: var(--gold-d); font-family: var(--serif);
+  background: linear-gradient(135deg, #F6F2FC, var(--gold-soft)); color: var(--gold-d); font-family: var(--serif);
   font-weight: 600; box-shadow: var(--shadow); }}
 div.st-key-topauth [data-testid="stPopoverButton"] svg, div.st-key-topauth [data-testid="stPopover"] button svg {{
   display: none; }}
 div[data-testid="stPopoverBody"] {{ border-radius: 16px; border: 1px solid var(--hair); min-width: 260px; }}
 /* log-in dialog */
 div[data-testid="stDialog"] div[role="dialog"] {{ border-radius: 22px; border-top: 3px solid var(--gold);
-  box-shadow: 0 30px 80px -30px rgba(15,23,42,.45); animation: sla-pop .28s var(--ease) both; }}
+  box-shadow: 0 30px 80px -30px rgba(65,35,78,.45); animation: sla-pop .28s var(--ease) both; }}
 @keyframes sla-pop {{ from {{ opacity: 0; transform: translateY(10px) scale(.98); }} to {{ opacity: 1;
   transform: none; }} }}
 div[data-testid="stDialog"] h2, div[data-testid="stDialog"] [data-testid="stHeading"] {{ font-family: var(--serif); }}
 /* hero (native container so page links keep the session) */
 div.st-key-hero {{ position: relative; overflow: hidden; padding: 2.6rem 2.6rem 2.3rem; border: 1px solid var(--hair);
   border-radius: 24px; margin-bottom: 1.2rem; box-shadow: var(--shadow);
-  background: linear-gradient(135deg, #FFFFFF 0%, #FBF6EC 55%, #F3F1FD 100%); }}
+  background: linear-gradient(135deg, #FFFFFF 0%, #F3EEFA 55%, #EEE9FB 100%); }}
 div.st-key-hero::before, div.st-key-hero::after {{ content: ""; position: absolute; border-radius: 50%;
   filter: blur(48px);
   pointer-events: none; }}
-div.st-key-hero::before {{ width: 360px; height: 360px; right: -80px; top: -120px; background: rgba(201,162,75,.28);
+div.st-key-hero::before {{ width: 360px; height: 360px; right: -80px; top: -120px; background: rgba(175,152,228,.28);
   animation: sla-blob 14s ease-in-out infinite alternate; }}
-div.st-key-hero::after {{ width: 300px; height: 300px; left: 30%; bottom: -170px; background: rgba(79,70,229,.14);
+div.st-key-hero::after {{ width: 300px; height: 300px; left: 30%; bottom: -170px; background: rgba(70,50,201,.14);
   animation: sla-blob 18s ease-in-out infinite alternate-reverse; }}
 div.st-key-hero > div {{ position: relative; z-index: 1; }}
 .sla-hero-copy .eyebrow {{ font-size: .72rem; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-d);
@@ -432,8 +435,8 @@ div.st-key-hero > div {{ position: relative; z-index: 1; }}
   font-weight: 600; margin: .7rem 0 0; color: var(--ink); padding: 0; }}
 .sla-hero-copy .w {{ display: inline-block; opacity: 0; transform: translateY(.45em); filter: blur(6px);
   animation: sla-word .8s var(--ease) forwards; }}
-.sla-hero-copy .w.gold {{ background: linear-gradient(100deg, var(--gold-d) 0%, #E8CC86 40%, var(--gold-d) 60%,
-  #B8913A 100%); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+.sla-hero-copy .w.gold {{ background: linear-gradient(100deg, var(--gold-d) 0%, #AF98E4 40%, var(--gold-d) 60%,
+  #4632C9 100%); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
   animation: sla-word .8s var(--ease) forwards, sla-sheen 5s ease-in-out 1.6s infinite; }}
 .sla-hero-copy p {{ font-size: 1.08rem; max-width: 600px; margin: .8rem 0 .9rem;
   animation: sla-up .7s var(--ease) .55s both; }}
@@ -451,14 +454,14 @@ div[class*="st-key-cta_"] [data-testid="stPageLink"] a, div[class*="st-key-cta_"
   overflow: hidden; display: inline-flex; padding: .55rem 1.25rem; border-radius: 999px; text-decoration: none;
   transition: transform .2s var(--ease), box-shadow .2s; }}
 div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a {{
-  background: linear-gradient(135deg, #D9B866, var(--gold) 55%, #B8913A);
-  box-shadow: 0 8px 20px -10px rgba(169,131,47,.8);
+  background: linear-gradient(135deg, #AF98E4, var(--gold) 55%, #4632C9);
+  box-shadow: 0 8px 20px -10px rgba(70,50,201,.8);
   animation: sla-glow 3.2s ease-in-out 1.5s infinite; }}
 div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a span,
   div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a p {{
-  color: #1A1306 !important; font-weight: 600; }}
+  color: #FFFFFF !important; font-weight: 600; }}
 div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a {{ background: #fff;
-  border: 1px solid rgba(15,23,42,.16); }}
+  border: 1px solid rgba(65,35,78,.16); }}
 div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a span,
   div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a p {{
   color: var(--ink) !important; font-weight: 600; }}
@@ -488,7 +491,7 @@ div.st-key-proof_cta, div.st-key-cta_actions {{ gap: .7rem; }}
   padding: .7rem 1rem; border-radius: 14px; background: #fff; border: 1px solid var(--border);
   box-shadow: var(--shadow);
   animation: sla-up .5s var(--ease) both; }}
-.sla-arch .lay:nth-child(4) {{ border-color: var(--hair); background: #FFFBF2; }}
+.sla-arch .lay:nth-child(4) {{ border-color: var(--hair); background: #F8F5FD; }}
 .sla-arch .lay b {{ font-size: .92rem; color: var(--ink); }}
 .sla-arch .lay span {{ font-size: .8rem; color: var(--muted); text-align: right; }}
 .sla-arch .lay:not(:last-child)::after {{ content: ""; position: absolute; left: 50%; bottom: -.5rem; width: 1px;
@@ -500,10 +503,10 @@ div[data-testid="stExpander"] details:hover {{ border-color: var(--hair) !import
 /* final call-to-action band */
 div.st-key-ctaband {{ margin-top: 2.6rem; padding: 2.4rem 2.6rem; border-radius: 24px; position: relative;
   overflow: hidden;
-  background: radial-gradient(600px 300px at 90% 0%, rgba(201,162,75,.35), transparent 70%), linear-gradient(135deg,
+  background: radial-gradient(600px 300px at 90% 0%, rgba(175,152,228,.35), transparent 70%), linear-gradient(135deg,
   #0F172A, #1E293B);
-  border: 1px solid rgba(201,162,75,.4); box-shadow: var(--shadow-lg); }}
-.sla-cta-copy .eyebrow {{ font-size: .7rem; letter-spacing: .24em; text-transform: uppercase; color: #E8CC86;
+  border: 1px solid rgba(175,152,228,.4); box-shadow: var(--shadow-lg); }}
+.sla-cta-copy .eyebrow {{ font-size: .7rem; letter-spacing: .24em; text-transform: uppercase; color: #AF98E4;
   font-weight: 600; }}
 .sla-cta-copy h2 {{ font-family: var(--serif); color: #FFFFFF; font-size: 2rem; font-weight: 600; margin: .4rem 0 .3rem;
   padding: 0; }}
@@ -543,7 +546,7 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
   color: var(--secondary); margin-top: .3rem; }}
 .sla-pred .bar {{ height: .45rem; border-radius: 99px; background: var(--surface2); overflow: hidden; }}
 .sla-pred .bar i {{ display: block; height: 100%; border-radius: 99px;
-  background: linear-gradient(90deg, var(--gold), #E6C77A);
+  background: linear-gradient(90deg, var(--gold), #AF98E4);
   transition: width .3s var(--ease); }}
 .sla-pred .row b {{ color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }}
 .sla-lake {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; max-width: 360px; margin: .6rem 0; }}
@@ -552,9 +555,9 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
   border: 1px solid var(--border); }}
 .sla-lake .cell.hole {{ background: #CBD5E1; font-size: .7rem; letter-spacing: .1em; color: #334155; }}
 .sla-lake .cell.goal {{ background: #A7F3D0; font-size: .7rem; letter-spacing: .1em; }}
-.sla-lake .cell.here {{ outline: 2px solid var(--gold); background: #FFFBF2;
+.sla-lake .cell.here {{ outline: 2px solid var(--gold); background: #F8F5FD;
   animation: sla-lit-cell 1.6s ease-in-out infinite; }}
-@keyframes sla-lit-cell {{ 50% {{ box-shadow: 0 0 0 6px rgba(201,162,75,.18); }} }}
+@keyframes sla-lit-cell {{ 50% {{ box-shadow: 0 0 0 6px rgba(175,152,228,.18); }} }}
 .sla-lake .prop {{ position: absolute; right: .3rem; bottom: .15rem; font-size: .9rem; color: var(--gold-d); }}
 
 .stButton > button[kind="primary"]:disabled, .stFormSubmitButton > button[kind^="primary"]:disabled {{
@@ -564,8 +567,8 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
 /* ambient drifting light behind the whole app */
 .stApp {{ isolation: isolate; }}
 .stApp::before {{ content:""; position:fixed; inset:-20%; z-index:-1; pointer-events:none;
-  background: radial-gradient(520px 380px at 20% 30%, rgba(201,162,75,.10), transparent 70%),
-  radial-gradient(560px 420px at 80% 70%, rgba(79,70,229,.07), transparent 70%);
+  background: radial-gradient(520px 380px at 20% 30%, rgba(175,152,228,.10), transparent 70%),
+  radial-gradient(560px 420px at 80% 70%, rgba(70,50,201,.07), transparent 70%);
   animation: sla-drift 26s ease-in-out infinite alternate; }}
 @keyframes sla-drift {{ 0% {{ transform: translate3d(0,0,0) scale(1); }}
   50% {{ transform: translate3d(4%,-3%,0) scale(1.06); }} 100% {{ transform: translate3d(-3%,4%,0) scale(1); }} }}
@@ -573,17 +576,17 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
 /* hero: aurora blobs, gold sparks, word-by-word headline, gold sheen */
 .sla-hero.big::before, .sla-hero.big::after {{ content:""; position:absolute; border-radius:50%; filter: blur(48px);
   pointer-events:none; z-index:0; }}
-.sla-hero.big::before {{ width:360px; height:360px; right:-80px; top:-120px; background: rgba(201,162,75,.28);
+.sla-hero.big::before {{ width:360px; height:360px; right:-80px; top:-120px; background: rgba(175,152,228,.28);
   animation: sla-blob 14s ease-in-out infinite alternate; }}
-.sla-hero.big::after {{ width:300px; height:300px; left:30%; bottom:-170px; background: rgba(79,70,229,.14);
+.sla-hero.big::after {{ width:300px; height:300px; left:30%; bottom:-170px; background: rgba(70,50,201,.14);
   animation: sla-blob 18s ease-in-out infinite alternate-reverse; }}
 @keyframes sla-blob {{ to {{ transform: translate(-40px, 30px) scale(1.15); }} }}
 .sla-hero > div:not(.sla-sparks) {{ position:relative; z-index:1; }}
 .sla-hero .w {{ display:inline-block; opacity:0; transform: translateY(.45em); filter: blur(6px);
   animation: sla-word .8s var(--ease) forwards; }}
 @keyframes sla-word {{ to {{ opacity:1; transform:none; filter:none; }} }}
-.sla-hero.big h1 .gold {{ background: linear-gradient(100deg, var(--gold-d) 0%, #E8CC86 40%, var(--gold-d) 60%,
-  #B8913A 100%); background-size: 220% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
+.sla-hero.big h1 .gold {{ background: linear-gradient(100deg, var(--gold-d) 0%, #AF98E4 40%, var(--gold-d) 60%,
+  #4632C9 100%); background-size: 220% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
   animation: sla-word .8s var(--ease) forwards, sla-sheen 5s ease-in-out 1.6s infinite; }}
 @keyframes sla-sheen {{ 0%,100% {{ background-position: 100% 0; }} 50% {{ background-position: 0 0; }} }}
 .sla-hero p, .sla-hero .right, .sla-actions {{ animation: sla-up .7s var(--ease) both; }}
@@ -591,15 +594,15 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
 .sla-actions {{ animation-delay: .85s; }}
 .sla-sparks {{ position:absolute; inset:0; pointer-events:none; z-index:0; }}
 .sla-sparks i {{ position:absolute; bottom:-10px; width:4px; height:4px; border-radius:50%;
-  background: radial-gradient(circle, #F3DFA6, var(--gold)); box-shadow: 0 0 8px rgba(201,162,75,.8); opacity:0;
+  background: radial-gradient(circle, #F3DFA6, var(--gold)); box-shadow: 0 0 8px rgba(175,152,228,.8); opacity:0;
   animation: sla-rise var(--d, 9s) linear infinite; animation-delay: var(--t, 0s); }}
 @keyframes sla-rise {{ 0% {{ opacity:0; transform: translate(0,0) scale(.6); }} 15% {{ opacity:.9; }}
   100% {{ opacity:0; transform: translate(var(--x, 20px), -340px) scale(1.1); }} }}
 
 /* gold CTA: idle glow + arrow nudge */
 .sla-btn.gold {{ animation: sla-glow 3.2s ease-in-out 1.5s infinite; }}
-@keyframes sla-glow {{ 0%,100% {{ box-shadow: 0 8px 20px -10px rgba(169,131,47,.8); }}
-  50% {{ box-shadow: 0 10px 30px -8px rgba(201,162,75,.95), 0 0 0 4px rgba(201,162,75,.12); }} }}
+@keyframes sla-glow {{ 0%,100% {{ box-shadow: 0 8px 20px -10px rgba(70,50,201,.8); }}
+  50% {{ box-shadow: 0 10px 30px -8px rgba(175,152,228,.95), 0 0 0 4px rgba(175,152,228,.12); }} }}
 .sla-btn .arr {{ display:inline-block; transition: transform .25s var(--ease); }}
 .sla-btn:hover .arr {{ transform: translateX(4px); }}
 .sla-btn:active {{ transform: translateY(0) scale(.98); }}
@@ -615,12 +618,12 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
 .sla-halo {{ fill:none; stroke-width:.8; transform-box: fill-box; transform-origin:center; opacity:0;
   animation: sla-halo 4s ease-out infinite; }}
 @keyframes sla-halo {{ 0% {{ transform: scale(1); opacity:.7; }} 60%,100% {{ transform: scale(2.6); opacity:0; }} }}
-.sla-loop {{ filter: drop-shadow(0 10px 24px rgba(169,131,47,.18)); }}
+.sla-loop {{ filter: drop-shadow(0 10px 24px rgba(70,50,201,.18)); }}
 
 /* section headers: gold hairline draws in */
 .sla-section {{ border-top-color: transparent; position:relative; }}
 .sla-section::before {{ content:""; position:absolute; left:0; right:0; top:-1px; height:1px;
-  background: linear-gradient(90deg, var(--gold), rgba(201,162,75,.35) 40%, transparent);
+  background: linear-gradient(90deg, var(--gold), rgba(175,152,228,.35) 40%, transparent);
   transform-origin:left; animation: sla-draw 1.1s var(--ease) both; }}
 @keyframes sla-draw {{ from {{ transform: scaleX(0); }} }}
 
@@ -635,7 +638,7 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
 /* how it works: line draws, a pulse travels along it, numbers light up in turn */
 .sla-steps::before {{ transform-origin:left; animation: sla-draw 1.4s var(--ease) .2s both; }}
 .sla-steps::after {{ content:""; position:absolute; top:23px; left:12%; width:7px; height:7px; border-radius:50%;
-  background: var(--gold); box-shadow: 0 0 10px 2px rgba(201,162,75,.7);
+  background: var(--gold); box-shadow: 0 0 10px 2px rgba(175,152,228,.7);
   animation: sla-travel 5s ease-in-out infinite; }}
 @keyframes sla-travel {{ 0% {{ left:12%; opacity:0; }} 10% {{ opacity:1; }} 90% {{ opacity:1; }}
   100% {{ left:88%; opacity:0; }} }}
@@ -643,14 +646,14 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
 .sla-step:nth-child(2) .n {{ animation-delay: 1.25s; }} .sla-step:nth-child(3) .n {{ animation-delay: 2.5s; }}
 .sla-step:nth-child(4) .n {{ animation-delay: 3.75s; }}
 @keyframes sla-lit {{ 0%,30%,100% {{ background:#fff; color: var(--gold-d); }}
-  10% {{ background: linear-gradient(135deg,#E6C77A,var(--gold)); color:#1A1306;
-  box-shadow: 0 0 0 6px rgba(201,162,75,.15), var(--shadow); }} }}
+  10% {{ background: linear-gradient(135deg,#AF98E4,var(--gold)); color:#FFFFFF;
+  box-shadow: 0 0 0 6px rgba(175,152,228,.15), var(--shadow); }} }}
 .sla-step:hover .n {{ transform: scale(1.08); transition: transform .25s var(--ease); }}
 
 /* features: gold gradient border on hover, icon turns gold and tilts */
 .sla-feature {{ position:relative; }}
 .sla-feature::before {{ content:""; position:absolute; inset:0; border-radius: inherit; padding:1px;
-  background: linear-gradient(135deg, var(--gold), rgba(201,162,75,0) 45%, rgba(79,70,229,.45));
+  background: linear-gradient(135deg, var(--gold), rgba(175,152,228,0) 45%, rgba(70,50,201,.45));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; opacity:0; transition: opacity .35s; pointer-events:none; }}
 .sla-feature:hover::before {{ opacity:1; }}
@@ -679,6 +682,95 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
 @media (prefers-reduced-motion: reduce) {{ *, *::before, *::after {{ animation: none !important;
   transition: none !important; }}
   .sla-hero .w {{ opacity:1; transform:none; filter:none; }} .sla-arc {{ stroke-dashoffset:0; }} }}
+/* ================= violet redesign (docs/design.md) ================= */
+html, body, .stApp {{ font-size: 16px; }}
+h1, h2, h3 {{ font-family: var(--serif); }}
+.stApp {{ background: radial-gradient(1000px 480px at 92% -8%, rgba(153,101,232,.16) 0%, transparent 62%),
+  radial-gradient(900px 480px at -6% 108%, rgba(175,152,228,.20) 0%, transparent 62%), var(--mist); }}
+header[data-testid="stHeader"] {{ border-bottom: 1px solid var(--border); }}
+:focus-visible {{ outline: 2px solid var(--indigo) !important; outline-offset: 2px; }}
+a {{ color: var(--indigo); }}
+.sla-card {{ border-radius: 20px; }}
+.sla-card .label .ic {{ background: #EDE7FA; color: var(--indigo); }}
+.sla-card.accent::before {{ background: var(--card-accent, var(--orchid)); }}
+.sla-kicker, .sla-hero .eyebrow, .sla-insight .k, .sla-side .ttl, .sla-auth-brand .eyebrow {{ color: var(--indigo); }}
+.sla-badge {{ background: #fff; border-color: var(--border); }}
+.sla-section {{ border-top-color: var(--border); }}
+.sla-step .n {{ color: var(--indigo); }}
+.sla-rank.first {{ background: var(--coral-text); color: #fff; }}
+.sla-progress .fill {{ background: linear-gradient(90deg, var(--indigo), var(--orchid)); }}
+.sla-empty {{ border-color: rgba(70,50,201,.35); }}
+.sla-empty .glyph {{ background: #EDE7FA; color: var(--indigo); }}
+.sla-verdict .t {{ letter-spacing: .14em; }}
+.sla-lock {{ border-color: rgba(70,50,201,.35); }}
+
+/* buttons: indigo pills */
+.sla-btn.gold, div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a,
+.stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primaryFormSubmit"],
+.stFormSubmitButton > button[kind="primary"] {{ background: var(--indigo); color: #fff !important; border: 0;
+  box-shadow: 0 10px 24px -12px rgba(70,50,201,.75); }}
+.sla-btn.gold, div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a span,
+div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a p, .stButton > button[kind="primary"] p,
+.stFormSubmitButton > button[kind^="primary"] p {{ color: #fff !important; }}
+.stButton > button[kind="primary"]:hover, .stFormSubmitButton > button[kind^="primary"]:hover
+   {{ color:#fff; filter: brightness(1.08); }}
+.sla-btn.outline, div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a
+   {{ background:#fff; border:1px solid var(--border); }}
+div[data-testid="stDialog"] div[role="dialog"] {{ border-top-color: var(--indigo); }}
+div[class*="st-key-card_auth"] {{ border-top-color: var(--indigo); }}
+
+/* dark hero */
+div.st-key-hero {{ border: 1px solid rgba(175,152,228,.25); border-radius: 28px; padding: 3rem 2.8rem 2.6rem;
+  background: radial-gradient(600px 300px at 82% 0%, rgba(153,101,232,.38), transparent 70%),
+  linear-gradient(135deg, #040207 0%, #1E0F27 45%, #41234E 100%);
+  box-shadow: 0 30px 60px -30px rgba(65,35,78,.7); }}
+div.st-key-hero::before {{ background: rgba(153,101,232,.30); }}
+div.st-key-hero::after {{ background: rgba(175,152,228,.16); }}
+.sla-hero-copy .eyebrow {{ color: var(--lavender); }}
+.sla-hero-copy .eyebrow::before {{ background: var(--lavender); }}
+.sla-hero-copy h1 {{ color: var(--mist); font-size: 3.4rem; }}
+.sla-hero-copy .w.gold {{ background: linear-gradient(100deg, #AF98E4 0%, #F9F6FA 45%, #9965E8 100%);
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }}
+.sla-hero-copy p {{ color: rgba(249,246,250,.82); }}
+div.st-key-hero .sla-badge
+   {{ background: rgba(249,246,250,.08); color: var(--mist); border-color: rgba(175,152,228,.35); }}
+div.st-key-hero .sla-hero-art svg text {{ fill: var(--mist); }}
+div.st-key-hero .sla-hero-art .sla-core {{ fill: #41234E; stroke: #AF98E4; }}
+div.st-key-hero .sla-hero-art svg circle[fill="#FFFFFF"] {{ fill: #F9F6FA; }}
+div.st-key-hero [data-testid="stPageLink"] a {{ transition: transform .2s var(--ease); }}
+div.st-key-hero div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a
+   {{ background: var(--lavender); box-shadow: none; }}
+div.st-key-hero div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a span,
+div.st-key-hero div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a p {{ color: var(--void) !important; }}
+div.st-key-hero div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a
+   {{ background: transparent; border-color: rgba(249,246,250,.4); }}
+div.st-key-hero div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a span,
+div.st-key-hero div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a p {{ color: var(--mist) !important; }}
+.sla-hero {{ border-radius: 28px; border-color: rgba(175,152,228,.3); }}
+.sla-hero.big {{ background: linear-gradient(135deg, #040207 0%, #41234E 100%); }}
+.sla-hero.big h1, .sla-hero.big .eyebrow {{ color: var(--mist); }}
+.sla-hero.big .eyebrow::before {{ background: var(--lavender); }}
+.sla-hero.big p {{ color: rgba(249,246,250,.82); }}
+
+/* dark footer */
+.sla-footer {{ margin-top: 3.5rem; padding: 1.8rem 2rem; border: 0; border-radius: 28px;
+  background: linear-gradient(135deg, #1E0F27, var(--plum)); color: rgba(249,246,250,.75); }}
+.sla-footer .brand {{ color: var(--mist); }}
+.sla-footer a {{ color: var(--lavender); }} .sla-footer a:hover {{ color: #fff; }}
+
+/* team avatar: gold ring kept, lilac tint */
+.sla-member .av {{ border: 2px solid var(--avatar-ring); }}
+.sla-member .links a {{ color: var(--indigo); }}
+section[data-testid="stSidebar"] {{ background: #FBF8FD; }}
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {{ background: #EDE7FA; }}
+
+/* 360px phones */
+@media (max-width: 480px) {{
+  div.st-key-hero {{ padding: 1.8rem 1.2rem 1.6rem; border-radius: 22px; }}
+  .sla-hero-copy h1 {{ font-size: 2.2rem; }}
+  .sla-footer {{ padding: 1.3rem 1.1rem; border-radius: 20px; }}
+  .block-container {{ padding-left: .9rem; padding-right: .9rem; }}
+}}
 </style>
 """
 
