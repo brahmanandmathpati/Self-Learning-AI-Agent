@@ -11,25 +11,28 @@ from __future__ import annotations
 
 import streamlit as st
 
+from sla.app.styles.mission import MISSION_CSS, MISSION_FONTS
+
 INK = {
-    "page": "#F9F6FA", "surface": "#FFFFFF", "surface_2": "#F1EBF6", "primary": "#040207",
-    "secondary": "#5A4763", "muted": "#6B5B73", "grid": "rgba(65,35,78,0.07)", "axis": "rgba(65,35,78,0.18)",
-    "border": "rgba(65,35,78,0.12)",
+    "page": "#0B0D14", "surface": "#121624", "surface_2": "#171C2E", "primary": "#E6E9F2",
+    "secondary": "#B4BBD0", "muted": "#8A93AD", "grid": "rgba(138,147,173,0.16)", "axis": "rgba(138,147,173,0.32)",
+    "border": "#232A40",
 }
 GOLD = "#C9A24B"  # kept only for the team-avatar ring and walked-path fill
 VOID, MIST, PLUM, LAVENDER, CORAL, ORCHID = "#040207", "#F9F6FA", "#41234E", "#AF98E4", "#C96B4B", "#9965E8"
 INDIGO = "#4632C9"
 ACCENT = INDIGO
-SERIES = ["#3987e5", "#d95926", "#199e70"]
-STATUS = {"good": "#15803D", "warning": "#B45309", "serious": "#C2410C", "critical": "#B91C1C", "info": INDIGO}
-AGENT_COLORS = {"Q-learning": SERIES[0], "DQN": SERIES[1], "SARSA": SERIES[2], "Expected SARSA": "#8b5cf6",
-                "Random": "#94A3B8"}
+SERIES = ["#22D3EE", "#F59E0B", "#A3E635"]  # Mission Control: cyan / amber / lime
+STATUS = {"good": "#A3E635", "warning": "#F59E0B", "serious": "#FB923C", "critical": "#F87171", "info": "#22D3EE"}
+AGENT_COLORS = {"Q-learning": SERIES[0], "DQN": SERIES[1], "SARSA": SERIES[2], "Expected SARSA": "#A78BFA",
+                "Random": "#8A93AD"}
 VARIANT_COLORS = {"full": SERIES[0], "no_replay": SERIES[1], "no_target": SERIES[2]}
 VARIANT_LABELS = {"full": "Full DQN", "no_replay": "No replay", "no_target": "No target network"}
 
 CSS = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+@import
+  url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 :root {{
   --page:{INK['page']}; --band:#F1EBF6; --surface:#FFFFFF; --surface2:{INK['surface_2']};
   --ink:{INK['primary']}; --secondary:{INK['secondary']}; --muted:{INK['muted']};
@@ -73,7 +76,7 @@ a {{ color: var(--indigo); }}
 .sla-hero {{ position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between;
   gap:1.5rem;
   padding: 2rem 2.2rem; border:1px solid var(--hair); border-radius: 24px; margin-bottom: 1.6rem;
-  background: linear-gradient(135deg, #FFFFFF 0%, #F3EEFA 55%, #EEE9FB 100%); box-shadow: var(--shadow); }}
+  background: linear-gradient(135deg, var(--surface) 0%, #151B30 100%); box-shadow: var(--shadow); }}
 .sla-hero .eyebrow {{ font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color: var(--gold-d);
   font-weight:600;
   margin-bottom:.6rem; display:flex; align-items:center; gap:.6rem; }}
@@ -92,7 +95,7 @@ a {{ color: var(--indigo); }}
   transition: transform .2s var(--ease), box-shadow .2s; }}
 .sla-btn.gold {{ background: linear-gradient(135deg, #AF98E4, var(--gold) 55%, #4632C9); color: #FFFFFF !important;
   box-shadow: 0 8px 20px -10px rgba(70,50,201,.8); }}
-.sla-btn.outline {{ background: #fff; color: var(--ink) !important; border: 1px solid rgba(65,35,78,.16); }}
+.sla-btn.outline {{ background: var(--surface); color: var(--ink) !important; border: 1px solid rgba(65,35,78,.16); }}
 .sla-btn:hover {{ transform: translateY(-1px); box-shadow: var(--shadow-lg); }}
 .sla-btn::after {{ content:""; position:absolute; inset:0;
   background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%);
@@ -144,7 +147,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 /* ---------- badges ---------- */
 .sla-badge {{ display:inline-flex; align-items:center; gap:.45rem; padding: .3rem .75rem; border-radius: 999px;
   font-size: .72rem; font-weight: 650;
-  letter-spacing:.08em; text-transform:uppercase; border:1px solid rgba(65,35,78,.10); background: #fff;
+  letter-spacing:.08em; text-transform:uppercase; border:1px solid rgba(65,35,78,.10); background: var(--surface);
   color: var(--ink); white-space:nowrap; }}
 .sla-dot {{ width:.5rem; height:.5rem; border-radius:50%; display:inline-block; background: var(--c, var(--muted)); }}
 .sla-dot.pulse {{ animation: sla-pulse 1.8s ease-out infinite; }}
@@ -168,13 +171,13 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-step .n {{ position:relative; z-index:1; width:52px; height:52px; margin:0 auto .8rem; border-radius:50%;
   display:flex; align-items:center;
   justify-content:center; font-family: var(--serif); font-size:1.25rem; font-weight:600; color: var(--gold-d);
-  background:#fff;
+  background: var(--surface);
   border:1px solid var(--hair); box-shadow: var(--shadow); }}
 .sla-step h4 {{ margin:0 0 .3rem; font-size:1rem; font-weight:650; }}
 .sla-step p {{ margin:0; font-size:.86rem; }}
 
 /* ---------- features ---------- */
-.sla-feature {{ border:1px solid var(--border); border-radius: var(--radius); background:#fff;
+.sla-feature {{ border:1px solid var(--border); border-radius: var(--radius); background: var(--surface);
   padding:1.3rem 1.35rem; box-shadow: var(--shadow);
   transition: transform .25s var(--ease), box-shadow .25s, border-color .25s; height:100%; }}
 .sla-feature:hover {{ transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--hair); }}
@@ -186,12 +189,13 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 
 /* ---------- chips / tech stack ---------- */
 .sla-stack {{ display:flex; flex-wrap:wrap; gap:.55rem; }}
-.sla-stack span {{ padding:.4rem .85rem; border-radius:999px; background:#fff; border:1px solid var(--hair);
+.sla-stack span {{ padding:.4rem .85rem; border-radius:999px; background: var(--surface); border:1px solid var(--hair);
   font-size:.84rem; font-weight:500; color: var(--ink); }}
 
 /* ---------- team ---------- */
 .sla-team {{ display:grid; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); gap:1rem; }}
-.sla-member {{ border:1px solid var(--border); border-radius: var(--radius); background:#fff; padding:1.5rem 1.2rem;
+.sla-member {{ border:1px solid var(--border); border-radius: var(--radius); background: var(--surface);
+  padding:1.5rem 1.2rem;
   text-align:center; box-shadow: var(--shadow);
   transition: transform .25s var(--ease), box-shadow .25s; }}
 .sla-member:hover {{ transform: translateY(-3px); box-shadow: var(--shadow-lg); }}
@@ -206,7 +210,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-member .links a {{ color: var(--indigo, #4F46E5); font-weight:600; text-decoration:none; }}
 .sla-member .links .todo {{ font-style: italic; }}
 .sla-member .av {{ width:84px; height:84px; border:2px solid var(--avatar-ring);
-  box-shadow: 0 0 0 4px #fff, 0 6px 18px -8px rgba(65,35,78,.35); }}
+  box-shadow: 0 0 0 4px var(--surface), 0 6px 18px -8px rgba(65,35,78,.35); }}
 .sla-college {{ text-align:center; font-size:.84rem !important; color: var(--muted); margin:1.4rem auto 0;
   max-width:820px; line-height:1.7; padding-top:1rem; border-top:1px solid var(--hair); }}
 .sla-college b {{ font-family: var(--serif); color: var(--ink); font-size:1rem; font-weight:600; }}
@@ -221,7 +225,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 
 /* ---------- verdict ---------- */
 .sla-verdict {{ display:flex; gap:1rem; align-items:center; border-radius: var(--radius); padding: 1.1rem 1.3rem;
-  background:#fff; box-shadow: var(--shadow);
+  background: var(--surface); box-shadow: var(--shadow);
   border:1px solid color-mix(in srgb, var(--c) 35%, transparent); animation: sla-up .45s var(--ease) both;
   margin: .3rem 0 1rem; }}
 .sla-verdict .icon {{ width:2.7rem; height:2.7rem; flex:none; border-radius:12px; display:flex; align-items:center;
@@ -245,7 +249,8 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-why {{ font-size:.82rem; color: var(--muted); margin-top:.6rem; line-height:1.5; }}
 
 /* ---------- progress / skeleton ---------- */
-.sla-progress {{ border:1px solid var(--border); border-radius: var(--radius); background:#fff; padding:.9rem 1.1rem;
+.sla-progress {{ border:1px solid var(--border); border-radius: var(--radius); background: var(--surface);
+  padding:.9rem 1.1rem;
   margin-bottom:.9rem; box-shadow: var(--shadow); }}
 .sla-progress .row {{ display:flex; justify-content:space-between; align-items:center; gap:1rem; font-size:.84rem;
   color: var(--secondary); flex-wrap:wrap; }}
@@ -258,7 +263,8 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
   background-blend-mode: overlay; animation: sla-stripes 1s linear infinite; }}
 @keyframes sla-stripes {{ to {{ background-position: 0 0, 32px 0; }} }}
 .sla-skel {{ border-radius: var(--radius); height: var(--h, 90px); border:1px solid var(--border);
-  background: linear-gradient(90deg, #fff 25%, var(--surface2) 37%, #fff 63%); background-size: 400% 100%;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 37%, var(--surface) 63%);
+  background-size: 400% 100%;
   animation: sla-shimmer 1.4s ease infinite; }}
 @keyframes sla-shimmer {{ 0% {{ background-position: 100% 50%; }} 100% {{ background-position: 0 50%; }} }}
 
@@ -281,7 +287,7 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 
 /* ---------- insight (reflection) ---------- */
 .sla-insight {{ border-radius: 20px; padding: 1.4rem 1.5rem 1.2rem; border:1px solid var(--hair);
-  background: linear-gradient(135deg, #FFFFFF, #F3EEFA 70%, #EEE9FB); box-shadow: var(--shadow); }}
+  background: linear-gradient(135deg, var(--surface), #151B30); box-shadow: var(--shadow); }}
 .sla-insight .h {{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; flex-wrap:wrap; }}
 .sla-insight .k {{ font-size:.72rem; font-weight:700; letter-spacing:.22em; color: var(--gold-d); display:flex;
   gap:.5rem; align-items:center; }}
@@ -289,14 +295,14 @@ div[class*="st-key-card"] {{ border:1px solid var(--border); border-radius: var(
 .sla-insight .meta {{ color: var(--muted); font-size:.78rem; margin-top:.8rem; }}
 .sla-chips {{ display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.5rem; }}
 .sla-chip {{ display:inline-flex; flex-direction:column; gap:.05rem; padding:.5rem .75rem; border-radius:12px;
-  border:1px solid var(--border); background:#fff; min-width:7.5rem; box-shadow: var(--shadow); }}
+  border:1px solid var(--border); background: var(--surface); min-width:7.5rem; box-shadow: var(--shadow); }}
 .sla-chip .ck {{ font-size:.64rem; letter-spacing:.1em; text-transform:uppercase; color: var(--muted);
   font-weight:600; }}
 .sla-chip .cv {{ font-size:.95rem; color: var(--ink); font-weight:650; font-variant-numeric: tabular-nums; }}
 
 /* ---------- key/value ---------- */
 .sla-kv {{ display:grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap:.55rem; }}
-.sla-kv div {{ border:1px solid var(--border); border-radius:12px; padding:.55rem .75rem; background:#fff; }}
+.sla-kv div {{ border:1px solid var(--border); border-radius:12px; padding:.55rem .75rem; background: var(--surface); }}
 .sla-kv .k {{ font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color: var(--muted); font-weight:600; }}
 .sla-kv .v {{ font-size:.86rem; color: var(--ink); font-family:"JetBrains Mono", monospace; word-break: break-all; }}
 .sla-env-row {{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:.8rem; }}
@@ -307,18 +313,18 @@ section[data-testid="stSidebar"] {{ background: #FBF8FD; border-right: 1px solid
 section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] {{ border-radius:10px; transition: background .15s; }}
 section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {{
   background: var(--gold-soft); }}
-.sla-side {{ border:1px solid var(--border); border-radius:14px; padding:.8rem .9rem; background:#fff;
+.sla-side {{ border:1px solid var(--border); border-radius:14px; padding:.8rem .9rem; background: var(--surface);
   font-size:.8rem; box-shadow: var(--shadow); }}
 .sla-side .row {{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; padding:.28rem 0;
   color: var(--secondary); }}
 .sla-side .row b {{ color: var(--ink); font-weight:600; text-align:right; overflow:hidden; text-overflow:ellipsis;
   white-space:nowrap; max-width: 60%; }}
 .sla-side .ttl {{ font-size:.64rem; letter-spacing:.2em; color: var(--gold-d); font-weight:700; margin-bottom:.25rem; }}
-div[data-testid="stForm"] {{ border:1px solid var(--border); border-radius: var(--radius); background:#fff;
+div[data-testid="stForm"] {{ border:1px solid var(--border); border-radius: var(--radius); background: var(--surface);
   box-shadow: var(--shadow); }}
 div[data-testid="stDataFrame"] {{ border:1px solid var(--border); border-radius: 14px; overflow:hidden; }}
 div[data-testid="stExpander"] details {{ border:1px solid var(--border) !important; border-radius:14px !important;
-  background:#fff; }}
+  background: var(--surface); }}
 .stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primaryFormSubmit"],
   .stFormSubmitButton > button[kind="primary"] {{ background: linear-gradient(135deg, #AF98E4, var(--gold) 55%,
   #4632C9);
@@ -345,7 +351,7 @@ div[data-testid="stExpander"] details {{ border:1px solid var(--border) !importa
   animation: sla-flow 3s linear infinite; }}
 @keyframes sla-flow {{ to {{ stroke-dashoffset: -24; }} }}
 .sla-neuron {{ animation: sla-fire 2.4s ease-in-out infinite; }}
-@keyframes sla-fire {{ 0%,100% {{ fill:#FFFFFF; }} 45% {{ fill:#EDE7FA; }} }}
+@keyframes sla-fire {{ 0%,100% {{ fill:#0B0D14; }} 45% {{ fill:#1B2A3A; }} }}
 .sla-flow {{ display:grid; grid-template-columns: 1.1fr 1fr; gap:1.2rem; align-items:center; }}
 
 /* ---------- responsive ---------- */
@@ -419,7 +425,7 @@ div[data-testid="stDialog"] h2, div[data-testid="stDialog"] [data-testid="stHead
 /* hero (native container so page links keep the session) */
 div.st-key-hero {{ position: relative; overflow: hidden; padding: 2.6rem 2.6rem 2.3rem; border: 1px solid var(--hair);
   border-radius: 24px; margin-bottom: 1.2rem; box-shadow: var(--shadow);
-  background: linear-gradient(135deg, #FFFFFF 0%, #F3EEFA 55%, #EEE9FB 100%); }}
+  background: linear-gradient(135deg, var(--surface) 0%, #151B30 100%); }}
 div.st-key-hero::before, div.st-key-hero::after {{ content: ""; position: absolute; border-radius: 50%;
   filter: blur(48px);
   pointer-events: none; }}
@@ -460,7 +466,7 @@ div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a {{
 div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a span,
   div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a p {{
   color: #FFFFFF !important; font-weight: 600; }}
-div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a {{ background: #fff;
+div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a {{ background: var(--surface);
   border: 1px solid rgba(65,35,78,.16); }}
 div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a span,
   div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a p {{
@@ -475,7 +481,7 @@ div.st-key-proof_cta, div.st-key-cta_actions {{ gap: .7rem; }}
 /* status line, proof table, architecture */
 .sla-status {{ font-size: .86rem; color: var(--muted); margin: .2rem 0 0; }}
 .sla-status b {{ color: var(--ink); }}
-.sla-proof {{ border: 1px solid var(--border); border-radius: var(--radius); background: #fff;
+.sla-proof {{ border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
   box-shadow: var(--shadow);
   overflow-x: auto; margin-bottom: .7rem; }}
 .sla-proof table {{ width: 100%; border-collapse: collapse; font-size: .92rem; }}
@@ -488,7 +494,7 @@ div.st-key-proof_cta, div.st-key-cta_actions {{ gap: .7rem; }}
 .sla-proof td small {{ color: var(--muted); }}
 .sla-arch {{ display: grid; gap: .5rem; }}
 .sla-arch .lay {{ position: relative; display: flex; justify-content: space-between; gap: 1rem; align-items: center;
-  padding: .7rem 1rem; border-radius: 14px; background: #fff; border: 1px solid var(--border);
+  padding: .7rem 1rem; border-radius: 14px; background: var(--surface); border: 1px solid var(--border);
   box-shadow: var(--shadow);
   animation: sla-up .5s var(--ease) both; }}
 .sla-arch .lay:nth-child(4) {{ border-color: var(--hair); background: #F8F5FD; }}
@@ -536,7 +542,8 @@ div.st-key-ctaband div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a
 div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidden; }}
 
 /* ---------- Vision Lab: live prediction panel and the FrozenLake board ---------- */
-.sla-pred {{ border: 1px solid var(--border); border-radius: var(--radius); background: #fff; padding: 1rem 1.1rem;
+.sla-pred {{ border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
+  padding: 1rem 1.1rem;
   box-shadow: var(--shadow); }}
 .sla-pred.empty {{ color: var(--muted); font-size: .9rem; }}
 .sla-pred .top {{ font-family: var(--serif); font-size: 1.6rem; font-weight: 600; color: var(--ink);
@@ -645,7 +652,7 @@ div.st-key-cookiejar {{ position: absolute; width: 0; height: 0; overflow: hidde
 .sla-step .n {{ animation: sla-lit 5s ease-in-out infinite; }}
 .sla-step:nth-child(2) .n {{ animation-delay: 1.25s; }} .sla-step:nth-child(3) .n {{ animation-delay: 2.5s; }}
 .sla-step:nth-child(4) .n {{ animation-delay: 3.75s; }}
-@keyframes sla-lit {{ 0%,30%,100% {{ background:#fff; color: var(--gold-d); }}
+@keyframes sla-lit {{ 0%,30%,100% {{ background: var(--surface); color: var(--gold-d); }}
   10% {{ background: linear-gradient(135deg,#AF98E4,var(--gold)); color:#FFFFFF;
   box-shadow: 0 0 0 6px rgba(175,152,228,.15), var(--shadow); }} }}
 .sla-step:hover .n {{ transform: scale(1.08); transition: transform .25s var(--ease); }}
@@ -694,7 +701,7 @@ a {{ color: var(--indigo); }}
 .sla-card .label .ic {{ background: #EDE7FA; color: var(--indigo); }}
 .sla-card.accent::before {{ background: var(--card-accent, var(--orchid)); }}
 .sla-kicker, .sla-hero .eyebrow, .sla-insight .k, .sla-side .ttl, .sla-auth-brand .eyebrow {{ color: var(--indigo); }}
-.sla-badge {{ background: #fff; border-color: var(--border); }}
+.sla-badge {{ background: var(--surface); border-color: var(--border); }}
 .sla-section {{ border-top-color: var(--border); }}
 .sla-step .n {{ color: var(--indigo); }}
 .sla-rank.first {{ background: var(--coral-text); color: #fff; }}
@@ -715,7 +722,7 @@ div[class*="st-key-cta_gold"] [data-testid="stPageLink"] a p, .stButton > button
 .stButton > button[kind="primary"]:hover, .stFormSubmitButton > button[kind^="primary"]:hover
    {{ color:#fff; filter: brightness(1.08); }}
 .sla-btn.outline, div[class*="st-key-cta_outline"] [data-testid="stPageLink"] a
-   {{ background:#fff; border:1px solid var(--border); }}
+   {{ background: var(--surface); border:1px solid var(--border); }}
 div[data-testid="stDialog"] div[role="dialog"] {{ border-top-color: var(--indigo); }}
 div[class*="st-key-card_auth"] {{ border-top-color: var(--indigo); }}
 
@@ -776,4 +783,4 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="
 
 
 def inject_css() -> None:
-    st.markdown(CSS, unsafe_allow_html=True)
+    st.markdown(MISSION_FONTS + CSS + MISSION_CSS, unsafe_allow_html=True)

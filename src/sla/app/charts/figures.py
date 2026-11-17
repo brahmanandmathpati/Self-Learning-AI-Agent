@@ -148,8 +148,8 @@ def grid_map(desc: list[str], arrows: list[str] | None = None, values: np.ndarra
     kinds = {"S": 0.15, "F": 0.15, "H": 0.0, "C": 0.0, "G": 1.0}
     z = [[0.5 if path and (i * cols + j) in path and c in "SF" else kinds[c] for j, c in enumerate(row)]
          for i, row in enumerate(desc)]
-    colors = [[0, "#CBD5E1"], [0.14, "#CBD5E1"], [0.15, "#F1F5F9"], [0.49, "#F1F5F9"], [0.5, "#F5ECD7"],
-              [0.99, "#F5ECD7"], [1.0, "#A7F3D0"]]
+    colors = [[0, "#3A2230"], [0.14, "#3A2230"], [0.15, "#1B2136"], [0.49, "#1B2136"], [0.5, "#17414A"],
+              [0.99, "#17414A"], [1.0, "#2F5D1E"]]  # Mission Control: hole / free / walked path / goal
     fig = go.Figure(go.Heatmap(z=z, colorscale=colors, zmin=0, zmax=1, showscale=False, hoverinfo="skip",
                                xgap=3, ygap=3))
     labels = {"S": "START", "H": "HOLE", "C": "CLIFF", "G": "GOAL", "F": "", **(names or {})}
@@ -177,7 +177,7 @@ def frozenlake_map(desc: list[str], arrows: list[str] | None = None, values: np.
 
 def confusion_heatmap(classes: list[str], matrix: list[list[int]], height: int = 320) -> go.Figure:
     """Rows = true class, columns = predicted class (held-out samples)."""
-    fig = go.Figure(go.Heatmap(z=matrix, x=classes, y=classes, colorscale=[[0, "#FFFFFF"], [1, "#C9A24B"]],
+    fig = go.Figure(go.Heatmap(z=matrix, x=classes, y=classes, colorscale=[[0, "#121624"], [1, "#22D3EE"]],
                                showscale=False, text=matrix, texttemplate="%{text}", xgap=2, ygap=2,
                                hovertemplate="true %{y}<br>predicted %{x}<br>%{z} samples<extra></extra>"))
     fig.update_yaxes(autorange="reversed")
