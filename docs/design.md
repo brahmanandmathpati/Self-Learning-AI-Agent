@@ -246,3 +246,27 @@ without data, as a guest and as a signed-in user.
 7. Reboot the Streamlit Cloud app after the merge so the new theme loads.
 
 *Reference credit: palette and case-study mood inspired by tubik's "Case Study: Website Design for EternaCloud" on Dribbble.*
+
+## 11. Mission Control skin (branch `feat/mission-control`)
+
+A dark "control room" look layered on the violet system. Only UI files change: `styles/mission.py` (new skin and motion),
+`styles/theme.py` (colour tokens, white surfaces to variables), `components/motion.py` (SVG colours), `assets/logo.svg`,
+`charts/figures.py` (grid-map and confusion-matrix colours) and `.streamlit/config.toml` (dark base). No logic, data or
+number changes.
+
+| Token | Value | Use |
+|---|---|---|
+| page / card | `#0B0D14` / `#121624` | background, surfaces |
+| text / secondary / muted | `#E6E9F2` / `#B4BBD0` / `#8A93AD` | all at least 5:1 on the surfaces (WCAG AA) |
+| cyan / lime / amber | `#22D3EE` / `#A3E635` / `#F59E0B` | actions and Q-learning / success and SARSA / warnings, NOT RUN and DQN |
+
+Fonts: Space Grotesk (headings), Inter (body), JetBrains Mono (numbers).
+
+Motion (all CSS, all off under `prefers-reduced-motion`): drifting grid, pulsing live dots, count-up numbers (existing),
+hover lift with sweep and glow, rotating signal on the orbit, glowing "learning verified" badge, charts that draw their
+line and grow their bars, a scan line over each new chart, shine on primary buttons.
+
+Not done (would need new logic or data, so out of scope for a UI-only change): the "watch the agent play" replay and the
+Problem / Approach / Proof / Next step page framing.
+
+Screenshots: `docs/redesign/mission_*.jpg` (before: `after_*.jpg` from the violet round).

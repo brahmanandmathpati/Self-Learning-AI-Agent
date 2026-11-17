@@ -43,7 +43,7 @@ def _policy_map(env_name: str, algorithm: str, desc: list[str], key: str, height
     arrows = [ARROWS[env_name][a] for a in pol["actions"]]
     path = set(walk(env_name, pol["actions"]))
     chart_card(grid_map(desc, arrows, pol["values"], height=height, path=path),
-               f"{algo_label(algorithm)} — learned path", "gold squares = the path it walks with ε = 0", key=key)
+               f"{algo_label(algorithm)} — learned path", "teal squares = the path it walks with ε = 0", key=key)
     src = "best checkpoint" if pol["source"] == "checkpoint" else "best checkpoint (saved snapshot)"
     st.caption(f"Arrows = argmax_a Q(s, a) from the {src} of run {pol['run_id']}; "
                f"path length {len(walk(env_name, pol['actions'])) - 1} steps.")
