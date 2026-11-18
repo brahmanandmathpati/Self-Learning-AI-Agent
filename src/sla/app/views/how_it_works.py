@@ -11,8 +11,9 @@ import html
 import pandas as pd
 import streamlit as st
 
-from sla.app import data, routes
-from sla.app.charts.figures import epsilon_chart, group_bars, learning_curve, q_grid
+from sla.app import data, how_data, routes
+from sla.app.charts.figures import group_bars, learning_curve
+from sla.app.charts.how_figures import epsilon_chart, q_grid
 from sla.app.components.chart_card import chart_card
 from sla.app.components.landing import features, steps
 from sla.app.components.metric_card import NOT_RUN, card_grid, metric_card
@@ -254,7 +255,7 @@ def _prove(cp: RunConfig | None) -> None:
 
 def _data_tables() -> None:
     _head("data", "Where the data lives", "7 · SQLite")
-    counts = data.table_counts()
+    counts = how_data.table_counts()
     rows = [{"Table": t, "What it holds": note, "Rows": f"{counts[t]:,}" if t in counts else "not available"}
             for t, note in TABLE_NOTES]
     st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
