@@ -10,7 +10,7 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 
 PAGES = ["overview", "training", "vision", "comparison", "evaluation", "ablation", "explorer", "reflection",
          "environment",
-         "about"]
+         "how_it_works", "about"]
 
 
 def page(name):

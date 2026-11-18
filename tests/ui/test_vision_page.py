@@ -48,3 +48,21 @@ def test_reward_buttons_update_the_agent():
     assert not at.exception, at.exception
     agent = at.session_state["vl_agent"]
     assert agent.q.max() > 0 and agent.steps + len(agent.history) >= 1
+
+
+def test_missing_system_library_shows_a_clear_card():
+    """If MediaPipe's native library cannot load (e.g. libEGL missing on the cloud), say so instead of a DB error."""
+    script = ("from sla.app import vision_live as vl\n"
+              "def _boom():\n"
+              "    raise OSError('libEGL.so.1: cannot open shared object file')\n"
+              "vl.detector = _boom\n"
+              "from sla.app.views import vision\n"
+              "vision.render()")
+    at = AppTest.from_string(script, default_timeout=90).run()
+    if "extra packages" in _md(at):
+        pytest.skip("vision packages not installed")
+    at.checkbox(key="vl_consent").check().run()
+    assert not at.exception, at.exception
+    text = _md(at)
+    assert "hand-tracking model could not start" in text
+    assert "Unable to load this page" not in text

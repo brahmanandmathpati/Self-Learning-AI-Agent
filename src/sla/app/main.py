@@ -24,6 +24,7 @@ from sla.app.views import (  # noqa: E402
     environment,
     evaluation,
     explorer,
+    how_it_works,
     overview,
     reflection,
     training,
@@ -73,11 +74,14 @@ _ANALYSIS = [
 ]
 _VISION = st.Page(safe(vision.render), title="Vision Lab", icon=":material/back_hand:", url_path="vision")
 _ENVS = st.Page(safe(environment.render), title="Environments", icon=":material/grid_on:", url_path="environments")
+_HOW = st.Page(safe(how_it_works.render), title="How it works", icon=":material/account_tree:",
+               url_path="how-it-works")
 _ABOUT = st.Page(safe(about.render), title="About", icon=":material/info:", url_path="about")
-# Top navbar: Overview · Training · Vision Lab · Environments · About · Analysis ▾ ("" = pages without a dropdown).
-PAGES = {"": [_OVERVIEW, _TRAINING, _VISION, _ENVS, _ABOUT], "Analysis": _ANALYSIS}
+# Top navbar: Overview · Training · Vision Lab · Environments · How it works · About · Analysis ▾
+# ("" = pages without a dropdown).
+PAGES = {"": [_OVERVIEW, _TRAINING, _VISION, _ENVS, _HOW, _ABOUT], "Analysis": _ANALYSIS}
 routes.register({"overview": _OVERVIEW, "training": _TRAINING, "vision": _VISION, "environments": _ENVS,
-                 "about": _ABOUT,
+                 "how": _HOW, "about": _ABOUT,
                  "comparison": _ANALYSIS[0], "evaluation": _ANALYSIS[1], "ablation": _ANALYSIS[2],
                  "runs": _ANALYSIS[3], "reflection": _ANALYSIS[4]})
 
