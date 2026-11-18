@@ -159,8 +159,9 @@ def grid_map(desc: list[str], arrows: list[str] | None = None, values: np.ndarra
             text = labels[c]
             k = i * cols + j
             if arrows and c in "SF":
-                text = f"{arrows[k]}" + (f"<br><span style='font-size:{8 if small else 10}px'>V={values[k]:.1f}</span>"
-                                         if values is not None and not small else "")
+                v = values[k] if values is not None else None
+                vtxt = "" if v is None or small else f"{v:.2f}" if abs(v) < 10 else f"{v:.0f}"
+                text = f"{arrows[k]}" + (f"<br><span style='font-size:10px'>V={vtxt}</span>" if vtxt else "")
             fig.add_annotation(x=j, y=i, text=text, showarrow=False,
                                font=dict(color=INK["primary"], size=(15 if small else 18) if arrows and c in "SF"
                                          else (8 if small else 11)))
