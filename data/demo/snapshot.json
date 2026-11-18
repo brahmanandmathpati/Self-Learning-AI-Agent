@@ -1,15 +1,15 @@
 {
-  "created_at": "2026-10-09T07:58:51+00:00",
-  "source": "local experiment database (runs/sla.db) on the project laptop",
+  "created_at": "2026-11-05T16:04:11+00:00",
+  "source": "local experiment database on the project laptop (sla pipeline / sla ablation)",
   "runs_between": [
     "2026-10-08T14:55:33+00:00",
-    "2026-10-08T16:55:33+00:00"
+    "2026-11-05T16:02:27+00:00"
   ],
   "counts": {
-    "experiments": 3,
-    "runs": 36,
-    "episodes": 20314,
-    "evaluations": 344,
+    "experiments": 11,
+    "runs": 116,
+    "episodes": 137814,
+    "evaluations": 1414,
     "ablation_results": 15,
     "reflections": 15
   },
@@ -31,7 +31,55 @@
       "name": "DQN ablation on CartPole-v1",
       "kind": "ablation",
       "status": "completed"
+    },
+    {
+      "id": 4,
+      "name": "q_learning on CliffWalking-v1",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 5,
+      "name": "sarsa on CliffWalking-v1",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 6,
+      "name": "expected_sarsa on CliffWalking-v1",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 7,
+      "name": "sarsa on FrozenLake-v1",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 8,
+      "name": "expected_sarsa on FrozenLake-v1",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 9,
+      "name": "q_learning on Taxi-v4",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 11,
+      "name": "expected_sarsa on Taxi-v4",
+      "kind": "pipeline",
+      "status": "completed"
+    },
+    {
+      "id": 12,
+      "name": "sarsa on Taxi-v4",
+      "kind": "pipeline",
+      "status": "completed"
     }
   ],
-  "note": "Real results from sla pipeline / sla ablation (seeds 0-4). Read-only copy used to seed the hosted app."
+  "note": "Real results, seeds 0-4. Experiments 1-3 (Oct 2026): Q-learning on FrozenLake, DQN on CartPole, DQN ablation. Experiments 4-9, 11, 12 (Nov 2026): Q-learning, SARSA and Expected SARSA on CliffWalking, FrozenLake and Taxi. Experiment 10 (Taxi SARSA) was interrupted when the laptop went to sleep (seed 0 stopped by the wall-clock guard after 1,129 of 6,000 episodes); it was removed and repeated as experiment 12. Read-only copy used to seed the hosted app."
 }

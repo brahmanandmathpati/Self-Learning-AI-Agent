@@ -91,6 +91,12 @@ class ExperimentService:
                 return test
         test = test.sort_values("eval_id").groupby("run_id", as_index=False).last()
         test["label"] = test.apply(_label, axis=1)
+        # Every experiment re-runs the random baseline on the same seeds and test games, so on a game with several
+        # experiments the same random result appears several times. Count each (game, seed) only once.
+        rnd = test["label"] == "Random"
+        if rnd.any() and "seed" in test.columns:
+            once = test[rnd].sort_values("eval_id").drop_duplicates(["env", "seed"], keep="last")
+            test = pd.concat([test[~rnd], once], ignore_index=True)
         return test
 
     def comparison_table(self) -> pd.DataFrame:
