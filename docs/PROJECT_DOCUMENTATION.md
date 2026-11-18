@@ -159,7 +159,7 @@ study — not with claims.
 | O3 | Prove the gain is not luck | Welch’s t-test and bootstrap 95% CI of the gain | p = 0.0018, CI 291.22–474.74 |
 | O4 | Show which DQN parts matter | Ablation: remove replay / target network | 86.79 and 9.36 vs 425.92 |
 | O5 | Explain results honestly | Every number in a note must exist in the computed facts | grounding check on every note |
-| O6 | Make it usable | Website with live training, results pages, accounts | 10 pages, view-only guest mode |
+| O6 | Make it usable | Website with live training, results pages, accounts | 11 pages, view-only guest mode |
 | O7 | Learn from a human | Vision Lab: gestures as samples and as rewards | built and tested; accuracy on the team’s own gestures **NOT MEASURED YET** |
 | O8 | Keep it reliable | Automated tests and linting in CI | 220 tests, ruff, GitHub Actions |
 
@@ -241,7 +241,7 @@ only to the layer below it. This keeps learning code, storage and the website se
 
 | Layer | Folder / file | Job |
 |---|---|---|
-| Website | `app/main.py`, `app/views/` | Ten pages, top navbar, log-in corner |
+| Website | `app/main.py`, `app/views/` | Eleven pages, top navbar, log-in corner |
 | Command line | `cli.py` | `sla train`, `pipeline`, `ablation`, `evaluate`, `baseline`, `reflect`, `runs`, `init-db`, `dashboard` |
 | Services | `services/` | One entry point per feature (training, evaluation, experiments, reflection, checkpoints) |
 | Pipeline | `training/pipeline.py` | Single run, multi-seed experiment, baseline, ablation |
@@ -482,7 +482,7 @@ entry point is `src/sla/app/main.py`; each page is a file in `app/views/`. Every
 database — the website never computes a result on its own, and an empty section says **NOT RUN** instead of showing a
 made-up value.
 
-**Navigation.** A sticky top navbar shows **Overview · Training · Vision Lab · Environments · About** and an
+**Navigation.** A sticky top navbar shows **Overview · Training · Vision Lab · Environments · How it works · About** and an
 **Analysis ▾** menu (Agent comparison, Evaluation, Ablation, Run explorer, Reflection). The top-right corner holds
 **Log in** and **Sign up**, or the signed-in user’s avatar (Section 18).
 
@@ -496,6 +496,7 @@ made-up value.
 | Training (`training.py`) | Form + live reward, ε, loss and episode-length charts | Start learning and watch it happen (members) |
 | Vision Lab (`vision.py`) | Webcam / uploads, live prediction, gesture rewards, results | The agent learns from a person (Section 19) |
 | Environments (`environment.py`) | Game cards and the learned FrozenLake map | What the agent sees and does |
+| How it works (`how_it_works.py`) | Pipeline, a Q-update calculator, a live FrozenLake demo, ε chart, DQN diagram, proof method, data tables, ablation, limits, glossary and practice questions | The whole project explained in one read-only page; all result numbers come from the database and configs |
 | About (`about.py`) | Objective, architecture diagram, stack, limits, team | Background |
 | Agent comparison (`comparison.py`) | Ranked cards: trained vs random, charts | Which agent is best, by how much |
 | Evaluation (`evaluation.py`) | LEARNING VERIFIED banner, statistics, per-seed table | The proof (Section 13) |
@@ -910,7 +911,7 @@ Self-Learning-AI-Agent/
 │   ├── database/      store.py — SQLite schema v2 and all queries
 │   ├── services/      training, evaluation, experiment, reflection, checkpoint services
 │   ├── utils/         errors, logging, seeding, validation, summaries
-│   ├── app/           main.py, views/ (10 pages), components/, charts/, styles/theme.py,
+│   ├── app/           main.py, views/ (11 pages), components/, charts/, styles/theme.py,
 │   │                  auth.py, mailer.py, routes.py, vision_live.py, data.py, demo_seed.py
 │   ├── accounts.py    accounts, password hashes, remember-me and reset tokens
 │   ├── cli.py         the `sla` command

@@ -31,6 +31,11 @@ def _db() -> str:
 
 
 @st.cache_data(ttl=TTL, show_spinner=False)
+def _table_counts(db: str, ver: tuple) -> dict[str, int]:
+    return services().db.table_counts()
+
+
+@st.cache_data(ttl=TTL, show_spinner=False)
 def _overview(db: str, ver: tuple) -> dict[str, Any]:
     return services().experiments.overview()
 
@@ -83,6 +88,10 @@ def _evaluations(db: str, ver: tuple, kind: str | None) -> pd.DataFrame:
 
 def overview() -> dict[str, Any]:
     return _overview(_db(), version())
+
+
+def table_counts() -> dict[str, int]:
+    return _table_counts(_db(), version())
 
 
 def runs() -> pd.DataFrame:

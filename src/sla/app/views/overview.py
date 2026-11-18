@@ -198,6 +198,7 @@ def render() -> None:
 
     section("How it works", "The same four steps repeat thousands of times.", kicker="The learning loop")
     steps(STEPS)
+    routes.link("how", "Read the full explanation →", "outline", "how")
     section("What makes it different", kicker="Features")
     features(FEATURES)
     routes.link("vision", "Teach the agent with your hands →", "outline", "vision")
