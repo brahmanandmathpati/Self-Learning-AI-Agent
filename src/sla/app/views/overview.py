@@ -101,6 +101,26 @@ def _hero(ov: dict) -> None:
             st.markdown(f'<div class="sla-hero-art">{learning_loop()}</div>', unsafe_allow_html=True)
 
 
+START_STEPS = (
+    ("1", "Watch it learn", "See the agent play and the score go up while it trains.", "training", "Open Training"),
+    ("2", "See the proof", "Check that the score is real and not luck.", "evaluation", "Open Evaluation"),
+    ("3", "Compare agents", "See which agent is best on each game.", "comparison", "Open Comparison"),
+)
+
+
+def _start_here() -> None:
+    """Three plain steps for a first-time visitor: the one-click demo path through the website."""
+    from sla.app.components.guide import page_header_extras
+    page_header_extras("Overview")
+    section("Start here", "Three steps, about two minutes. No sign-in needed to look.", kicker="New here?")
+    st.markdown('<div class="sla-start">' + "".join(
+        f'<div><span class="n">Step {n}</span><h4>{html.escape(t)}</h4><p>{html.escape(d)}</p></div>'
+        for n, t, d, _, _ in START_STEPS) + '</div>', unsafe_allow_html=True)
+    with st.container(horizontal=True, key="start_here_cta"):
+        for n, _, _, page, label in START_STEPS:
+            routes.link(page, label + " →", "gold" if n == "1" else "outline", f"start{n}")
+
+
 def _status_line(ov: dict) -> None:
     """What used to be the sidebar 'System' and 'Data' cards, as one quiet line."""
     latest = ov["latest_run"]
@@ -167,6 +187,7 @@ def render() -> None:
     ov = data.overview()
     latest = ov["latest_run"]
     _hero(ov)
+    _start_here()
 
     section("At a glance", "Live numbers from the experiment database.", kicker="Results")
     featured = _featured_run(latest)

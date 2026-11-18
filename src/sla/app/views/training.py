@@ -8,6 +8,7 @@ from dataclasses import replace
 import pandas as pd
 import streamlit as st
 
+from sla import friendly
 from sla.app import auth, data
 from sla.app.charts.figures import learning_curve, single_series
 from sla.app.components.chart_card import PLOTLY_CONFIG, chart_card
@@ -36,6 +37,25 @@ def _progress_html(done: int, total: int, run_id: str, live: bool, label: str = 
             f'style="width:{pct:.1f}%"></div></div></div>')
 
 
+def _strip_html(game: str, done: int, total: int, eps: float, start: float, end: float, last: float,
+                best: float) -> str:
+    """The 'Now happening' strip: game, episode, what epsilon means in words, last score, best score."""
+    _, phase = friendly.phase_for(eps, start, end)
+    cells = (("Game", game), ("Episode", f"{done:,} of {total:,}"), ("Phase", phase),
+             ("Exploration", friendly.epsilon_in_words(eps)), ("Last score", f"{last:,.4g}"),
+             ("Best score", f"{best:,.4g}"))
+    return ('<div class="sla-strip" role="status" aria-live="polite">' + "".join(
+        f'<div><div class="k">{html.escape(k)}</div><div class="v">{html.escape(v)}</div></div>'
+        for k, v in cells) + "</div>")
+
+
+def _log_html(events: list[str]) -> str:
+    if not events:
+        return ""
+    items = "".join(f"<li>{html.escape(e)}</li>" for e in events[-6:])
+    return f'<p class="sla-strip"><b>What just happened</b></p><ul class="sla-log">{items}</ul>'
+
+
 def _live_cards(df: pd.DataFrame, info, agent: str) -> list[str]:
     last = df.tail(50)
     if agent != "dqn":
@@ -57,19 +77,34 @@ def _live_cards(df: pd.DataFrame, info, agent: str) -> list[str]:
 
 def _live_panel(cfg, total_episodes: int, n_runs: int = 1):
     """Placeholders updated from the training callback (throttled to ~25 redraws per run)."""
+    st.caption("Now happening: the agent plays one game after another. Watch the score go up.")
+    strip = st.empty()
     head = st.empty()
     head.markdown(_progress_html(0, total_episodes, "starting…", True) + skeleton(6, 96), unsafe_allow_html=True)
+    log_ph = st.empty()
     trend_ph = st.empty()
     chart = st.empty()
     small = st.empty()
     rows: list[dict] = []
-    state = {"run": None, "k": 0}  # each seed of an experiment gets a fresh panel
+    state = {"run": None, "k": 0, "phase": None, "best": None}  # each seed of an experiment gets a fresh panel
+    events: list[str] = []
+    game = env_label(cfg.env_name)
     color = AGENT_COLORS.get(LABELS.get(cfg.agent, ""), SERIES[0])
 
     def on_episode(info, ctx) -> bool:
         if ctx.run_id != state["run"]:
             state["run"], state["k"] = ctx.run_id, state["k"] + 1
             rows.clear()
+            events.clear()
+            state["phase"], state["best"] = None, None
+        key, _ = friendly.phase_for(info.epsilon, cfg.epsilon_start, cfg.epsilon_end)
+        for line in (friendly.phase_change_event(state["phase"], key, info.episode + 1),):
+            if line:
+                events.append(line)
+        state["phase"] = key
+        line, state["best"] = friendly.best_score_event(info.episode + 1, info.total_reward, state["best"])
+        if line:
+            events.append(line)
         rows.append({"episode": info.episode, "total_reward": info.total_reward, "length": info.length,
                      "epsilon": info.epsilon, "mean_loss": info.mean_loss})
         done = info.episode + 1
@@ -77,6 +112,9 @@ def _live_panel(cfg, total_episodes: int, n_runs: int = 1):
             df = pd.DataFrame(rows)
             live = done < total_episodes or state["k"] < n_runs
             label = f"run {state['k']} / {n_runs} · " if n_runs > 1 else ""
+            strip.markdown(_strip_html(game, done, total_episodes, info.epsilon, cfg.epsilon_start,
+                                       cfg.epsilon_end, info.total_reward, state["best"]), unsafe_allow_html=True)
+            log_ph.markdown(_log_html(events), unsafe_allow_html=True)
             head.markdown(_progress_html(done, total_episodes, ctx.run_id, live, label)
                           + '<div class="sla-grid">' + "".join(_live_cards(df, info, cfg.agent)) + "</div>",
                           unsafe_allow_html=True)
@@ -101,6 +139,34 @@ def _live_panel(cfg, total_episodes: int, n_runs: int = 1):
                                     width="stretch", config=PLOTLY_CONFIG, key=f"ln_{ctx.run_id}_{done}")
         return False
     return on_episode
+
+
+STATE_TEXT = {
+    "running": "Running: the agent is still training.",
+    "completed": "Finished: training ended normally and the final test was done.",
+    "stopped": "Stopped: training was interrupted (for example the page was left). The numbers below are what was "
+               "saved up to that point.",
+    "failed": "Failed: training hit an error. Check the run in Run explorer.",
+}
+
+
+def _run_state(status: str) -> None:
+    st.caption(STATE_TEXT.get(str(status), f"Status: {status}"))
+
+
+def _before_after(run_id: str) -> None:
+    """Untrained vs trained test score of this run, read from stored evaluations (never typed in)."""
+    detail = data.run_detail(run_id)
+    ev = detail["evaluations"] if detail else None
+    before = after = None
+    if ev is not None and not ev.empty:
+        init, test = ev[ev["kind"] == "initial"], ev[ev["kind"] == "test"]
+        before = float(init.iloc[-1]["mean_return"]) if not init.empty else None
+        after = float(test.iloc[-1]["mean_return"]) if not test.empty else None
+    view = st.radio("Show", ["After training", "Before training"], horizontal=True, key="tr_before_after")
+    value = after if view == "After training" else before
+    st.markdown(f"**{view}:** " + (f"mean test score {value:,.2f}" if value is not None else "not available"))
+    st.caption(friendly.before_after_sentence(before, after))
 
 
 def render() -> None:
@@ -210,19 +276,24 @@ def render() -> None:
         word, c = TREND[trend[0]]
         st.markdown(f'<div class="sla-badge" style="margin:.3rem 0 .6rem"><span class="sla-dot" style="--c:{c}"></span>'
                     f'Training trend: {word} · {html.escape(trend[1])}</div>', unsafe_allow_html=True)
-    chart_card(learning_curve(ep, color=color, height=330), "Reward vs episode",
-               "faint = reward per episode · bold = moving average", key="tr_reward")
+    _run_state(run["status"])
+    _before_after(run_id)
+    chart_card(learning_curve(ep, color=color, height=330), "Is the agent getting better?",
+               "Good looks like: the bold line climbs. Faint = each episode, bold = moving average", key="tr_reward")
     a, b, c = st.columns(3, gap="medium")
     with a:
-        chart_card(single_series(ep, "epsilon", "Epsilon", SERIES[2], height=230), "Exploration (ε)",
-                   "probability of a random action", key="tr_eps")
+        chart_card(single_series(ep, "epsilon", "Epsilon", SERIES[2], height=230),
+                   "How often does it try random moves?",
+                   "Good looks like: starts high, falls smoothly, then stays low", key="tr_eps")
     with b:
         if ep["mean_loss"].notna().any():
-            chart_card(single_series(ep, "mean_loss", "Loss", SERIES[1], window=20, height=230), "Huber loss",
-                       "moving average of 20", key="tr_loss")
+            chart_card(single_series(ep, "mean_loss", "Loss", SERIES[1], window=20, height=230),
+                       "How wrong are its guesses?",
+                       "Good looks like: falls and settles (moving average of 20)", key="tr_loss")
         else:
             empty_state("No loss for tabular Q-learning.", next_step="Q-learning updates a table, not a network.",
                         glyph="loss", tag="NOT APPLICABLE")
     with c:
-        chart_card(single_series(ep, "length", "Steps", SERIES[0], window=20, height=230), "Episode length",
-                   "moving average of 20", key="tr_len")
+        chart_card(single_series(ep, "length", "Steps", SERIES[0], window=20, height=230),
+                   "How long does each game last?",
+                   "Good looks like: CartPole games get longer; in FrozenLake it depends", key="tr_len")

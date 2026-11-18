@@ -1,2 +1,3 @@
 v1.0 (October 2026): Q-learning on FrozenLake, DQN on CartPole, 5-seed evaluation with statistics, ablation study, SQLite tracking, reflection notes, Streamlit dashboard.
 v1.1 (October 2026): new “AI Learning Lab” dashboard design, deployed on Streamlit Cloud.
+Unreleased: friendly website layer. A "What am I looking at?" card and a Help / glossary button on every page, a "Start here" 3-step banner on the Overview, a live status strip and event log on Training, question-style chart titles, before/after sentence, comparison filters, winner sentence and CSV download, and a "Why?" explanation of the verdict. No result numbers changed.

@@ -35,6 +35,8 @@ def hero(title: str, subtitle: str, right_html: str = "", eyebrow: str = "AI Lea
                 f'style="justify-content:flex-start;margin-top:.8rem">{right_html}</div>{actions}</div>'
                 + (f'<div class="art">{art}</div>' if art else '') + '</div>',
                 unsafe_allow_html=True)
+    from sla.app.components.guide import page_header_extras  # local import: guide uses routes and how_content
+    page_header_extras(title)
 
 
 def section(title: str, caption: str | None = None, right_html: str = "", kicker: str = "") -> None:

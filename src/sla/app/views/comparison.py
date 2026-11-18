@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from sla import friendly
 from sla.app import data
 from sla.app.charts.figures import group_bars, mean_curves
 from sla.app.components.chart_card import chart_card
@@ -37,6 +38,17 @@ def render() -> None:
                     "Run a multi-seed experiment (Training → Multi-seed) — it also runs the random baseline.")
         return
     runs = data.trained_runs()
+    envs = sorted(table["env"].unique())
+    algos = sorted(table["label"].unique())
+    f1, f2 = st.columns(2)
+    pick_env = f1.multiselect("Game", envs, default=envs, key="cmp_filter_env")
+    pick_algo = f2.multiselect("Algorithm", algos, default=algos, key="cmp_filter_algo")
+    table = table[table["env"].isin(pick_env) & table["label"].isin(pick_algo)]
+    if table.empty:
+        empty_state("Nothing matches these filters.", next_step="Choose at least one game and one algorithm.")
+        return
+    st.download_button("Download this table (CSV)", table.to_csv(index=False).encode("utf-8"),
+                       "comparison.csv", "text/csv", key="cmp_csv")
     for env in sorted(table["env"].unique()):
         t = table[table["env"] == env].sort_values("mean", ascending=False).reset_index(drop=True)
         pts = points[points["env"] == env]
@@ -44,10 +56,18 @@ def render() -> None:
         rnd = t[t["label"] == "Random"]
         rnd_mean = float(rnd["mean"].iloc[0]) if not rnd.empty else None
         top = t.iloc[0]
-        summary = f"{top['label']} ranks first with a mean test return of {top['mean']:,.2f}"
+        tied = [str(x) for x in t.loc[(t["mean"] - best).abs() < 1e-9, "label"]]
+        if len(tied) > 1:
+            names = ", ".join(tied[:-1]) + " and " + tied[-1]
+            summary = f"{names} tie for first with a mean test return of {best:,.2f}"
+        else:
+            summary = f"{top['label']} ranks first with a mean test return of {top['mean']:,.2f}"
         if rnd_mean is not None and top["label"] != "Random":
             summary += f", {top['mean'] - rnd_mean:+,.2f} versus the random agent"
-        section(env, summary + ".")
+        winner = friendly.winner_sentence(str(env), list(zip(t["label"], t["mean"])))
+        section(env, winner or summary + ".")
+        st.caption("Why do they differ? " + " ".join(
+            f"{lab}: {WHY[lab.split(' (')[0]]}" for lab in t["label"] if lab.split(" (")[0] in WHY))
         cards = []
         for i, r in t.iterrows():
             delta = None

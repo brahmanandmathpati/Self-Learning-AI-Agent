@@ -212,5 +212,18 @@ div[data-testid="stAlert"] { background:rgba(18,22,36,.85); border:1px solid var
   div.st-key-hero_cta { flex-wrap:wrap; gap:.5rem; }
   div.st-key-hero [data-testid="stPageLink"] a { padding:.55rem .9rem; font-size:.88rem; white-space:nowrap; }
 }
+
+/* ================= friendly layer: guide card, status strip, start steps ================= */
+.sla-guide { border:1px solid rgba(34,211,238,.28); border-left:4px solid var(--cyan); border-radius:12px;
+  padding:.7rem 1rem; margin:.3rem 0 .4rem; background:rgba(34,211,238,.06); }
+.sla-guide p { margin:.25rem 0 0; }
+.sla-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.6rem; margin:.4rem 0 .8rem; }
+.sla-strip > div { border:1px solid rgba(34,211,238,.28); border-radius:12px; padding:.55rem .8rem; }
+.sla-strip .k { font-size:.75rem; opacity:.8; text-transform:uppercase; letter-spacing:.04em; }
+.sla-strip .v { font-size:1.05rem; font-weight:600; overflow-wrap:anywhere; }
+.sla-start { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.7rem; margin:.4rem 0; }
+.sla-start > div { border:1px solid rgba(34,211,238,.28); border-radius:14px; padding:.8rem 1rem; }
+.sla-start .n { color:var(--cyan); font-weight:700; }
+.sla-log { font-size:.92rem; margin:0; padding-left:1.1rem; }
 </style>
 """
