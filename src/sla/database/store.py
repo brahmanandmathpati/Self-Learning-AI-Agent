@@ -399,6 +399,12 @@ class Database:
             return {t: int(con.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]) for t in
                     ("experiments", "runs", "episodes", "evaluations", "ablation_results", "reflections")}
 
+    def table_counts(self) -> dict[str, int]:
+        """Row count of each of the seven main tables (used by the 'How it works' page)."""
+        tables = ("experiments", "runs", "episodes", "metrics", "evaluations", "ablation_results", "reflections")
+        with self._connect() as con:
+            return {t: int(con.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]) for t in tables}
+
     def _df(self, sql: str, params: tuple = ()) -> pd.DataFrame:
         with self._connect() as con:
             return pd.read_sql_query(sql, con, params=params)
