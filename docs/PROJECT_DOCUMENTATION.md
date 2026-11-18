@@ -95,7 +95,7 @@ Most programs that are called “AI agents” do not really learn: they answer f
 agent that **starts with no knowledge and measurably improves from experience** using reinforcement learning, and then
 **proves** the improvement with fair tests.
 
-The agent learns two games from the Gymnasium library. On FrozenLake, a tabular Q-learning agent learns to cross the ice
+The agent learns four games from the Gymnasium library (FrozenLake, Taxi, CliffWalking and CartPole), using four kinds of learner (Q-learning, SARSA, Expected SARSA and a Deep Q-Network). On FrozenLake, a tabular Q-learning agent learns to cross the ice
 and reaches the goal in **100%** of held-out test games (mean 1.000 over 5 seeds), compared with **1.2%** for a random
 player. On CartPole, a Deep Q-Network (DQN) built from scratch in PyTorch balances the pole for **425.92 ± 122.59** steps
 on average (out of 500), against **22.58** for a random player and **25.63** before training. The gain over random is
@@ -106,9 +106,11 @@ DQN parts matter: removing replay memory drops the score to **86.79**, and remov
 Every run, episode and test is stored in a SQLite database and shown on a Streamlit website with a live training view,
 a grounded plain-language “reflection” layer, accounts with a view-only guest mode, and a **Vision Lab** where the agent
 learns hand gestures from a webcam, photos or videos, and where the user’s 👍/👎 gestures act as rewards for the
-FrozenLake agent. The project has 220 automated tests.
+FrozenLake agent. The project has 242 automated tests.
 
-**Keywords:** reinforcement learning, Q-learning, Deep Q-Network, experience replay, statistical evaluation, ablation,
+**Added later (Sections 10, 11 and 20.4).** The first version of this report covered Q-learning on FrozenLake and a DQN on CartPole. The project was then extended with two more learning rules, **SARSA** and **Expected SARSA**, and two more games, **Taxi** and **CliffWalking**. All three table-based learners were trained for 5 seeds on FrozenLake, Taxi and CliffWalking and tested on held-out games in the same way. All three solve FrozenLake (success 1.000 against 0.012 for random). On Taxi, Expected SARSA scored highest (mean return 7.18, against 5.96 for Q-learning and 5.90 for SARSA, random −768.86). On CliffWalking the three learners found different paths of 13 (Q-learning), 15 (Expected SARSA) and 17 (SARSA) steps — the textbook result, reproduced here.
+
+**Keywords:** reinforcement learning, Q-learning, SARSA, Expected SARSA, Deep Q-Network, experience replay, statistical evaluation, ablation,
 human-in-the-loop learning, hand-gesture recognition, Streamlit.
 
 # Part A — The idea
@@ -137,8 +139,8 @@ Many demos call themselves “self-learning” without showing any proof. We wan
 
 ### 6.3 What we built (in one paragraph)
 
-A reinforcement-learning system in Python with three agents (random, Q-learning, DQN), two environments (FrozenLake,
-CartPole), a training pipeline that runs several seeds, a fair evaluation step with statistics, an ablation study, a
+A reinforcement-learning system in Python with five agents (random, Q-learning, SARSA, Expected SARSA, DQN), four environments (FrozenLake,
+Taxi, CliffWalking, CartPole), a training pipeline that runs several seeds, a fair evaluation step with statistics, an ablation study, a
 SQLite database that stores every result, a reflection layer that explains results in plain language without inventing
 numbers, a Streamlit website with accounts, and a Vision Lab that learns hand gestures and lets gestures reward the agent
 (Figure 1 in Section 9 shows the whole system).
@@ -159,9 +161,10 @@ study — not with claims.
 | O3 | Prove the gain is not luck | Welch’s t-test and bootstrap 95% CI of the gain | p = 0.0018, CI 291.22–474.74 |
 | O4 | Show which DQN parts matter | Ablation: remove replay / target network | 86.79 and 9.36 vs 425.92 |
 | O5 | Explain results honestly | Every number in a note must exist in the computed facts | grounding check on every note |
-| O6 | Make it usable | Website with live training, results pages, accounts | 10 pages, view-only guest mode |
+| O6 | Make it usable | Website with live training, results pages, accounts | 11 pages, view-only guest mode |
 | O7 | Learn from a human | Vision Lab: gestures as samples and as rewards | built and tested; accuracy on the team’s own gestures **NOT MEASURED YET** |
-| O8 | Keep it reliable | Automated tests and linting in CI | 220 tests, ruff, GitHub Actions |
+| O8 | Keep it reliable | Automated tests and linting in CI | 242 tests, ruff, GitHub Actions |
+| O9 | Compare learning rules on more games | SARSA, Expected SARSA and Q-learning on FrozenLake, Taxi and CliffWalking: 5 seeds, held-out tests | Section 20.4: all learn; the paths and scores differ as theory predicts |
 
 <a id="s8"></a>
 ## 8. Background in plain words
@@ -241,7 +244,8 @@ only to the layer below it. This keeps learning code, storage and the website se
 
 | Layer | Folder / file | Job |
 |---|---|---|
-| Website | `app/main.py`, `app/views/` | Ten pages, top navbar, log-in corner |
+| Website | `app/main.py`, `app/views/` | Eleven pages, top navbar, log-in corner |
+| Friendly layer | `friendly.py`, `app/guide_content.py`, `app/components/guide.py` | Plain-language sentences computed from real data; the "What am I looking at?" card, Help / glossary button, Start-here banner, live status strip, comparison filters and the verdict "Why?" |
 | Command line | `cli.py` | `sla train`, `pipeline`, `ablation`, `evaluate`, `baseline`, `reflect`, `runs`, `init-db`, `dashboard` |
 | Services | `services/` | One entry point per feature (training, evaluation, experiments, reflection, checkpoints) |
 | Pipeline | `training/pipeline.py` | Single run, multi-seed experiment, baseline, ablation |
@@ -268,8 +272,9 @@ reads it, so the website can never change a result.
 <a id="s10"></a>
 ## 10. Environments
 
-Both games come from **Gymnasium** [4], the standard library of RL environments. `envs/factory.py` creates them and fixes
-their seeds.
+All four games come from **Gymnasium** [4], the standard library of RL environments. `envs/factory.py` creates them and fixes
+their seeds. FrozenLake, Taxi and CliffWalking have a small, countable set of situations, so a table can hold one score for
+each (**tabular** learning). CartPole has endless situations, so it needs a neural network.
 
 | | FrozenLake-v1 (4×4) | CartPole-v1 |
 |---|---|---|
@@ -278,15 +283,35 @@ their seeds.
 | Actions | 4: left, down, right, up | 2: push left, push right |
 | Reward | 1 at the goal, otherwise 0 | +1 for every step the pole stays up |
 | Episode ends | Goal, hole, or 100 steps | Pole falls, cart leaves the track, or 500 steps |
-| Our setting | Non-slippery map (`is_slippery: false` in `configs/frozenlake_qlearning.yaml`) | Standard |
-| Agent used | Tabular Q-learning | DQN |
+| Our setting | Non-slippery map (`is_slippery: false`) | Standard |
+| Agents used | Q-learning, SARSA, Expected SARSA | DQN |
 | Why chosen | Small enough to *see* learning in a table | Endless states: needs a neural network |
 
-*Table 2 — The two environments.*
+*Table 2 — The first two environments.*
+
+| | Taxi-v4 | CliffWalking-v1 |
+|---|---|---|
+| Story | A taxi picks up a passenger at one of 4 stops and drops them at another | Walk from the bottom-left to the bottom-right of a grid; the row of squares between them is a cliff |
+| State | 500 situations (taxi square × passenger place × destination) | 48 squares (4 rows × 12 columns) |
+| Actions | 6: south, north, east, west, pick up, drop off | 4: up, right, down, left |
+| Reward | +20 for a correct drop-off, −1 per step, −10 for a wrong pick-up or drop-off | −1 per step, −100 for stepping on the cliff (the walker goes back to START) |
+| Episode ends | Correct drop-off, or 200 steps | Goal, or 200 steps (we add this limit; the game has none) |
+| Agents used | Q-learning, SARSA, Expected SARSA | Q-learning, SARSA, Expected SARSA |
+| Why chosen | Many more situations than FrozenLake, with a two-part task (pick up, then drop off) | A safe path and a short-but-risky path: it shows how the three learning rules differ |
+
+*Table 2a — The two environments added later. Taxi uses version v4 because v3 is deprecated in the Gymnasium release we use.*
+
+In Taxi and CliffWalking a game counts as a **success** only if it really *ended at the goal* (not merely if it scored
+above a threshold); this rule is in `evaluation/evaluate.py` (`SUCCESS_ON_TERMINATION`). Tabular agents are refused on
+CartPole and DQN on the grid games, with a clear message (`training/config.py`).
 
 ![Figure 3 — Environments page: the learned FrozenLake policy (arrows) from a stored run.](images/environments.jpg)
 
 *Figure 3 — Environments page: the learned FrozenLake policy (arrows) from a stored run.*
+
+![Figure 3a — Environments page for CliffWalking: the path walked by Q-learning (13 steps) and by SARSA (17 steps); gold squares are the walked path.](images/env_cliff.jpg)
+
+*Figure 3a — Environments page for CliffWalking: the path walked by Q-learning (13 steps) and by SARSA (17 steps); gold squares are the walked path.*
 
 <a id="s11"></a>
 ## 11. Agents
@@ -315,7 +340,44 @@ The agent keeps a 16 × 4 table of scores, all starting at 0. After every move i
 > that square: r = 0, and the best score there is now 0.1, so target = 0 + 0.99 × 0.1 = 0.099 and the new score is
 > 0 + 0.1 × 0.099 = **0.0099**. Over thousands of games, the reward “flows backwards” from the goal to the start.
 
-### 11.3 Deep Q-Network (`agents/dqn.py`, `agents/networks.py`, `memory/replay_buffer.py`)
+### 11.3 SARSA (`agents/sarsa.py`)
+
+SARSA is the same table-learner as Q-learning with **one change in the target**. Q-learning looks at the *best* move in the
+next situation, even if the agent will not play it. SARSA looks at the move the agent *will actually play* next, *a′*,
+including the occasional random exploring move.
+
+> `Q(s, a) ← Q(s, a) + α · ( r + γ · Q(s′, a′) − Q(s, a) )`
+
+SARSA is **on-policy**: it learns the value of the behaviour it really follows (including its mistakes). Q-learning is
+**off-policy**: it learns the value of the best possible behaviour. The code in `SarsaAgent` picks *a′* inside `update()`
+and `act()` then plays exactly that move, so the update and the real play always agree.
+
+> **Worked example (cliff edge).** The walker stands on the safe row above the cliff. While ε = 0.1 it sometimes picks a
+> random move, and one in four random moves is “down”, which is the cliff (−100). SARSA feels those risks in its numbers
+> and learns to keep a row away from the edge. Q-learning assumes it will never explore, so it walks right on the edge.
+
+### 11.4 Expected SARSA (`agents/sarsa.py`)
+
+Expected SARSA replaces the single next move by the **average over all next moves**, weighted by how likely the ε-greedy
+policy is to pick each one:
+
+> `Q(s, a) ← Q(s, a) + α · ( r + γ · Σ π(a′|s′) · Q(s′, a′) − Q(s, a) )`
+
+It has the safety-awareness of SARSA but less random noise, because it does not depend on one lucky or unlucky next move.
+With ε = 0 it becomes exactly Q-learning (this is checked by a unit test).
+
+| Setting | FrozenLake | Taxi | CliffWalking |
+|---|---|---|---|
+| Learning rate α | 0.1 | 0.1 | 0.5 |
+| Discount γ | 0.99 | 0.99 | 0.99 |
+| ε schedule | 1.0 → 0.05 over 10,000 steps | 1.0 → 0.05 over 150,000 steps | constant 0.1 |
+| Training length | 2,000 episodes | 6,000 episodes | 500 episodes |
+| Max steps per game | 100 | 200 | 200 |
+| Config files | `frozenlake_sarsa.yaml`, `frozenlake_expected_sarsa.yaml` | `taxi_*.yaml` | `cliffwalking_*.yaml` |
+
+*Table 2b — Settings of the table-based learners (all three use the same values in a given game; only the target differs).*
+
+### 11.5 Deep Q-Network (`agents/dqn.py`, `agents/networks.py`, `memory/replay_buffer.py`)
 
 ![Figure 5 — How the DQN learns (sizes from configs/cartpole_dqn.yaml).](images/dqn.svg)
 
@@ -470,8 +532,8 @@ into Python. The schema is versioned with `PRAGMA user_version`: **version 1** c
 
 *Table 5 — Database tables (accounts are stored separately, see Section 18).*
 
-The committed snapshot `data/demo/sla_demo.db` contains **3 experiments, 36 runs, 20,314 episodes and 344 evaluations**
-(11 initial, 296 validation, 37 test). The live website loads it on first start so visitors can see real results.
+The committed snapshot `data/demo/sla_demo.db` contains **11 experiments, 116 runs, 137,814 episodes and 1414 evaluations**
+(51 initial, 1246 validation, 117 test). The live website loads it on first start so visitors can see real results.
 
 
 <a id="s17"></a>
@@ -482,7 +544,7 @@ entry point is `src/sla/app/main.py`; each page is a file in `app/views/`. Every
 database — the website never computes a result on its own, and an empty section says **NOT RUN** instead of showing a
 made-up value.
 
-**Navigation.** A sticky top navbar shows **Overview · Training · Vision Lab · Environments · About** and an
+**Navigation.** A sticky top navbar shows **Overview · Training · Vision Lab · Environments · How it works · About** and an
 **Analysis ▾** menu (Agent comparison, Evaluation, Ablation, Run explorer, Reflection). The top-right corner holds
 **Log in** and **Sign up**, or the signed-in user’s avatar (Section 18).
 
@@ -496,6 +558,7 @@ made-up value.
 | Training (`training.py`) | Form + live reward, ε, loss and episode-length charts | Start learning and watch it happen (members) |
 | Vision Lab (`vision.py`) | Webcam / uploads, live prediction, gesture rewards, results | The agent learns from a person (Section 19) |
 | Environments (`environment.py`) | Game cards and the learned FrozenLake map | What the agent sees and does |
+| How it works (`how_it_works.py`) | Pipeline, a Q-update calculator, a live FrozenLake demo, ε chart, DQN diagram, proof method, data tables, ablation, limits, glossary and practice questions | The whole project explained in one read-only page; all result numbers come from the database and configs |
 | About (`about.py`) | Objective, architecture diagram, stack, limits, team | Background |
 | Agent comparison (`comparison.py`) | Ranked cards: trained vs random, charts | Which agent is best, by how much |
 | Evaluation (`evaluation.py`) | LEARNING VERIFIED banner, statistics, per-seed table | The proof (Section 13) |
@@ -739,6 +802,63 @@ it (9.36 steps is worse than a random player). Both parts are necessary, and bot
 
 *Figure 26 — Ablation results (bars = mean, dots = seeds).*
 
+### 20.4 SARSA, Expected SARSA, Taxi and CliffWalking (experiments 4–12)
+
+Each learner × game pair is its own experiment with 5 training seeds and 100 held-out test games per seed (test seeds
+20,000,000 + i). Random players are the baseline. All numbers are read from `data/demo/sla_demo.db`.
+
+| Game | Random | SARSA | Learns from State, Action, Reward, next State, next Action: the target uses the move it will really play next |
+| Q-learning | SARSA | Expected SARSA |
+|---|---|---|---|---|
+| FrozenLake (success rate) | 0.012 | **1.000** | **1.000** | **1.000** |
+| Taxi (mean return) | −768.86 | 5.96 | 5.90 | **7.18** |
+| CliffWalking (mean return) | −2021.87 | **−13.00** | −17.00 | −15.00 |
+
+*Table 12a — Held-out test results, mean of 5 seeds.*
+
+| Taxi, per seed | Seed 0 | 1 | 2 | 3 | 4 |
+|---|---|---|---|---|---|
+| Q-learning | 5.56 | 7.59 | 7.59 | 3.52 | 5.56 |
+| SARSA | 5.54 | 3.46 | 7.53 | 7.49 | 5.49 |
+| Expected SARSA | 7.59 | 7.59 | 7.59 | 7.59 | 5.55 |
+
+*Table 12b — Taxi test return per seed. A return near 7.6 means a full pick-up and drop-off in about 13 steps.*
+
+![Figure 25a — Held-out test scores of the table-based learners on the three grid games.](images/grid_test_bars.png)
+
+*Figure 25a — Held-out test scores of the table-based learners on the three grid games (bars = mean, dots = seeds).*
+
+**FrozenLake.** All three learners solve it in every seed, so the learning rules are tied here and no ranking is claimed.
+
+**Taxi.** Every learner is far above random (differences of about +775 in mean return; Welch’s t-test p < 0.001 in all
+three). Expected SARSA is the highest on average and the most consistent (four seeds at 7.59), but with only 5 seeds the
+three learners are close, so we call this a small, suggestive edge, not a proven one. Q-learning learns fastest at the start
+(Figure 25b).
+
+![Figure 25b — Taxi: validation return while learning (mean of 5 seeds).](images/curve_taxi.png)
+
+*Figure 25b — Taxi: validation return while learning (mean of 5 seeds). All three reach the same plateau by about episode 5,000.*
+
+![Figure 25c — Taxi page of the website: the Environments tab.](images/env_taxi.jpg)
+
+*Figure 25c — Taxi tab on the Environments page of the website.*
+
+**CliffWalking.** Every seed of every learner reached the goal in every test game, so the scores have zero spread: the best
+checkpoint of each learner is a fixed path. Q-learning walks along the cliff edge (13 steps, return −13), SARSA keeps well
+away from it (17 steps, return −17) and Expected SARSA is in between (15 steps). With ε = 0 at test time the shortest path
+scores best; the safer paths matter *while exploring*, which is exactly what the on-policy rule learns (Figure 3a). The
+cliff’s −100 penalties are what make the random player’s average so low (−2021.87).
+
+![Figure 25d — CliffWalking: validation return while learning (mean of 5 seeds).](images/curve_cliff.png)
+
+*Figure 25d — CliffWalking: validation return while learning (mean of 5 seeds).*
+
+**An honest note about experiment 12.** The first Taxi run of SARSA (an earlier experiment 10) was cut short because the
+laptop went to sleep and the 30-minute time guard stopped training at 1,129 of 6,000 episodes, yet the pipeline still marked
+it completed. We noticed it in the logs, deleted that experiment, and re-ran it as experiment 12 with the computer kept
+awake. Only the full run is in the results. The pipeline should mark such runs as *stopped*; Section 28 lists this as a
+limitation.
+
 <a id="s21"></a>
 ## 21. Vision Lab results
 
@@ -774,10 +894,10 @@ document, and we do not report invented numbers. What *was* measured during deve
 
 | Suite | Folder | Files | Tests | What it covers |
 |---|---|---|---|---|
-| Unit | `tests/unit/` | 26 | 162 | Agents, Q-learning update, DQN, replay buffer, schedules, environments, statistics, evaluation, database (incl. `vision_models`), accounts and tokens, reflection and grounding, Vision Lab features, learners, video sampling, human-feedback RL |
+| Unit | `tests/unit/` | 29 | 184 | Agents, Q-learning update, DQN, replay buffer, schedules, environments, statistics, evaluation, database (incl. `vision_models`), accounts and tokens, reflection and grounding, Vision Lab features, learners, video sampling, human-feedback RL, SARSA and Expected SARSA updates, Taxi and CliffWalking environments, policy extraction, comparison de-duplication |
 | Integration | `tests/integration/` | 7 | 20 | CLI commands, pipeline runs end to end, checkpoint resume |
 | UI | `tests/ui/` | 3 | 38 | Every page renders (empty and with data), log in / sign up / guest, reset links, share links, Vision Lab gating |
-| **Total** | | **36** | **220** | |
+| **Total** | | **39** | **242** | |
 
 *Table 14 — Automated tests (counted with `pytest --collect-only`).*
 
@@ -899,26 +1019,27 @@ Buttons that change data show a short “View-only mode” note with a Log in bu
 ```
 Self-Learning-AI-Agent/
 ├── src/sla/
-│   ├── agents/        random_agent, q_learning, dqn, networks (QNetwork), schedules (ε)
+│   ├── agents/        random_agent, q_learning, sarsa (SARSA, Expected SARSA), dqn, networks (QNetwork), schedules (ε)
 │   ├── envs/          factory.py — Gymnasium environments with seeding
 │   ├── memory/        replay_buffer.py — experience replay
 │   ├── training/      runner (training loop), pipeline, config, callbacks, guards, safety
-│   ├── evaluation/    evaluate (frozen policy), stats (t-test, bootstrap), ablation, metrics, plots
+│   ├── catalog.py     names and labels of the algorithms and games
+│   ├── evaluation/    policies (learned paths), evaluate (frozen policy), stats (t-test, bootstrap), ablation, metrics, plots
 │   ├── checkpoints/   manager.py — save / resume / best checkpoint
 │   ├── reflection/    stats (facts), fallback (template), llm_client (Ollama), grounding, feedback, reflect
 │   ├── vision/        hands (MediaPipe), features (42 numbers), learners (k-NN, MLP), video, human_rl
 │   ├── database/      store.py — SQLite schema v2 and all queries
 │   ├── services/      training, evaluation, experiment, reflection, checkpoint services
 │   ├── utils/         errors, logging, seeding, validation, summaries
-│   ├── app/           main.py, views/ (10 pages), components/, charts/, styles/theme.py,
+│   ├── app/           main.py, views/ (11 pages), components/, charts/, styles/theme.py,
 │   │                  auth.py, mailer.py, routes.py, vision_live.py, data.py, demo_seed.py
 │   ├── accounts.py    accounts, password hashes, remember-me and reset tokens
 │   ├── cli.py         the `sla` command
 │   └── settings.py    paths (database, configs, runs)
-├── configs/           YAML experiment settings (FrozenLake, CartPole, ablations, baselines)
+├── configs/           YAML experiment settings (FrozenLake, Taxi, CliffWalking, CartPole, ablations, baselines)
 ├── data/demo/         committed results snapshot (sla_demo.db, snapshot.json)
 ├── results/           exported tables (experiments, comparison, ablation)
-├── tests/             unit/, integration/, ui/ — 220 tests
+├── tests/             unit/, integration/, ui/ — 242 tests
 ├── docs/              this documentation, the Complete Guide and topic notes
 ├── .streamlit/        config.toml (theme), secrets.toml.example
 ├── requirements.txt   packages for Streamlit Cloud
@@ -944,7 +1065,10 @@ Self-Learning-AI-Agent/
 | Dialog did not re-open in tests | Dialogs re-run only inside a real browser | The open dialog is kept in session state |
 | A hard-to-read button | Streamlit names form buttons differently (`primaryFormSubmit`) | Extra CSS selector and dark text on gold |
 | MediaPipe API change | The old `solutions.hands` API is gone in MediaPipe 1.x | The Tasks `HandLandmarker` with a one-time model download |
-| OpenCV on the cloud | Missing `libGL` system library | `packages.txt` |
+| OpenCV on the cloud | Missing `libGL` system library | `packages.txt` (also `libegl1` and `libgles2`, which MediaPipe needs) |
+| Lucky checkpoint on Taxi | With a learning rate of 0.2 and 20 validation games, a lucky checkpoint was picked and 13 of 100 test games failed | Learning rate 0.1 and 100 validation games |
+| Duplicate random baselines | The comparison counted the same random seeds three times | The baseline is de-duplicated per game and seed, with a unit test |
+| Deprecated Taxi-v3 | Gymnasium warns that v3 is deprecated | Use `Taxi-v4` |
 
 *Table 16 — Real problems met during the project.*
 
@@ -953,7 +1077,9 @@ Self-Learning-AI-Agent/
 
 **Limitations (honest):**
 
-- Two small benchmark games. This is bounded, single-task learning — not general intelligence.
+- Four small benchmark games. This is bounded, single-task learning — not general intelligence.
+- On Taxi the three table-based learners are within noise of each other at 5 seeds; on FrozenLake and CliffWalking the test scores have no spread, so those results show that learning works but cannot rank the learners statistically.
+- The training pipeline marks an experiment *completed* even when the time guard stopped a run early (seen once on Taxi, Section 20.4); the fix is to record such runs as *stopped*.
 - Five seeds give wide confidence intervals; the CartPole DQN is sensitive to hyper-parameters (one seed scored 212.92
   while two reached 500), and results can vary across hardware.
 - The LLM in the reflection layer only explains results; it never learns, and it is optional.
@@ -1017,6 +1143,7 @@ The same team details appear on the website (Overview and About pages), with eac
 | Confusion matrix | A table of which gestures were mistaken for which |
 | DQN | Deep Q-Network: a neural network that estimates Q-values |
 | Environment | The game the agent plays |
+| Expected SARSA | Like SARSA, but averages over all possible next moves instead of using one |
 | Episode | One full game from start to end |
 | ε-greedy | Usually pick the best move, sometimes (probability ε) a random one |
 | Experience replay | Train on random old moves from a memory, not only the newest ones |
@@ -1026,6 +1153,8 @@ The same team details appear on the website (Overview and About pages), with eac
 | Held-out seeds | Game set-ups never used in training, kept for the final test |
 | Huber loss | An error measure that grows slowly for big mistakes |
 | k-NN | Predict by looking at the k most similar stored examples |
+| Off-policy | Learns the value of the best behaviour, not the one it actually follows (Q-learning) |
+| On-policy | Learns the value of the behaviour it really follows, including exploring (SARSA) |
 | Learning rate (α) | How big each learning step is |
 | MLP | A small neural network made of fully connected layers |
 | Neural network | Layers of numbers (weights) that turn inputs into outputs and can be trained |
@@ -1072,7 +1201,7 @@ The same team details appear on the website (Overview and About pages), with eac
 16. **Can the reflection LLM make up numbers?** No. Every number must match a computed fact within 1%, or the note is
     rejected and the template is used.
 17. **Does the LLM learn?** No. It only describes facts; learning happens only in the Q-table or network weights.
-18. **Why SQLite?** Free, one file, no server, built into Python, and fast enough for our 20,314 stored episodes.
+18. **Why SQLite?** Free, one file, no server, built into Python, and fast enough for our 137,814 stored episodes.
 19. **How are passwords stored?** Never as text: salted PBKDF2-SHA256 hashes with 200,000 rounds; remember-me and reset
     tokens are stored only as SHA-256 hashes.
 20. **What can a guest do?** View everything, but not train, write notes or save models.
@@ -1085,6 +1214,12 @@ The same team details appear on the website (Overview and About pages), with eac
     user’s own samples, with a CI and the chance level.
 25. **What would you add next?** Double/Dueling DQN, harder games, background training, and gesture data from many
     people.
+
+26. **What is the difference between Q-learning and SARSA?** Q-learning’s target uses the best next move (off-policy); SARSA’s uses the move it will really play next, including random exploring moves (on-policy). On CliffWalking this makes Q-learning take the short path along the cliff (13 steps) and SARSA the safer path (17 steps).
+27. **What does Expected SARSA do?** It averages the next-move scores using the exploring policy’s probabilities. It is less noisy than SARSA, and with ε = 0 it equals Q-learning.
+28. **Why were Taxi and CliffWalking added?** Taxi has 500 situations and a two-part task; CliffWalking has a risky short path and a safe long path, so it shows the learning rules differ. FrozenLake alone could not show that.
+29. **Which learner is best?** It depends on the game: all tie on FrozenLake; on Taxi Expected SARSA is slightly ahead but within noise at 5 seeds; on CliffWalking Q-learning has the best score with ε = 0 at test time, while SARSA is the safest while exploring.
+
 
 <a id="s33"></a>
 ## 33. References

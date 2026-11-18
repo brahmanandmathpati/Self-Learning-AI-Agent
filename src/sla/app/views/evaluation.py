@@ -7,6 +7,7 @@ import statistics
 import pandas as pd
 import streamlit as st
 
+from sla import friendly
 from sla.app import data
 from sla.app.charts.figures import before_after, group_bars
 from sla.app.components.chart_card import chart_card
@@ -80,6 +81,11 @@ def render() -> None:
     ci = summary.get("trained_mean_ci95")
     kind, detail = _evidence(summary)
     verdict(kind, detail)
+    vs_r = summary.get("trained_vs_random") or {}
+    with st.expander("Why?"):
+        for line in friendly.verdict_why(vs_r.get("p_value"), vs_r.get("diff_ci_low"), vs_r.get("diff_ci_high")):
+            st.markdown("- " + line)
+        st.caption("Rule used: LEARNING VERIFIED needs p < 0.05 and a confidence interval that stays above 0.")
     card_grid([
         metric_card(f"Mean reward · {label}", statistics.fmean(trained) if trained else None,
                     f"{len(trained)} seeds · test episodes, ε = 0", icon="trophy", accent="#3987e5"),
